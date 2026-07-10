@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Scholaria | Master Timetable</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "on-tertiary-fixed": "#211b00",
+                "on-secondary-container": "#606569",
+                "surface-container-lowest": "#ffffff",
+                "on-error": "#ffffff",
+                "primary": "#094cb2",
+                "surface-dim": "#dbdadb",
+                "on-tertiary": "#ffffff",
+                "surface-bright": "#faf9fa",
+                "outline": "#737784",
+                "inverse-on-surface": "#f2f0f1",
+                "on-primary": "#ffffff",
+                "surface-container-low": "#f5f3f4",
+                "on-tertiary-fixed-variant": "#524600",
+                "error": "#ba1a1a",
+                "tertiary-container": "#bfab49",
+                "background": "#faf9fa",
+                "surface": "#faf9fa",
+                "tertiary-fixed-dim": "#dcc661",
+                "on-error-container": "#93000a",
+                "surface-container-highest": "#e3e2e3",
+                "on-background": "#1b1c1d",
+                "outline-variant": "#c3c6d5",
+                "tertiary": "#6d5e00",
+                "surface-container-high": "#e9e8e9",
+                "on-primary-fixed": "#001946",
+                "on-secondary": "#ffffff",
+                "on-secondary-fixed-variant": "#42474b",
+                "secondary-fixed": "#dfe3e8",
+                "on-tertiary-container": "#4a3f00",
+                "surface-tint": "#2259bf",
+                "surface-container": "#efedee",
+                "on-secondary-fixed": "#171c20",
+                "tertiary-fixed": "#f9e37a",
+                "on-surface-variant": "#434653",
+                "secondary-fixed-dim": "#c2c7cc",
+                "secondary-container": "#dfe3e8",
+                "on-primary-container": "#e7ebff",
+                "inverse-surface": "#303031",
+                "inverse-primary": "#b1c5ff",
+                "error-container": "#ffdad6",
+                "secondary": "#5a5f63",
+                "primary-fixed": "#d9e2ff",
+                "primary-container": "#3366cc",
+                "on-primary-fixed-variant": "#00419d",
+                "primary-fixed-dim": "#b1c5ff",
+                "surface-variant": "#e3e2e3",
+                "on-surface": "#1b1c1d"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+            },
+            "fontFamily": {
+                "headline": ["Noto Serif"],
+                "display": ["Noto Serif"],
+                "body": ["Inter"],
+                "label": ["Public Sans"]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-serif { font-family: 'Noto Serif', serif; }
+        .font-label { font-family: 'Public Sans', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #c3c6d5; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #737784; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex overflow-hidden">
+<!-- Shared SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-[280px] bg-surface-container-lowest border-r border-outline-variant flex flex-col py-8 px-6 z-50">
+<div class="mb-12">
+<h1 class="font-headline text-2xl font-bold text-primary">Scholaria</h1>
+<p class="font-label text-xs tracking-widest text-on-surface-variant mt-1">2026-2027 ACADEMIC YEAR</p>
+</div>
+<nav class="flex-1 space-y-2">
+<!-- Active State: Academics (closest match to Timetable) -->
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low hover:text-secondary transition-all duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body text-sm">Overview</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-secondary font-bold border-r-4 border-secondary bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">school</span>
+<span class="font-body text-sm">Academics</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low hover:text-secondary transition-all duration-200" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-body text-sm">People</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low hover:text-secondary transition-all duration-200" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-body text-sm">Finance</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low hover:text-secondary transition-all duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body text-sm">Settings</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-outline-variant pt-6">
+<button class="flex items-center gap-4 px-4 py-3 text-on-surface-variant w-full hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined">menu_open</span>
+<span class="font-body text-sm">Collapse</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-[280px] w-[calc(100%-280px)] h-screen flex flex-col bg-surface overflow-hidden">
+<!-- Shared TopNavBar -->
+<header class="flex justify-between items-center h-16 px-8 border-b border-outline-variant bg-surface sticky top-0 z-40">
+<div class="flex items-center gap-6">
+<div class="relative group">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant material-symbols-outlined text-lg">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-lg text-sm w-64 focus:ring-1 focus:ring-primary transition-all" placeholder="Search curriculum or students..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="px-4 py-2 bg-surface-container-high text-primary font-label text-xs font-semibold rounded hover:bg-secondary-container transition-transform active:scale-95">
+                    + Log Absence
+                </button>
+<button class="px-4 py-2 bg-primary text-white font-label text-xs font-semibold rounded shadow-sm hover:opacity-90 transition-transform active:scale-95">
+                    + New Student
+                </button>
+<div class="h-8 w-px bg-outline-variant mx-2"></div>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container transition-all rounded-full relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-surface"></span>
+</button>
+<img class="w-8 h-8 rounded-full border border-outline-variant object-cover" data-alt="A portrait of an elegant woman in her late 40s with professional attire, sitting in a bright and airy sun-drenched office. The setting is clean and high-end editorial, with soft depth-of-field focusing on her calm, authoritative expression. The lighting is warm and scholarly, reflecting a prestige school environment with white walls and subtle wood accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAK_GyoXFnIiAkQ9WIggfUK9nvvIbbwTw2O1RJe3fWggqdOv-M0dsxdwMlZxzJwJpJ_JRSqC6iR7TViorhRqkJHMo6-wTrgG-2K4oMsDvx30x5vzdlL8AqmrOVcc4gEoYGr6g74rCewcziCRNRWhClF0i3So5RhIHW19zdELYbPSGon_cKN2nQ8AVTkj60sE2HXa73_nR3bqz-rrN-PSH6CxobjxHjlW0cqpY7fVAWRQbbnW66yBvwNEhY67CqEVkn55wBo4aGOvA"/>
+</div>
+</header>
+<!-- View Content -->
+<div class="flex-1 flex overflow-hidden">
+<!-- Schedule Section Sidebar -->
+<aside class="w-80 border-r border-outline-variant bg-surface-container-low p-6 overflow-y-auto">
+<div class="mb-8">
+<h2 class="font-serif text-xl font-bold mb-4">Course Library</h2>
+<div class="space-y-3">
+<!-- Math Template -->
+<div class="p-4 bg-white rounded-xl shadow-sm border-l-4 border-primary cursor-grab active:grabbing hover:shadow-md transition-all">
+<div class="flex justify-between items-start mb-1">
+<span class="font-label text-[10px] text-primary font-bold uppercase tracking-widest">Mathematics</span>
+<span class="material-symbols-outlined text-sm text-outline-variant">drag_indicator</span>
+</div>
+<p class="font-serif text-sm font-semibold">Calculus II (Advanced)</p>
+<p class="text-xs text-on-surface-variant mt-1">Rm 402 • Prof. Aristhanes</p>
+</div>
+<!-- Science Template -->
+<div class="p-4 bg-white rounded-xl shadow-sm border-l-4 border-tertiary cursor-grab active:grabbing hover:shadow-md transition-all">
+<div class="flex justify-between items-start mb-1">
+<span class="font-label text-[10px] text-tertiary font-bold uppercase tracking-widest">Science</span>
+<span class="material-symbols-outlined text-sm text-outline-variant">drag_indicator</span>
+</div>
+<p class="font-serif text-sm font-semibold">Molecular Biology</p>
+<p class="text-xs text-on-surface-variant mt-1">Lab B • Dr. Sterling</p>
+</div>
+<!-- History Template -->
+<div class="p-4 bg-white rounded-xl shadow-sm border-l-4 border-secondary cursor-grab active:grabbing hover:shadow-md transition-all">
+<div class="flex justify-between items-start mb-1">
+<span class="font-label text-[10px] text-secondary font-bold uppercase tracking-widest">History</span>
+<span class="material-symbols-outlined text-sm text-outline-variant">drag_indicator</span>
+</div>
+<p class="font-serif text-sm font-semibold">Classical Antiquity</p>
+<p class="text-xs text-on-surface-variant mt-1">Audit. A • Prof. Walsh</p>
+</div>
+</div>
+</div>
+<!-- Conflict Checker Section -->
+<div class="mt-auto">
+<div class="p-4 bg-error-container rounded-xl">
+<div class="flex items-center gap-2 mb-2 text-on-error-container">
+<span class="material-symbols-outlined text-lg">warning</span>
+<span class="font-bold text-sm">Conflict Alert</span>
+</div>
+<p class="text-xs text-on-error-container leading-relaxed">
+                            Room 402 is double-booked on Wednesday at 10:00 AM. (Calculus II &amp; Physics Lab)
+                        </p>
+<button class="mt-3 text-xs font-bold text-on-error-container underline underline-offset-2 hover:opacity-80 transition-all">
+                            Resolve Conflicts (2)
+                        </button>
+</div>
+<div class="mt-6 p-4 border border-outline-variant/30 rounded-xl bg-surface-container">
+<h4 class="font-label text-[10px] uppercase font-bold text-on-surface-variant mb-3 tracking-widest">Global Filters</h4>
+<div class="space-y-2">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="rounded-sm border-outline text-primary focus:ring-primary" type="checkbox"/>
+<span class="text-sm font-body text-on-surface group-hover:text-primary transition-colors">Grade 12 Faculty</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="rounded-sm border-outline text-primary focus:ring-primary" type="checkbox"/>
+<span class="text-sm font-body text-on-surface group-hover:text-primary transition-colors">Main Building Only</span>
+</label>
+</div>
+</div>
+</div>
+</aside>
+<!-- Timetable Grid -->
+<div class="flex-1 flex flex-col p-8 bg-white overflow-hidden">
+<div class="flex justify-between items-end mb-8">
+<div>
+<h1 class="font-serif text-3xl font-bold text-on-surface">Master Timetable</h1>
+<p class="text-on-surface-variant font-label text-sm mt-1">Upper Secondary Academy • Michaelmas Term</p>
+</div>
+<div class="flex bg-surface-container-low p-1 rounded-lg">
+<button class="px-4 py-1.5 text-xs font-bold font-label bg-white shadow-sm rounded-md text-primary">Grid View</button>
+<button class="px-4 py-1.5 text-xs font-bold font-label text-on-surface-variant hover:text-on-surface">List View</button>
+<button class="px-4 py-1.5 text-xs font-bold font-label text-on-surface-variant hover:text-on-surface">Conflicts</button>
+</div>
+</div>
+<div class="flex-1 overflow-auto border border-outline-variant/20 rounded-2xl">
+<div class="min-w-[800px] h-full grid grid-cols-6 divide-x divide-outline-variant/10">
+<!-- Time Column -->
+<div class="bg-surface-container-low/30 divide-y divide-outline-variant/10">
+<div class="h-12 flex items-center justify-center font-label text-[10px] uppercase font-bold text-outline">Period</div>
+<div class="h-24 flex items-center justify-center flex-col px-2">
+<span class="text-xs font-bold">08:00</span>
+<span class="text-[10px] text-outline-variant">Period 1</span>
+</div>
+<div class="h-24 flex items-center justify-center flex-col px-2">
+<span class="text-xs font-bold">09:15</span>
+<span class="text-[10px] text-outline-variant">Period 2</span>
+</div>
+<div class="h-24 flex items-center justify-center flex-col px-2">
+<span class="text-xs font-bold">10:30</span>
+<span class="text-[10px] text-outline-variant">Recess</span>
+</div>
+<div class="h-24 flex items-center justify-center flex-col px-2">
+<span class="text-xs font-bold">11:00</span>
+<span class="text-[10px] text-outline-variant">Period 3</span>
+</div>
+<div class="h-24 flex items-center justify-center flex-col px-2">
+<span class="text-xs font-bold">12:15</span>
+<span class="text-[10px] text-outline-variant">Lunch</span>
+</div>
+</div>
+<!-- Days Columns -->
+<!-- Mon -->
+<div class="flex flex-col divide-y divide-outline-variant/10">
+<div class="h-12 flex items-center justify-center font-label text-xs font-bold bg-white sticky top-0">MONDAY</div>
+<div class="h-24 p-2">
+<div class="h-full bg-primary-fixed/30 rounded-lg p-2 border-l-2 border-primary group hover:bg-primary-fixed/50 transition-colors">
+<div class="text-[10px] font-bold text-primary truncate">CALCULUS II</div>
+<div class="text-[9px] text-on-surface-variant truncate">Aristhanes • Rm 402</div>
+</div>
+</div>
+<div class="h-24 p-2"></div>
+<div class="h-24 p-2 flex items-center justify-center">
+<div class="w-full h-1 bg-surface-container rounded-full"></div>
+</div>
+<div class="h-24 p-2">
+<div class="h-full bg-secondary-fixed/30 rounded-lg p-2 border-l-2 border-secondary group hover:bg-secondary-fixed/50 transition-colors">
+<div class="text-[10px] font-bold text-secondary truncate">CLASSICAL ANTIQ.</div>
+<div class="text-[9px] text-on-surface-variant truncate">Walsh • Audit. A</div>
+</div>
+</div>
+<div class="h-24 p-2 flex items-center justify-center">
+<span class="text-[10px] text-outline-variant italic font-serif">Staff Meeting</span>
+</div>
+</div>
+<!-- Tue -->
+<div class="flex flex-col divide-y divide-outline-variant/10">
+<div class="h-12 flex items-center justify-center font-label text-xs font-bold bg-white sticky top-0">TUESDAY</div>
+<div class="h-24 p-2"></div>
+<div class="h-24 p-2">
+<div class="h-full bg-tertiary-fixed/30 rounded-lg p-2 border-l-2 border-tertiary group hover:bg-tertiary-fixed/50 transition-colors">
+<div class="text-[10px] font-bold text-tertiary truncate">MOLECULAR BIO.</div>
+<div class="text-[9px] text-on-surface-variant truncate">Sterling • Lab B</div>
+</div>
+</div>
+<div class="h-24 p-2 flex items-center justify-center">
+<div class="w-full h-1 bg-surface-container rounded-full"></div>
+</div>
+<div class="h-24 p-2"></div>
+<div class="h-24 p-2"></div>
+</div>
+<!-- Wed -->
+<div class="flex flex-col divide-y divide-outline-variant/10">
+<div class="h-12 flex items-center justify-center font-label text-xs font-bold bg-white sticky top-0">WEDNESDAY</div>
+<div class="h-24 p-2">
+<div class="h-full bg-error-container/40 rounded-lg p-2 border-l-2 border-error relative overflow-hidden group transition-all">
+<div class="text-[10px] font-bold text-error truncate uppercase">Conflict</div>
+<div class="text-[9px] text-error truncate">Room 402 Occupied</div>
+<div class="absolute right-1 bottom-1 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-error text-sm">edit</span>
+</div>
+</div>
+</div>
+<div class="h-24 p-2"></div>
+<div class="h-24 p-2 flex items-center justify-center">
+<div class="w-full h-1 bg-surface-container rounded-full"></div>
+</div>
+<div class="h-24 p-2">
+<div class="h-full bg-primary-fixed/30 rounded-lg p-2 border-l-2 border-primary group hover:bg-primary-fixed/50 transition-colors">
+<div class="text-[10px] font-bold text-primary truncate">CALCULUS II</div>
+<div class="text-[9px] text-on-surface-variant truncate">Aristhanes • Rm 402</div>
+</div>
+</div>
+<div class="h-24 p-2"></div>
+</div>
+<!-- Thu -->
+<div class="flex flex-col divide-y divide-outline-variant/10">
+<div class="h-12 flex items-center justify-center font-label text-xs font-bold bg-white sticky top-0">THURSDAY</div>
+<div class="h-24 p-2"></div>
+<div class="h-24 p-2">
+<div class="h-full bg-secondary-fixed/30 rounded-lg p-2 border-l-2 border-secondary group hover:bg-secondary-fixed/50 transition-colors">
+<div class="text-[10px] font-bold text-secondary truncate">WORLD HISTORY</div>
+<div class="text-[9px] text-on-surface-variant truncate">Walsh • Audit. A</div>
+</div>
+</div>
+<div class="h-24 p-2 flex items-center justify-center">
+<div class="w-full h-1 bg-surface-container rounded-full"></div>
+</div>
+<div class="h-24 p-2">
+<div class="h-full bg-tertiary-fixed/30 rounded-lg p-2 border-l-2 border-tertiary group hover:bg-tertiary-fixed/50 transition-colors">
+<div class="text-[10px] font-bold text-tertiary truncate">CHEMISTRY ADV.</div>
+<div class="text-[9px] text-on-surface-variant truncate">Sterling • Lab B</div>
+</div>
+</div>
+<div class="h-24 p-2"></div>
+</div>
+<!-- Fri -->
+<div class="flex flex-col divide-y divide-outline-variant/10">
+<div class="h-12 flex items-center justify-center font-label text-xs font-bold bg-white sticky top-0">FRIDAY</div>
+<div class="h-24 p-2">
+<div class="h-full bg-primary-fixed/30 rounded-lg p-2 border-l-2 border-primary group hover:bg-primary-fixed/50 transition-colors">
+<div class="text-[10px] font-bold text-primary truncate">EXAM PREP</div>
+<div class="text-[9px] text-on-surface-variant truncate">Various Halls</div>
+</div>
+</div>
+<div class="h-24 p-2"></div>
+<div class="h-24 p-2 flex items-center justify-center">
+<div class="w-full h-1 bg-surface-container rounded-full"></div>
+</div>
+<div class="h-24 p-2"></div>
+<div class="h-24 p-2 flex items-center justify-center">
+<div class="text-[10px] font-label font-bold text-primary">Early Release</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Float Action for Timetable Context -->
+<div class="fixed bottom-10 right-10">
+<button class="h-14 w-14 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-2xl">publish</span>
+</button>
+</div>
+</main>
+<script>
+        // Micro-interactions for Drag and Drop Visual Feedback
+        document.querySelectorAll('.cursor-grab').forEach(card => {
+            card.addEventListener('mousedown', () => {
+                card.style.transform = 'scale(1.05) rotate(1deg)';
+                card.style.zIndex = '100';
+            });
+            card.addEventListener('mouseup', () => {
+                card.style.transform = 'scale(1) rotate(0deg)';
+                card.style.zIndex = '1';
+            });
+        });
+
+        // Simple tooltip for conflicts
+        const conflictCard = document.querySelector('.bg-error-container\/40');
+        if(conflictCard) {
+            conflictCard.addEventListener('mouseenter', () => {
+                console.log('Show conflict details overlay');
+            });
+        }
+    </script>
+</body></html>

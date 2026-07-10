@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Scholaria | Master Timetable</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed-variant": "#004395",
+                        "on-secondary-fixed": "#002113",
+                        "on-secondary": "#ffffff",
+                        "surface-tint": "#565e74",
+                        "secondary-fixed-dim": "#4edea3",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "surface-bright": "#f8f9ff",
+                        "secondary-fixed": "#6ffbbe",
+                        "on-error": "#ffffff",
+                        "background": "#f8f9ff",
+                        "outline-variant": "#c6c6cd",
+                        "tertiary-fixed-dim": "#adc6ff",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-primary-fixed": "#131b2e",
+                        "surface-container-high": "#dce9ff",
+                        "on-secondary-container": "#00714d",
+                        "on-surface": "#0b1c30",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-primary-container": "#7c839b",
+                        "surface": "#f8f9ff",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#005236",
+                        "primary-container": "#131b2e",
+                        "surface-dim": "#cbdbf5",
+                        "secondary-container": "#6cf8bb",
+                        "inverse-primary": "#bec6e0",
+                        "primary": "#000000",
+                        "secondary": "#006c49",
+                        "on-tertiary-container": "#3980f4",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed": "#001a42",
+                        "surface-container-low": "#eff4ff",
+                        "primary-fixed": "#dae2fd",
+                        "surface-variant": "#d3e4fe",
+                        "tertiary": "#000000",
+                        "on-surface-variant": "#45464d",
+                        "error": "#ba1a1a",
+                        "surface-container": "#e5eeff",
+                        "tertiary-fixed": "#d8e2ff",
+                        "on-background": "#0b1c30",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "inverse-surface": "#213145",
+                        "primary-fixed-dim": "#bec6e0",
+                        "tertiary-container": "#001a42",
+                        "outline": "#76777d",
+                        "error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "base": "4px",
+                        "container-max": "1440px",
+                        "xs": "4px",
+                        "3xl": "64px",
+                        "md": "16px",
+                        "xl": "32px",
+                        "lg": "24px",
+                        "sm": "8px",
+                        "2xl": "48px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "display-lg": ["48px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.25", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.01em", "fontWeight": "500"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: 80px repeat(5, 1fr);
+            grid-template-rows: auto repeat(16, 40px); /* 8am to 4pm in 30min blocks */
+        }
+        .timetable-slot {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .timetable-slot:hover {
+            transform: scale(1.02);
+            z-index: 10;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md selection:bg-secondary-container">
+<!-- Predicted SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-[280px] bg-surface-container-lowest border-r border-outline-variant flex flex-col py-lg px-md z-50">
+<div class="mb-xl px-sm flex items-center gap-md">
+<div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Scholaria</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant opacity-70">2026-2027</p>
+</div>
+</div>
+<nav class="flex-1 space-y-xs">
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-secondary transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md text-body-md">Overview</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-secondary font-bold border-r-4 border-secondary bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">school</span>
+<span class="font-body-md text-body-md">Academics</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-secondary transition-all" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-body-md text-body-md">People</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-secondary transition-all" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-body-md text-body-md">Finance</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-secondary transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+</nav>
+<div class="pt-md border-t border-outline-variant">
+<button class="w-full flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined">menu_open</span>
+<span class="font-body-md text-body-md">Collapse</span>
+</button>
+</div>
+</aside>
+<!-- Predicted TopNavBar -->
+<header class="fixed top-0 left-[280px] w-[calc(100%-280px)] h-16 bg-surface border-b border-outline-variant flex justify-between items-center px-lg z-40">
+<div class="flex items-center gap-lg flex-1">
+<h2 class="font-headline-sm text-headline-sm font-semibold text-on-surface whitespace-nowrap">Master Timetable</h2>
+<div class="max-w-md w-full relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-full text-body-sm focus:ring-2 focus:ring-secondary/20" placeholder="Search classes, rooms, or teachers..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="px-md py-2 border border-outline-variant rounded-lg text-label-md font-semibold hover:bg-surface-container transition-transform active:scale-95">
+                + Log Absence
+            </button>
+<button class="px-md py-2 bg-secondary text-on-secondary rounded-lg text-label-md font-semibold hover:opacity-90 transition-transform active:scale-95 shadow-sm">
+                + New Student
+            </button>
+<div class="h-8 w-px bg-outline-variant mx-sm"></div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container relative">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-surface"></span>
+</button>
+<div class="flex items-center gap-sm pl-sm">
+<div class="text-right hidden xl:block">
+<p class="font-label-md text-label-md font-bold text-on-surface">Jane Doe</p>
+<p class="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Principal</p>
+</div>
+<img class="w-10 h-10 rounded-full border-2 border-outline-variant object-cover" data-alt="A professional headshot of a female principal in her late 40s, wearing business attire, with a warm and authoritative expression. The background is a blurred office with clean white and slate blue tones consistent with the Scholaria design system. Professional high-key studio lighting with soft shadows." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBINjMhaePvzMw_8YEBZqK8-hx9EZ4lwtp6hHWtnNbw4mpt6ZqgCl-7sh2jbjf6APT3JBUxMUQEL8JE35N1hkEmiEM3UkXXCbqZTTiJC5KvBjwoU0ySYdEUQ51S7IE2u4EkNGtrr2u-J3wx_d8ISsyGX3iQHV1dsx5drLBUreN6pYcbyvhewSWFoG1t-7VP51lHF1-qX78L8lQYQ3Jv9o6OjHTiYCpWcxp4eaLmB5o_Za4ACJf3CxPA"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-[280px] mt-16 p-lg flex gap-lg h-[calc(100vh-64px)]">
+<!-- Timetable Section -->
+<div class="flex-1 flex flex-col bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden">
+<!-- Calendar Controls -->
+<div class="p-md border-b border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-md">
+<div class="flex bg-surface-container rounded-lg p-1">
+<button class="px-4 py-1.5 rounded-md text-label-sm font-bold bg-white shadow-sm text-secondary">Week</button>
+<button class="px-4 py-1.5 rounded-md text-label-sm font-semibold text-on-surface-variant hover:text-on-surface">Day</button>
+</div>
+<div class="flex items-center gap-sm">
+<button class="p-1 hover:bg-surface-container rounded transition-colors"><span class="material-symbols-outlined">chevron_left</span></button>
+<span class="font-label-md text-label-md font-bold">Sept 14 - 18, 2026</span>
+<button class="p-1 hover:bg-surface-container rounded transition-colors"><span class="material-symbols-outlined">chevron_right</span></button>
+</div>
+</div>
+<div class="flex items-center gap-sm">
+<button class="flex items-center gap-xs px-md py-1.5 border border-outline-variant rounded-lg text-label-sm font-semibold hover:bg-surface-container">
+<span class="material-symbols-outlined text-[18px]">filter_list</span> Filter
+                    </button>
+<button class="flex items-center gap-xs px-md py-1.5 border border-outline-variant rounded-lg text-label-sm font-semibold hover:bg-surface-container">
+<span class="material-symbols-outlined text-[18px]">download</span> Export
+                    </button>
+</div>
+</div>
+<!-- Scrollable Grid Container -->
+<div class="flex-1 overflow-y-auto custom-scrollbar">
+<div class="calendar-grid min-w-[800px]">
+<!-- Header Row -->
+<div class="bg-surface-container-low border-b border-r border-outline-variant"></div>
+<div class="bg-surface-container-low p-sm text-center border-b border-r border-outline-variant">
+<p class="font-label-sm text-label-sm font-bold">MON</p>
+<p class="text-[10px] text-on-surface-variant">SEP 14</p>
+</div>
+<div class="bg-surface-container-low p-sm text-center border-b border-r border-outline-variant">
+<p class="font-label-sm text-label-sm font-bold">TUE</p>
+<p class="text-[10px] text-on-surface-variant">SEP 15</p>
+</div>
+<div class="bg-surface-container-low p-sm text-center border-b border-r border-outline-variant">
+<p class="font-label-sm text-label-sm font-bold text-secondary">WED</p>
+<p class="text-[10px] text-secondary">SEP 16</p>
+</div>
+<div class="bg-surface-container-low p-sm text-center border-b border-r border-outline-variant">
+<p class="font-label-sm text-label-sm font-bold">THU</p>
+<p class="text-[10px] text-on-surface-variant">SEP 17</p>
+</div>
+<div class="bg-surface-container-low p-sm text-center border-b border-outline-variant">
+<p class="font-label-sm text-label-sm font-bold">FRI</p>
+<p class="text-[10px] text-on-surface-variant">SEP 18</p>
+</div>
+<!-- Time Slots & Background Lines -->
+<!-- This would usually be mapped in a real app -->
+<div class="text-right pr-sm py-2 border-r border-outline-variant text-[11px] font-bold text-on-surface-variant">08:00 AM</div>
+<div class="border-b border-r border-outline-variant/50 relative" colspan="5"></div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-outline-variant/50"></div>
+<div class="text-right pr-sm py-2 border-r border-outline-variant text-[11px] font-bold text-on-surface-variant">09:00 AM</div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-outline-variant/50"></div>
+<div class="text-right pr-sm py-2 border-r border-outline-variant text-[11px] font-bold text-on-surface-variant">10:00 AM</div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-outline-variant/50"></div>
+<div class="text-right pr-sm py-2 border-r border-outline-variant text-[11px] font-bold text-on-surface-variant">11:00 AM</div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-outline-variant/50"></div>
+<div class="text-right pr-sm py-2 border-r border-outline-variant text-[11px] font-bold text-on-surface-variant">12:00 PM</div>
+<div class="border-b border-r border-outline-variant/50 bg-surface-container-low/30"></div>
+<div class="border-b border-r border-outline-variant/50 bg-surface-container-low/30"></div>
+<div class="border-b border-r border-outline-variant/50 bg-surface-container-low/30"></div>
+<div class="border-b border-r border-outline-variant/50 bg-surface-container-low/30"></div>
+<div class="border-b border-outline-variant/50 bg-surface-container-low/30"></div>
+<div class="text-right pr-sm py-2 border-r border-outline-variant text-[11px] font-bold text-on-surface-variant">01:00 PM</div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-outline-variant/50"></div>
+<div class="text-right pr-sm py-2 border-r border-outline-variant text-[11px] font-bold text-on-surface-variant">02:00 PM</div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-outline-variant/50"></div>
+<div class="text-right pr-sm py-2 border-r border-outline-variant text-[11px] font-bold text-on-surface-variant">03:00 PM</div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-r border-outline-variant/50"></div>
+<div class="border-b border-outline-variant/50"></div>
+<!-- Timetable Overlay Content (Positioned Absolute relative to grid or using grid-area) -->
+<!-- Mon 8:30-10:00 (Math) -->
+<div class="timetable-slot absolute top-[60px] left-[80px] w-[calc((100%-80px)/5-4px)] h-[120px] m-0.5 bg-on-tertiary-fixed-variant/10 border-l-4 border-on-tertiary-fixed-variant rounded p-sm flex flex-col justify-between group cursor-pointer z-10">
+<div>
+<p class="font-label-sm text-label-sm font-bold text-on-tertiary-fixed-variant">Advanced Algebra</p>
+<p class="text-[10px] text-on-tertiary-fixed-variant/80">Dr. Aris Thorne</p>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[10px] font-bold text-on-tertiary-fixed-variant bg-white px-1.5 py-0.5 rounded shadow-sm">Room 302</span>
+<span class="material-symbols-outlined text-[14px] text-on-tertiary-fixed-variant opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</span>
+</div>
+</div>
+<!-- Tue 10:30-12:00 (Science) -->
+<div class="timetable-slot absolute top-[220px] left-[calc(80px+(100%-80px)/5)] w-[calc((100%-80px)/5-4px)] h-[120px] m-0.5 bg-secondary-container/20 border-l-4 border-secondary rounded p-sm flex flex-col justify-between group cursor-pointer z-10">
+<div>
+<p class="font-label-sm text-label-sm font-bold text-on-secondary-container">Quantum Physics</p>
+<p class="text-[10px] text-on-secondary-container/80">Sarah Jenkins</p>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[10px] font-bold text-on-secondary-container bg-white px-1.5 py-0.5 rounded shadow-sm">Lab 4</span>
+<span class="material-symbols-outlined text-[14px] text-on-secondary-container opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</span>
+</div>
+</div>
+<!-- Wed 13:00-14:30 (History) -->
+<div class="timetable-slot absolute top-[420px] left-[calc(80px+2*(100%-80px)/5)] w-[calc((100%-80px)/5-4px)] h-[120px] m-0.5 bg-on-error-container/10 border-l-4 border-error rounded p-sm flex flex-col justify-between group cursor-pointer z-10">
+<div>
+<p class="font-label-sm text-label-sm font-bold text-on-error-container">Modern World History</p>
+<p class="text-[10px] text-on-error-container/80">Marcus Aurelius</p>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[10px] font-bold text-on-error-container bg-white px-1.5 py-0.5 rounded shadow-sm">Room 112</span>
+<span class="material-symbols-outlined text-[14px] text-on-error-container opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</span>
+</div>
+</div>
+<!-- Thu 08:00-09:30 (Math) -->
+<div class="timetable-slot absolute top-[40px] left-[calc(80px+3*(100%-80px)/5)] w-[calc((100%-80px)/5-4px)] h-[120px] m-0.5 bg-on-tertiary-fixed-variant/10 border-l-4 border-on-tertiary-fixed-variant rounded p-sm flex flex-col justify-between group cursor-pointer z-10">
+<div>
+<p class="font-label-sm text-label-sm font-bold text-on-tertiary-fixed-variant">Calculus II</p>
+<p class="text-[10px] text-on-tertiary-fixed-variant/80">Dr. Aris Thorne</p>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[10px] font-bold text-on-tertiary-fixed-variant bg-white px-1.5 py-0.5 rounded shadow-sm">Room 302</span>
+<span class="material-symbols-outlined text-[14px] text-on-tertiary-fixed-variant opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</span>
+</div>
+</div>
+<!-- Fri 14:00-15:30 (Science) -->
+<div class="timetable-slot absolute top-[500px] left-[calc(80px+4*(100%-80px)/5)] w-[calc((100%-80px)/5-4px)] h-[120px] m-0.5 bg-secondary-container/20 border-l-4 border-secondary rounded p-sm flex flex-col justify-between group cursor-pointer z-10">
+<div>
+<p class="font-label-sm text-label-sm font-bold text-on-secondary-container">Environmental Bio</p>
+<p class="text-[10px] text-on-secondary-container/80">Elena Rodriguez</p>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[10px] font-bold text-on-secondary-container bg-white px-1.5 py-0.5 rounded shadow-sm">Greenhouse</span>
+<span class="material-symbols-outlined text-[14px] text-on-secondary-container opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Action Sidebar (Add Class Section) -->
+<aside class="w-[320px] bg-surface-container-low rounded-xl border border-outline-variant flex flex-col p-lg">
+<div class="mb-lg">
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">Add Class Section</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-sm">Drag a subject template or fill out the form below to schedule.</p>
+</div>
+<!-- Drag and Drop Subjects -->
+<div class="mb-xl">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-md">Subject Templates</p>
+<div class="space-y-sm">
+<div class="p-md bg-white border border-outline-variant rounded-xl cursor-grab active:cursor-grabbing hover:border-secondary transition-all flex items-center gap-md group shadow-sm">
+<div class="w-2 h-8 bg-on-tertiary-fixed-variant rounded-full"></div>
+<div class="flex-1">
+<p class="font-label-md text-label-md font-bold">Mathematics</p>
+<p class="text-[11px] text-on-surface-variant">Default: 90 mins</p>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-secondary">drag_indicator</span>
+</div>
+<div class="p-md bg-white border border-outline-variant rounded-xl cursor-grab active:cursor-grabbing hover:border-secondary transition-all flex items-center gap-md group shadow-sm">
+<div class="w-2 h-8 bg-secondary rounded-full"></div>
+<div class="flex-1">
+<p class="font-label-md text-label-md font-bold">Science &amp; Labs</p>
+<p class="text-[11px] text-on-surface-variant">Default: 120 mins</p>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-secondary">drag_indicator</span>
+</div>
+<div class="p-md bg-white border border-outline-variant rounded-xl cursor-grab active:cursor-grabbing hover:border-secondary transition-all flex items-center gap-md group shadow-sm">
+<div class="w-2 h-8 bg-error rounded-full"></div>
+<div class="flex-1">
+<p class="font-label-md text-label-md font-bold">History &amp; Arts</p>
+<p class="text-[11px] text-on-surface-variant">Default: 60 mins</p>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-secondary">drag_indicator</span>
+</div>
+</div>
+</div>
+<!-- Quick Form -->
+<div class="flex-1 overflow-y-auto custom-scrollbar pr-1">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-md">Quick Entry</p>
+<form class="space-y-md">
+<div>
+<label class="block font-label-md text-label-md font-semibold text-on-surface mb-xs">Class Title</label>
+<input class="w-full bg-white border border-outline-variant rounded-lg px-md py-sm text-body-sm focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all" placeholder="e.g. Creative Writing" type="text"/>
+</div>
+<div class="grid grid-cols-2 gap-md">
+<div>
+<label class="block font-label-md text-label-md font-semibold text-on-surface mb-xs">Day</label>
+<select class="w-full bg-white border border-outline-variant rounded-lg px-md py-sm text-body-sm focus:ring-2 focus:ring-secondary/20">
+<option>Monday</option>
+<option>Tuesday</option>
+<option>Wednesday</option>
+<option>Thursday</option>
+<option>Friday</option>
+</select>
+</div>
+<div>
+<label class="block font-label-md text-label-md font-semibold text-on-surface mb-xs">Room</label>
+<input class="w-full bg-white border border-outline-variant rounded-lg px-md py-sm text-body-sm focus:ring-2 focus:ring-secondary/20" placeholder="Rm 401" type="text"/>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-md">
+<div>
+<label class="block font-label-md text-label-md font-semibold text-on-surface mb-xs">Start Time</label>
+<input class="w-full bg-white border border-outline-variant rounded-lg px-md py-sm text-body-sm focus:ring-2 focus:ring-secondary/20" type="time" value="08:00"/>
+</div>
+<div>
+<label class="block font-label-md text-label-md font-semibold text-on-surface mb-xs">End Time</label>
+<input class="w-full bg-white border border-outline-variant rounded-lg px-md py-sm text-body-sm focus:ring-2 focus:ring-secondary/20" type="time" value="09:30"/>
+</div>
+</div>
+<button class="w-full mt-lg py-sm bg-secondary text-on-secondary font-bold rounded-lg hover:opacity-90 transition-all shadow-md active:scale-95" type="button">
+                        Schedule Section
+                    </button>
+</form>
+</div>
+<div class="mt-lg p-md bg-secondary-container/30 border border-secondary/20 rounded-xl">
+<div class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-secondary">info</span>
+<p class="text-[11px] text-on-secondary-container leading-relaxed">
+<strong>Conflict Checker Active:</strong> The system will automatically highlight overlapping schedules in real-time.
+                    </p>
+</div>
+</div>
+</aside>
+</main>
+<script>
+        // Simple Interaction Logic
+        document.querySelectorAll('.timetable-slot').forEach(slot => {
+            slot.addEventListener('click', () => {
+                // In a real app, this would open a detail modal
+                const title = slot.querySelector('p').innerText;
+                console.log(`Viewing details for: ${title}`);
+            });
+        });
+
+        // Theme Toggle Logic (Optional)
+        // const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        // if(isDark) document.documentElement.classList.add('dark');
+    </script>
+</body></html>
