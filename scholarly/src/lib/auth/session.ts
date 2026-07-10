@@ -17,7 +17,7 @@ export async function getCurrentUser(): Promise<AppUser | null> {
 
   if (!user) return null;
 
-  const [{ data: profile }, { data: member }] = await Promise.all([
+  const [profileResult, memberResult] = await Promise.all([
     supabase.from("profiles").select("full_name,email,avatar_url").eq("id", user.id).maybeSingle(),
     supabase
       .from("school_members")
@@ -28,7 +28,17 @@ export async function getCurrentUser(): Promise<AppUser | null> {
       .maybeSingle<MemberRow>()
   ]);
 
-  if (!member) return null;
+  const profile = profileResult.data;
+  const member = memberResult.data;
+
+  if (!member) {
+    console.error(`getCurrentUser failed for user ${user.id}:`, JSON.stringify({
+      profileError: profileResult.error,
+      memberError: memberResult.error,
+      memberData: memberResult.data
+    }, null, 2));
+    return null;
+  }
 
   return {
     id: user.id,

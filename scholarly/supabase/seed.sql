@@ -38,8 +38,8 @@ on conflict (school_id, academic_year_id, name) do nothing;
 
 do $$
 declare
-  student_id uuid;
-  guardian_id uuid;
+  v_student_id uuid;
+  v_guardian_id uuid;
   class_ids uuid[] := array[
     '50000000-0000-0000-0000-000000000001'::uuid,
     '50000000-0000-0000-0000-000000000002'::uuid,
@@ -66,7 +66,7 @@ begin
       case when i = 20 then 'archived'::public.student_status else 'active'::public.student_status end
     )
     on conflict (school_id, admission_number) do update set first_name = excluded.first_name
-    returning id into student_id;
+    returning id into v_student_id;
 
     insert into public.guardians (
       school_id, full_name, relationship, email, phone, emergency_contact_name, emergency_contact_phone
@@ -79,14 +79,14 @@ begin
       last_names[i] || ' Emergency',
       '+1 (555) 988-' || lpad((6500 + i)::text, 4, '0')
     )
-    returning id into guardian_id;
+    returning id into v_guardian_id;
 
     insert into public.student_guardians (school_id, student_id, guardian_id, is_primary)
-    values ('00000000-0000-0000-0000-000000000001', student_id, guardian_id, true)
+    values ('00000000-0000-0000-0000-000000000001', v_student_id, v_guardian_id, true)
     on conflict (school_id, student_id, guardian_id) do nothing;
 
     insert into public.enrollments (school_id, student_id, class_id, academic_year_id, status)
-    values ('00000000-0000-0000-0000-000000000001', student_id, class_ids[((i - 1) % 4) + 1], '10000000-0000-0000-0000-000000000001', 'active')
+    values ('00000000-0000-0000-0000-000000000001', v_student_id, class_ids[((i - 1) % 4) + 1], '10000000-0000-0000-0000-000000000001', 'active')
     on conflict (school_id, student_id, class_id, academic_year_id) do nothing;
   end loop;
 end $$;
@@ -97,19 +97,22 @@ insert into public.activity_logs (school_id, action, entity_type, metadata) valu
 ('00000000-0000-0000-0000-000000000001','settings_changed','school_settings','{"field":"attendance_edit_window_days"}')
 on conflict do nothing;
 
--- Demo auth users should be created in Supabase Auth first. After creation,
--- re-run this block or replace the emails with your own test users.
+-- Demo auth users
 do $$
 declare
-  principal_id uuid;
-  admin_id uuid;
-  teacher_id uuid;
-  staff_id uuid;
+  principal_id uuid := '11111111-1111-1111-1111-111111111111';
+  admin_id uuid := '22222222-2222-2222-2222-222222222222';
+  teacher_id uuid := '33333333-3333-3333-3333-333333333333';
+  staff_id uuid := '44444444-4444-4444-4444-444444444444';
 begin
-  select id into principal_id from auth.users where email = 'principal@scholarly.test';
-  select id into admin_id from auth.users where email = 'admin@scholarly.test';
-  select id into teacher_id from auth.users where email = 'teacher@scholarly.test';
-  select id into staff_id from auth.users where email = 'staff@scholarly.test';
+  -- Insert into auth.users (password is 'password123' for all)
+  insert into auth.users (id, instance_id, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, role)
+  values 
+    (principal_id, '00000000-0000-0000-0000-000000000000', 'principal@scholarly.test', crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated'),
+    (admin_id, '00000000-0000-0000-0000-000000000000', 'admin@scholarly.test', crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated'),
+    (teacher_id, '00000000-0000-0000-0000-000000000000', 'teacher@scholarly.test', crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated'),
+    (staff_id, '00000000-0000-0000-0000-000000000000', 'staff@scholarly.test', crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated')
+  on conflict (id) do nothing;
 
   if principal_id is not null then
     insert into public.profiles (id, full_name, email) values (principal_id, 'Jane Doe', 'principal@scholarly.test') on conflict (id) do update set full_name = excluded.full_name;
