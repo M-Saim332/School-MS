@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+}
+
+body {
+  min-height: 100vh;
+  background: #faf9fa;
+  color: #1b1c1d;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+*:focus-visible {
+  outline: 3px solid rgba(51, 102, 204, 0.32);
+  outline-offset: 2px;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #c3c6d5;
+  border-radius: 999px;
+}
+
+.card-surface {
+  background: #ffffff;
+  border: 1px solid rgba(195, 198, 213, 0.72);
+  box-shadow: 0 14px 36px rgba(27, 28, 29, 0.04);
+}
