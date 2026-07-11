@@ -7,16 +7,25 @@ describe("role permissions", () => {
     expect(hasPermission("administrator", "settings:manage")).toBe(true);
   });
 
-  it("limits teachers to academic assignment visibility", () => {
+  it("lets teachers view their own operational work without student management rights", () => {
     expect(hasPermission("teacher", "students:create")).toBe(false);
     expect(hasPermission("teacher", "students:archive")).toBe(false);
-    expect(hasPermission("teacher", "attendance:submit")).toBe(false);
+    expect(hasPermission("teacher", "students:view")).toBe(true);
+    expect(hasPermission("teacher", "attendance:view")).toBe(true);
+    expect(hasPermission("teacher", "attendance:submit")).toBe(true);
     expect(hasPermission("teacher", "academics:view")).toBe(true);
   });
 
+  it("keeps attendance submission limited to teachers", () => {
+    expect(hasPermission("principal", "attendance:submit")).toBe(false);
+    expect(hasPermission("teacher", "attendance:submit")).toBe(true);
+    expect(hasPermission("student_staff", "attendance:submit")).toBe(false);
+  });
+
   it("routes users to role-aware homes", () => {
-    expect(roleHome("teacher")).toBe("/academics");
+    expect(roleHome("teacher")).toBe("/dashboard");
     expect(roleHome("administrator")).toBe("/admin");
     expect(roleHome("principal")).toBe("/dashboard");
+    expect(roleHome("student_staff")).toBe("/students");
   });
 });

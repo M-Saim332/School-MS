@@ -12,6 +12,9 @@ export type Permission =
   | "staff:manage"
   | "academics:view"
   | "academics:manage"
+  | "marks:manage"
+  | "marks:approve"
+  | "results:generate"
   | "reports:view"
   | "activity:view"
   | "settings:manage"
@@ -29,6 +32,8 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "attendance:view",
     "staff:view",
     "academics:view",
+    "marks:approve",
+    "results:generate",
     "reports:view",
     "activity:view",
     "approvals:view",
@@ -36,7 +41,7 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "teachers:manage",
     "classes:manage"
   ],
-  teacher: ["academics:view"],
+  teacher: ["dashboard:view", "students:view", "attendance:view", "attendance:submit", "academics:view", "marks:manage"],
   student_staff: [
     "dashboard:view",
     "students:view",
@@ -44,6 +49,7 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "students:update",
     "students:archive",
     "attendance:view",
+    "results:generate",
     "reports:view",
     "approvals:view"
   ],
@@ -54,11 +60,12 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "students:update",
     "students:archive",
     "attendance:view",
-    "attendance:submit",
     "staff:view",
     "staff:manage",
     "academics:view",
     "academics:manage",
+    "marks:approve",
+    "results:generate",
     "reports:view",
     "activity:view",
     "settings:manage",
@@ -80,7 +87,8 @@ export function getRolePermissions(role: UserRole) {
 }
 
 export function roleHome(role: UserRole) {
-  if (role === "teacher") return "/academics";
+  if (role === "teacher") return "/dashboard";
   if (role === "administrator") return "/admin";
+  if (role === "student_staff") return "/students";
   return "/dashboard";
 }

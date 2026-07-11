@@ -6,19 +6,29 @@ import { logActivity } from "@/lib/services/activity";
 export async function getAttendanceContext(user: AppUser, classId?: string, date?: string) {
   const supabase = await createClient();
   const attendanceDate = date ?? new Date().toISOString().slice(0, 10);
+  let teacherClassIds: string[] | null = null;
+
+  if (user.role === "teacher") {
+    const [assignedClasses, headClasses] = await Promise.all([
+      supabase.from("teacher_assignments").select("class_id").eq("school_id", user.schoolId).eq("teacher_id", user.id),
+      supabase.from("classes").select("id").eq("school_id", user.schoolId).eq("head_teacher_id", user.id)
+    ]);
+
+    if (assignedClasses.error) throw new Error(assignedClasses.error.message);
+    if (headClasses.error) throw new Error(headClasses.error.message);
+    teacherClassIds = [
+      ...new Set([...(assignedClasses.data ?? []).map((row: any) => row.class_id), ...(headClasses.data ?? []).map((row: any) => row.id)])
+    ];
+  }
+
   let classQuery = supabase
     .from("classes")
-    .select("id,name,room,grades(name),sections(name),academic_years(name)")
+    .select("id,name,room,head_teacher_id,grades(name),sections(name),academic_years(name)")
     .eq("school_id", user.schoolId)
     .order("name");
 
-  if (user.role === "teacher") {
-    const { data: assignments } = await supabase
-      .from("teacher_assignments")
-      .select("class_id")
-      .eq("school_id", user.schoolId)
-      .eq("teacher_id", user.id);
-    classQuery = classQuery.in("id", (assignments ?? []).map((item) => item.class_id));
+  if (teacherClassIds) {
+    classQuery = teacherClassIds.length ? classQuery.in("id", teacherClassIds) : classQuery.eq("id", "00000000-0000-0000-0000-000000000000");
   }
 
   const { data: classes } = await classQuery;
@@ -74,7 +84,8 @@ export async function getAttendanceContext(user: AppUser, classId?: string, date
       room: row.room,
       grade_name: row.grades?.name,
       section_name: row.sections?.name,
-      academic_year_name: row.academic_years?.name
+      academic_year_name: row.academic_years?.name,
+      can_mark_attendance: user.role === "teacher" && row.head_teacher_id === user.id
     })),
     selectedClassId,
     attendanceDate,
@@ -87,25 +98,47 @@ export async function submitAttendance(user: AppUser, values: AttendanceSubmissi
   const parsed = attendanceSubmissionSchema.parse(values);
   const supabase = await createClient();
 
+  const { data: targetClass, error: classError } = await supabase
+    .from("classes")
+    .select("id,head_teacher_id")
+    .eq("school_id", user.schoolId)
+    .eq("id", parsed.class_id)
+    .maybeSingle();
+
+  if (classError) throw new Error(classError.message);
+  if (!targetClass) throw new Error("Class not found.");
+  if (targetClass.head_teacher_id !== user.id) {
+    throw new Error("Only the head teacher can mark attendance.");
+  }
+
+  const { data: existingSession, error: existingError } = await supabase
+    .from("attendance_sessions")
+    .select("id")
+    .eq("school_id", user.schoolId)
+    .eq("class_id", parsed.class_id)
+    .eq("attendance_date", parsed.attendance_date)
+    .maybeSingle();
+
+  if (existingError) throw new Error(existingError.message);
+  if (existingSession) throw new Error("Attendance already marked for today.");
+
   const { data: session, error: sessionError } = await supabase
     .from("attendance_sessions")
-    .upsert(
-      {
-        school_id: user.schoolId,
-        class_id: parsed.class_id,
-        attendance_date: parsed.attendance_date,
-        submitted_by: user.id,
-        submitted_at: new Date().toISOString(),
-        status: "submitted"
-      },
-      { onConflict: "school_id,class_id,attendance_date" }
-    )
+    .insert({
+      school_id: user.schoolId,
+      class_id: parsed.class_id,
+      attendance_date: parsed.attendance_date,
+      submitted_by: user.id,
+      submitted_at: new Date().toISOString(),
+      status: "submitted"
+    })
     .select("id")
     .single();
 
+  if (sessionError?.code === "23505") throw new Error("Attendance already marked for today.");
   if (sessionError) throw new Error(sessionError.message);
 
-  const { error: recordsError } = await supabase.from("attendance_records").upsert(
+  const { error: recordsError } = await supabase.from("attendance_records").insert(
     parsed.records.map((record) => ({
       school_id: user.schoolId,
       session_id: session.id,
@@ -116,7 +149,6 @@ export async function submitAttendance(user: AppUser, values: AttendanceSubmissi
       note: record.note || null,
       recorded_by: user.id
     })),
-    { onConflict: "school_id,student_id,class_id,attendance_date" }
   );
 
   if (recordsError) throw new Error(recordsError.message);

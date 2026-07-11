@@ -1,6 +1,6 @@
-# Scholarly
+# GoCampusFlow
 
-Scholarly is a complete multi-tenant school management SaaS application for principals, teachers, student-management staff, and administrators. It uses Next.js, TypeScript, Supabase Auth, Supabase PostgreSQL, Supabase RLS, Tailwind CSS, Zod, React Hook Form, and Recharts.
+GoCampusFlow is a complete multi-tenant school management SaaS application for principals, teachers, student-management staff, and administrators. It uses Next.js, TypeScript, Supabase Auth, Supabase PostgreSQL, Supabase RLS, Tailwind CSS, Zod, React Hook Form, and Recharts.
 
 ## Main Features
 
@@ -51,6 +51,7 @@ ARCHITECTURE.md
 - npm
 - A Supabase project
 - Supabase CLI is recommended for local migrations, but Docker is optional and not required by this repository
+- For local Docker-based Supabase on Windows, Docker Desktop needs both `Microsoft-Windows-Subsystem-Linux` and `VirtualMachinePlatform` enabled, followed by a Windows restart.
 
 ## Environment Variables
 
@@ -71,10 +72,11 @@ Fill in:
 ```text
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-Do not add a service-role key to frontend environment variables.
+Keep `SUPABASE_SERVICE_ROLE_KEY` server-side only. Do not expose it in browser code.
 
 ## Install Dependencies
 
@@ -134,6 +136,52 @@ npm run dev
 ```
 
 Open `http://localhost:3000`.
+
+## Windows Local Docker Setup
+
+This repository is now wired for a full local Supabase stack on Windows.
+
+1. If Docker Desktop reports that the Linux engine cannot start, open an elevated PowerShell and run:
+
+```powershell
+dism.exe /online /Enable-Feature /FeatureName:Microsoft-Windows-Subsystem-Linux /All /NoRestart
+dism.exe /online /Enable-Feature /FeatureName:VirtualMachinePlatform /All /NoRestart
+```
+
+Or run the included script from an elevated PowerShell:
+
+```powershell
+npm.cmd run setup:docker-prereqs
+```
+
+2. Restart Windows.
+3. Open Docker Desktop and wait until the engine is running.
+4. In the project folder, initialize the local backend and demo data:
+
+```powershell
+npm.cmd run setup:local
+```
+
+5. Start the website:
+
+```powershell
+npm.cmd run dev:local
+```
+
+The local setup writes `.env.local`, starts the Supabase containers, applies all migrations, and reloads `supabase/seed.sql`.
+
+### DBeaver Connection
+
+Use these values to connect DBeaver to the local Supabase PostgreSQL instance:
+
+```text
+Host: 127.0.0.1
+Port: 54322
+Database: postgres
+Username: postgres
+Password: postgres
+SSL: Disable
+```
 
 ## Production Build
 

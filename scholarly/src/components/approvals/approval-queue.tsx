@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { ApprovalRequest } from "@/types/database";
 
-export function ApprovalQueue({ initialRequests }: { initialRequests: ApprovalRequest[] }) {
+export function ApprovalQueue({ initialRequests, canReview }: { initialRequests: ApprovalRequest[]; canReview: boolean }) {
   const requests = initialRequests;
   const [selectedRequest, setSelectedRequest] = useState<ApprovalRequest | null>(null);
 
@@ -47,9 +47,13 @@ export function ApprovalQueue({ initialRequests }: { initialRequests: ApprovalRe
                     {new Date(request.submitted_at).toLocaleDateString()}
                   </td>
                   <td className="py-3 pr-4 text-right">
-                    <Button onClick={() => setSelectedRequest(request)} variant="secondary" size="sm">
-                      Review
-                    </Button>
+                    {canReview ? (
+                      <Button onClick={() => setSelectedRequest(request)} variant="secondary" size="sm">
+                        Review
+                      </Button>
+                    ) : (
+                      <Badge tone={request.status === "pending" ? "yellow" : "gray"}>{request.status}</Badge>
+                    )}
                   </td>
                 </tr>
               ))

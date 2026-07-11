@@ -10,6 +10,8 @@ where email in (
   'staff@scholarly.test'
 );
 
+drop view if exists public.staff_directory;
+
 create or replace view public.staff_directory
 with (security_invoker = true)
 as

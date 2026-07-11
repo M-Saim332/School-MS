@@ -5,6 +5,7 @@ import type { FormEvent } from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/form-field";
+import { getSupabaseBrowserErrorMessage } from "@/lib/supabase/browser-error";
 import { createClient } from "@/lib/supabase/browser";
 
 export default function ResetPasswordPage() {
@@ -25,13 +26,18 @@ export default function ResetPasswordPage() {
       setError("Use at least 8 characters and make sure both passwords match.");
       return;
     }
-    const { error: updateError } = await supabase.auth.updateUser({ password });
-    setLoading(false);
-    if (updateError) {
-      setError(updateError.message);
-      return;
+    try {
+      const { error: updateError } = await supabase.auth.updateUser({ password });
+      if (updateError) {
+        setError(updateError.message);
+        return;
+      }
+      router.replace("/sign-in?message=Password updated. Please sign in again.");
+    } catch (error) {
+      setError(getSupabaseBrowserErrorMessage(error, "Unable to update your password right now. Please try again."));
+    } finally {
+      setLoading(false);
     }
-    router.replace("/sign-in?message=Password updated. Please sign in again.");
   }
 
   return (

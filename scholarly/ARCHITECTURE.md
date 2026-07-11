@@ -1,6 +1,6 @@
-# Scholarly Architecture
+# GoCampusFlow Architecture
 
-Scholarly is a multi-tenant school management SaaS built with Next.js, TypeScript, Supabase Auth, Supabase PostgreSQL, and Row Level Security.
+GoCampusFlow is a multi-tenant school management SaaS built with Next.js, TypeScript, Supabase Auth, Supabase PostgreSQL, and Row Level Security.
 
 ## Application Layers
 

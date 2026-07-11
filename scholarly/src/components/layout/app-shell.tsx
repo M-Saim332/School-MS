@@ -95,7 +95,7 @@ export function AppShell({ user, children }: { user: AppUser; children: ReactNod
           <BookOpen aria-hidden="true" />
         </div>
         <div>
-          <p className="font-display text-2xl font-bold leading-tight text-primary">Scholarly</p>
+          <p className="font-display text-2xl font-bold leading-tight text-primary">GoCampusFlow</p>
           <p className="font-label text-xs font-semibold uppercase tracking-wider text-muted">{user.schoolName}</p>
         </div>
       </div>

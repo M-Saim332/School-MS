@@ -6,7 +6,7 @@ import { getAcademicOptions } from "@/lib/services/academics";
 import { getStaff } from "@/lib/services/staff";
 import { ClassFormModal } from "@/components/classes/class-form";
 import { TeacherAssignmentModal } from "@/components/classes/teacher-assignment-form";
-import { BookOpen, MapPin, Users } from "lucide-react";
+import { BookOpen, MapPin, ShieldCheck, Users } from "lucide-react";
 
 export default async function ClassesPage() {
   const user = await requireUser("classes:manage");
@@ -14,9 +14,9 @@ export default async function ClassesPage() {
   // Fetch academic data (classes, grades, sections, years, subjects)
   const academicData = await getAcademicOptions(user);
   
-  // Fetch teachers to populate the assignment dropdown
+  // Fetch teachers to populate class ownership and assignment dropdowns.
   const allStaff = await getStaff(user);
-  const teachers = allStaff.filter((s: any) => s.role === "teacher" || s.role === "principal");
+  const teachers = allStaff.filter((s: any) => s.role === "teacher");
 
   // Group classes by grade
   const classesByGrade = academicData.classes.reduce((acc: Record<string, any[]>, cls: any) => {
@@ -37,6 +37,7 @@ export default async function ClassesPage() {
             grades={academicData.grades} 
             sections={academicData.sections} 
             academicYears={academicData.years} 
+            teachers={teachers}
           />
         }
       />
@@ -65,17 +66,42 @@ export default async function ClassesPage() {
                     </div>
                   </CardHeader>
                   <CardContent className="grid gap-4">
+                    <div className="flex justify-end">
+                      <ClassFormModal
+                        grades={academicData.grades}
+                        sections={academicData.sections}
+                        academicYears={academicData.years}
+                        teachers={teachers}
+                        initialClass={{
+                          id: cls.id,
+                          name: cls.name,
+                          grade_id: cls.grade_id,
+                          section_id: cls.section_id,
+                          academic_year_id: cls.academic_year_id,
+                          room: cls.room,
+                          head_teacher_id: cls.head_teacher_id
+                        }}
+                      />
+                    </div>
                     {cls.room && (
                       <div className="flex items-center gap-2 text-sm text-ink">
                         <MapPin className="h-4 w-4 text-muted" />
                         Room: <span className="font-semibold">{cls.room}</span>
                       </div>
                     )}
+                    <div className="rounded-lg bg-success-soft p-3 text-sm">
+                      <div className="flex items-center gap-2 font-semibold text-success">
+                        <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+                        Head teacher
+                      </div>
+                      <p className="mt-1 font-semibold text-ink">{cls.head_teacher_name ?? "Not assigned"}</p>
+                      {cls.head_teacher_email ? <p className="text-xs text-muted">{cls.head_teacher_email}</p> : null}
+                    </div>
                     
                     <div className="rounded-lg bg-surface-low p-3">
                       <div className="mb-2 flex items-center justify-between text-sm">
                         <span className="font-semibold text-muted flex items-center gap-2">
-                          <Users className="h-4 w-4" /> Teachers
+                          <Users className="h-4 w-4" /> Subject teachers
                         </span>
                       </div>
                       {/* Note: We would map over actual teacher assignments here if fetched in getAcademicOptions. */}

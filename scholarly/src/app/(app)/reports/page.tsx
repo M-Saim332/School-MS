@@ -23,7 +23,7 @@ export default async function ReportsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Daily Attendance</CardTitle>
-            <CsvExport rows={attendanceRows} filename="scholarly-attendance.csv" />
+            <CsvExport rows={attendanceRows} filename="gocampusflow-attendance.csv" />
           </CardHeader>
           <CardContent>
             <ReportTable rows={attendanceRows.slice(0, 10)} columns={["date", "student", "class", "status"]} />
@@ -32,7 +32,7 @@ export default async function ReportsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Enrollment Counts</CardTitle>
-            <CsvExport rows={reports.enrollment as any} filename="scholarly-enrollment.csv" />
+            <CsvExport rows={reports.enrollment as any} filename="gocampusflow-enrollment.csv" />
           </CardHeader>
           <CardContent>
             <ReportTable rows={(reports.enrollment as any[]).slice(0, 10)} columns={["grade_name", "class_name", "student_count"]} />

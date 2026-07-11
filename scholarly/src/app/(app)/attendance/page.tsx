@@ -9,13 +9,14 @@ export default async function AttendancePage({ searchParams }: { searchParams: P
   const params = await searchParams;
   const user = await requireUser("attendance:view");
   const context = await getAttendanceContext(user, params.classId, params.date);
+  const selectedClass = context.classes.find((item) => item.id === context.selectedClassId);
 
   return (
     <>
       <PageHeader
         eyebrow="Daily workflow"
         title="Attendance"
-        description="Choose a date and class, mark the roster, and submit duplicate-safe attendance records."
+        description="Choose a date and class, mark the roster, and submit attendance once for that class and day."
       />
       <AttendanceForm
         classes={context.classes}
@@ -23,7 +24,8 @@ export default async function AttendancePage({ searchParams }: { searchParams: P
         selectedClassId={context.selectedClassId}
         attendanceDate={context.attendanceDate}
         submitted={Boolean(context.session)}
-        canSubmit={hasPermission(user.role, "attendance:submit")}
+        canSubmit={hasPermission(user.role, "attendance:submit") && Boolean(selectedClass?.can_mark_attendance) && !context.session}
+        restrictionMessage={selectedClass && !selectedClass.can_mark_attendance ? "Only the head teacher can mark attendance." : null}
         onSubmit={submitAttendanceAction}
       />
     </>

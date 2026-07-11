@@ -19,19 +19,22 @@ export function AttendanceForm({
   attendanceDate,
   submitted,
   canSubmit,
+  restrictionMessage,
   onSubmit
 }: {
-  classes: Array<{ id: string; name: string; grade_name: string; section_name: string | null }>;
+  classes: Array<{ id: string; name: string; grade_name: string; section_name: string | null; can_mark_attendance?: boolean }>;
   roster: Array<{ student_id: string; student_name: string; admission_number: string; current_status: AttendanceStatus | null; note: string | null }>;
   selectedClassId?: string;
   attendanceDate: string;
   submitted: boolean;
   canSubmit: boolean;
+  restrictionMessage?: string | null;
   onSubmit: (values: AttendanceSubmission) => Promise<void>;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
   const [records, setRecords] = useState(() =>
     roster.map((student) => ({
       student_id: student.student_id,
@@ -59,13 +62,18 @@ export function AttendanceForm({
 
   function submit() {
     if (!selectedClassId) return;
+    setError(null);
     startTransition(async () => {
-      await onSubmit({
-        class_id: selectedClassId,
-        attendance_date: attendanceDate,
-        records: records.map((record) => ({ ...record, note: record.note || null }))
-      });
-      router.refresh();
+      try {
+        await onSubmit({
+          class_id: selectedClassId,
+          attendance_date: attendanceDate,
+          records: records.map((record) => ({ ...record, note: record.note || null }))
+        });
+        router.refresh();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Attendance could not be submitted.");
+      }
     });
   }
 
@@ -84,21 +92,23 @@ export function AttendanceForm({
           <Input type="date" value={attendanceDate} onChange={(event) => updateFilters(selectedClassId ?? "", event.target.value)} aria-label="Attendance date" />
           <Button onClick={submit} disabled={!canSubmit || pending || !roster.length} className="w-full md:w-auto">
             <Save className="h-4 w-4" aria-hidden="true" />
-            {pending ? "Saving..." : submitted ? "Update attendance" : "Submit attendance"}
+            {pending ? "Saving..." : submitted ? "Attendance marked" : "Submit attendance"}
           </Button>
         </div>
+        {restrictionMessage ? <div className="mt-3 rounded-lg bg-warning-soft px-3 py-2 text-sm font-semibold text-warning">{restrictionMessage}</div> : null}
+        {error ? <div className="mt-3 rounded-lg bg-danger-soft px-3 py-2 text-sm font-semibold text-danger">{error}</div> : null}
       </Card>
 
       <Card>
         <CardHeader>
           <div>
             <CardTitle>{selectedClass ? selectedClass.name : "Class roster"}</CardTitle>
-            <p className="mt-1 text-sm text-muted">{submitted ? "Attendance has already been submitted for this date." : "Default status is present. Update exceptions before saving."}</p>
+            <p className="mt-1 text-sm text-muted">{submitted ? "Attendance already marked for today." : "Default status is present. Update exceptions before saving."}</p>
           </div>
         </CardHeader>
         <CardContent>
           {!classes.length ? (
-            <EmptyState title="No classes available" description="Teachers only see classes assigned to them. Administrators can configure assignments in Academics." />
+            <EmptyState title="No classes available" description="Teachers see classes where they are head teacher or subject teacher. Administrators can configure assignments in Academics." />
           ) : !roster.length ? (
             <EmptyState title="No students enrolled" description="Add enrollments before taking attendance for this class." />
           ) : (

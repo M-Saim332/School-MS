@@ -35,7 +35,7 @@ export function ChangePasswordForm() {
       </div>
       <h1 className="font-display text-3xl font-semibold text-ink">Set a new password</h1>
       <p className="mt-2 text-sm leading-6 text-muted">
-        Your account was created with a temporary password. Choose a private password before continuing.
+        Choose a private password before continuing.
       </p>
       {error ? <div className="mt-4 rounded-lg bg-danger-soft px-4 py-3 text-sm font-semibold text-danger">{error}</div> : null}
       <form action={onSubmit} className="mt-6 grid gap-4">

@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { BriefcaseBusiness, CheckCircle2, IdCard, Mail, Phone, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { Field, Input, Textarea } from "@/components/ui/form-field";
 import { updateProfileAction } from "@/app/(app)/profile/actions";
 import { profileFormSchema, type ProfileFormValues } from "@/lib/validation/profile";
@@ -142,7 +142,10 @@ export function ProfileForm({ profile }: { profile: ProfileDetails }) {
           </div>
         </div>
 
-        <div className="mt-6 flex justify-end">
+        <div className="mt-6 flex flex-wrap justify-end gap-3">
+          <ButtonLink href="/change-password" variant="secondary">
+            Change Password
+          </ButtonLink>
           <Button type="submit" disabled={pending}>
             {pending ? "Saving..." : "Save Profile"}
           </Button>

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/session";
-import { createClass } from "@/lib/services/academics";
+import { createClass, updateClass } from "@/lib/services/academics";
 import { assignTeacherToClass, unassignTeacherFromClass } from "@/lib/services/teachers";
 import { z } from "zod";
 
@@ -11,7 +11,8 @@ const classSchema = z.object({
   grade_id: z.string().uuid("Grade is required"),
   section_id: z.string().uuid().optional().or(z.literal("")),
   academic_year_id: z.string().uuid("Academic year is required"),
-  room: z.string().optional()
+  room: z.string().optional(),
+  head_teacher_id: z.string().uuid("Head teacher is required")
 });
 
 export async function createClassAction(formData: FormData) {
@@ -22,9 +23,26 @@ export async function createClassAction(formData: FormData) {
     section_id: formData.get("section_id") || undefined,
     academic_year_id: formData.get("academic_year_id"),
     room: formData.get("room") || undefined,
+    head_teacher_id: formData.get("head_teacher_id")
   });
 
   await createClass(user, { ...data, section_id: data.section_id || null });
+  revalidatePath("/classes");
+  revalidatePath("/academics");
+}
+
+export async function updateClassAction(classId: string, formData: FormData) {
+  const user = await requireUser("classes:manage");
+  const data = classSchema.parse({
+    name: formData.get("name"),
+    grade_id: formData.get("grade_id"),
+    section_id: formData.get("section_id") || undefined,
+    academic_year_id: formData.get("academic_year_id"),
+    room: formData.get("room") || undefined,
+    head_teacher_id: formData.get("head_teacher_id")
+  });
+
+  await updateClass(user, classId, { ...data, section_id: data.section_id || null });
   revalidatePath("/classes");
   revalidatePath("/academics");
 }

@@ -6,6 +6,15 @@ insert into public.school_settings (school_id, settings)
 values ('00000000-0000-0000-0000-000000000001', '{"attendance_edit_window_days":7,"locale":"en-US"}')
 on conflict (school_id) do update set settings = excluded.settings;
 
+insert into public.grading_scales (school_id, grade, min_percentage, max_percentage, sort_order) values
+('00000000-0000-0000-0000-000000000001', 'A+', 90, 100, 1),
+('00000000-0000-0000-0000-000000000001', 'A', 80, 89.99, 2),
+('00000000-0000-0000-0000-000000000001', 'B', 70, 79.99, 3),
+('00000000-0000-0000-0000-000000000001', 'C', 60, 69.99, 4),
+('00000000-0000-0000-0000-000000000001', 'D', 50, 59.99, 5),
+('00000000-0000-0000-0000-000000000001', 'F', 0, 49.99, 6)
+on conflict (school_id, grade) do nothing;
+
 insert into public.academic_years (id, school_id, name, starts_on, ends_on, is_active) values
 ('10000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000001','2026-2027','2026-08-01','2027-06-15',true)
 on conflict (school_id, name) do update set is_active = excluded.is_active;
@@ -29,11 +38,50 @@ insert into public.subjects (id, school_id, name, code) values
 ('40000000-0000-0000-0000-000000000004','00000000-0000-0000-0000-000000000001','History','HIST')
 on conflict (school_id, name) do nothing;
 
-insert into public.classes (id, school_id, academic_year_id, grade_id, section_id, name, room) values
-('50000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000009','30000000-0000-0000-0000-000000000001','Grade 9A','Room 101'),
-('50000000-0000-0000-0000-000000000002','00000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000010','30000000-0000-0000-0000-000000000001','Grade 10A','Room 202'),
-('50000000-0000-0000-0000-000000000003','00000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000011','30000000-0000-0000-0000-000000000001','Grade 11A','Room 302'),
-('50000000-0000-0000-0000-000000000004','00000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000012','30000000-0000-0000-0000-000000000002','Grade 12B','Room 410')
+-- Demo auth users must exist before classes so head_teacher_id can reference profiles.
+do $$
+declare
+  principal_id uuid := '11111111-1111-1111-1111-111111111111';
+  admin_id uuid := '22222222-2222-2222-2222-222222222222';
+  teacher_id uuid := '33333333-3333-3333-3333-333333333333';
+  staff_id uuid := '44444444-4444-4444-4444-444444444444';
+begin
+  insert into auth.users (
+    id, instance_id, aud, email, encrypted_password,
+    email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+    created_at, updated_at, role,
+    confirmation_token, recovery_token, email_change_token_new,
+    email_change, phone_change, phone_change_token,
+    reauthentication_token, email_change_token_current,
+    is_sso_user, is_anonymous
+  )
+  values
+    (principal_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'principal@scholarly.test', crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated', '', '', '', '', '', '', '', '', false, false),
+    (admin_id,     '00000000-0000-0000-0000-000000000000', 'authenticated', 'admin@scholarly.test',     crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated', '', '', '', '', '', '', '', '', false, false),
+    (teacher_id,   '00000000-0000-0000-0000-000000000000', 'authenticated', 'teacher@scholarly.test',   crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated', '', '', '', '', '', '', '', '', false, false),
+    (staff_id,     '00000000-0000-0000-0000-000000000000', 'authenticated', 'staff@scholarly.test',     crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated', '', '', '', '', '', '', '', '', false, false)
+  on conflict (id) do nothing;
+
+  insert into public.profiles (id, full_name, email, must_change_password) values
+    (principal_id, 'Jane Doe', 'principal@scholarly.test', true),
+    (admin_id, 'Avery Admin', 'admin@scholarly.test', true),
+    (teacher_id, 'Miles Henderson', 'teacher@scholarly.test', true),
+    (staff_id, 'Sam Registrar', 'staff@scholarly.test', true)
+  on conflict (id) do update set full_name = excluded.full_name, must_change_password = excluded.must_change_password;
+
+  insert into public.school_members (school_id, user_id, role, department, job_title) values
+    ('00000000-0000-0000-0000-000000000001', principal_id, 'principal', 'Leadership', 'Principal'),
+    ('00000000-0000-0000-0000-000000000001', admin_id, 'administrator', 'Operations', 'System Administrator'),
+    ('00000000-0000-0000-0000-000000000001', teacher_id, 'teacher', 'Mathematics', 'Teacher'),
+    ('00000000-0000-0000-0000-000000000001', staff_id, 'student_staff', 'Admissions', 'Registrar')
+  on conflict (school_id, user_id) do update set role = excluded.role;
+end $$;
+
+insert into public.classes (id, school_id, academic_year_id, grade_id, section_id, name, room, head_teacher_id) values
+('50000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000009','30000000-0000-0000-0000-000000000001','Grade 9A','Room 101','33333333-3333-3333-3333-333333333333'),
+('50000000-0000-0000-0000-000000000002','00000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000010','30000000-0000-0000-0000-000000000001','Grade 10A','Room 202','33333333-3333-3333-3333-333333333333'),
+('50000000-0000-0000-0000-000000000003','00000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000011','30000000-0000-0000-0000-000000000001','Grade 11A','Room 302','33333333-3333-3333-3333-333333333333'),
+('50000000-0000-0000-0000-000000000004','00000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000012','30000000-0000-0000-0000-000000000002','Grade 12B','Room 410','33333333-3333-3333-3333-333333333333')
 on conflict (school_id, academic_year_id, name) do nothing;
 
 do $$
@@ -97,50 +145,7 @@ insert into public.activity_logs (school_id, action, entity_type, metadata) valu
 ('00000000-0000-0000-0000-000000000001','settings_changed','school_settings','{"field":"attendance_edit_window_days"}')
 on conflict do nothing;
 
--- Demo auth users
-do $$
-declare
-  principal_id uuid := '11111111-1111-1111-1111-111111111111';
-  admin_id uuid := '22222222-2222-2222-2222-222222222222';
-  teacher_id uuid := '33333333-3333-3333-3333-333333333333';
-  staff_id uuid := '44444444-4444-4444-4444-444444444444';
-begin
-  -- Insert into auth.users (password is 'password123' for all)
-  -- GoTrue requires token columns to be '' not NULL
-  insert into auth.users (
-    id, instance_id, aud, email, encrypted_password,
-    email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
-    created_at, updated_at, role,
-    confirmation_token, recovery_token, email_change_token_new,
-    email_change, phone_change, phone_change_token,
-    reauthentication_token, email_change_token_current,
-    is_sso_user, is_anonymous
-  )
-  values
-    (principal_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'principal@scholarly.test', crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated', '', '', '', '', '', '', '', '', false, false),
-    (admin_id,     '00000000-0000-0000-0000-000000000000', 'authenticated', 'admin@scholarly.test',     crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated', '', '', '', '', '', '', '', '', false, false),
-    (teacher_id,   '00000000-0000-0000-0000-000000000000', 'authenticated', 'teacher@scholarly.test',   crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated', '', '', '', '', '', '', '', '', false, false),
-    (staff_id,     '00000000-0000-0000-0000-000000000000', 'authenticated', 'staff@scholarly.test',     crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated', '', '', '', '', '', '', '', '', false, false)
-  on conflict (id) do nothing;
-
-  if principal_id is not null then
-    insert into public.profiles (id, full_name, email, must_change_password) values (principal_id, 'Jane Doe', 'principal@scholarly.test', true) on conflict (id) do update set full_name = excluded.full_name, must_change_password = excluded.must_change_password;
-    insert into public.school_members (school_id, user_id, role, department, job_title) values ('00000000-0000-0000-0000-000000000001', principal_id, 'principal', 'Leadership', 'Principal') on conflict (school_id, user_id) do update set role = excluded.role;
-  end if;
-  if admin_id is not null then
-    insert into public.profiles (id, full_name, email, must_change_password) values (admin_id, 'Avery Admin', 'admin@scholarly.test', true) on conflict (id) do update set full_name = excluded.full_name, must_change_password = excluded.must_change_password;
-    insert into public.school_members (school_id, user_id, role, department, job_title) values ('00000000-0000-0000-0000-000000000001', admin_id, 'administrator', 'Operations', 'System Administrator') on conflict (school_id, user_id) do update set role = excluded.role;
-  end if;
-  if teacher_id is not null then
-    insert into public.profiles (id, full_name, email, must_change_password) values (teacher_id, 'Miles Henderson', 'teacher@scholarly.test', true) on conflict (id) do update set full_name = excluded.full_name, must_change_password = excluded.must_change_password;
-    insert into public.school_members (school_id, user_id, role, department, job_title) values ('00000000-0000-0000-0000-000000000001', teacher_id, 'teacher', 'Mathematics', 'Teacher') on conflict (school_id, user_id) do update set role = excluded.role;
-    insert into public.teacher_assignments (school_id, teacher_id, class_id, subject_id) values
-      ('00000000-0000-0000-0000-000000000001', teacher_id, '50000000-0000-0000-0000-000000000002', '40000000-0000-0000-0000-000000000001'),
-      ('00000000-0000-0000-0000-000000000001', teacher_id, '50000000-0000-0000-0000-000000000003', '40000000-0000-0000-0000-000000000001')
-    on conflict do nothing;
-  end if;
-  if staff_id is not null then
-    insert into public.profiles (id, full_name, email, must_change_password) values (staff_id, 'Sam Registrar', 'staff@scholarly.test', true) on conflict (id) do update set full_name = excluded.full_name, must_change_password = excluded.must_change_password;
-    insert into public.school_members (school_id, user_id, role, department, job_title) values ('00000000-0000-0000-0000-000000000001', staff_id, 'student_staff', 'Admissions', 'Registrar') on conflict (school_id, user_id) do update set role = excluded.role;
-  end if;
-end $$;
+insert into public.teacher_assignments (school_id, teacher_id, class_id, subject_id) values
+  ('00000000-0000-0000-0000-000000000001', '33333333-3333-3333-3333-333333333333', '50000000-0000-0000-0000-000000000002', '40000000-0000-0000-0000-000000000001'),
+  ('00000000-0000-0000-0000-000000000001', '33333333-3333-3333-3333-333333333333', '50000000-0000-0000-0000-000000000003', '40000000-0000-0000-0000-000000000001')
+on conflict do nothing;

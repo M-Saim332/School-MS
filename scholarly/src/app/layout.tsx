@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Scholarly",
+  title: "GoCampusFlow",
   description: "Multi-tenant school management SaaS for administrators, principals, teachers, and student-management staff."
 };
 

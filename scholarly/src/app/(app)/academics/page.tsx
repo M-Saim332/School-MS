@@ -4,12 +4,12 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { requireUser } from "@/lib/auth/session";
-import { getAcademicOptions, getTeacherClasses } from "@/lib/services/academics";
+import { getAcademicOptions, getTeacherSubjectAssignments } from "@/lib/services/academics";
 
 export default async function AcademicsPage() {
   const user = await requireUser("academics:view");
   if (user.role === "teacher") {
-    const assignments = await getTeacherClasses(user);
+    const assignments = await getTeacherSubjectAssignments(user);
 
     return (
       <>
@@ -21,7 +21,7 @@ export default async function AcademicsPage() {
         {!assignments.length ? (
           <Card className="p-8 text-center">
             <h2 className="font-display text-2xl font-semibold text-ink">No assignments yet</h2>
-            <p className="mt-2 text-sm text-muted">A principal or administrator can assign classes from Class Management.</p>
+            <p className="mt-2 text-sm text-muted">A principal or administrator can assign subject responsibilities from Class Management.</p>
           </Card>
         ) : (
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

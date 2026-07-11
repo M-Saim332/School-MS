@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ApprovalQueue } from "@/components/approvals/approval-queue";
 import { requireUser } from "@/lib/auth/session";
 import { getApprovalRequests } from "@/lib/services/approvals";
+import { hasPermission } from "@/lib/permissions";
 
 export default async function ApprovalsPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const params = await searchParams;
@@ -22,7 +23,7 @@ export default async function ApprovalsPage({ searchParams }: { searchParams: Pr
           <CardTitle>Pending Requests</CardTitle>
         </CardHeader>
         <CardContent>
-          <ApprovalQueue initialRequests={requests} />
+          <ApprovalQueue initialRequests={requests} canReview={hasPermission(user.role, "approvals:review")} />
         </CardContent>
       </Card>
     </>

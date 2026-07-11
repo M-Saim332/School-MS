@@ -45,7 +45,7 @@ export async function getCurrentUser(): Promise<AppUser | null> {
   return {
     id: user.id,
     email: profile?.email ?? user.email ?? null,
-    fullName: profile?.full_name ?? user.email ?? "Scholarly User",
+    fullName: profile?.full_name ?? user.email ?? "GoCampusFlow User",
     avatarUrl: profile?.avatar_url ?? null,
     schoolId: member.school_id,
     schoolName: member.schools?.name ?? "School",

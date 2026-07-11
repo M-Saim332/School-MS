@@ -9,6 +9,10 @@ export type StudentStatus =
 export type AttendanceStatus = "present" | "absent" | "late" | "excused";
 export type ApprovalRequestType = "admission" | "cancellation";
 export type ApprovalRequestStatus = "pending" | "approved" | "denied";
+export type ExamType = "quiz" | "monthly" | "mid_term" | "final_term";
+export type ExamStatus = "draft" | "submitted" | "approved" | "rejected";
+export type MarkStatus = "draft" | "submitted" | "approved" | "rejected";
+export type ResultApprovalStatus = "pending" | "approved" | "rejected";
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
@@ -82,6 +86,9 @@ export type ClassRow = {
   section_name: string | null;
   academic_year_name: string;
   room: string | null;
+  head_teacher_id: string;
+  head_teacher_name?: string | null;
+  head_teacher_email?: string | null;
   student_count?: number;
 };
 
@@ -116,4 +123,52 @@ export type ApprovalRequest = {
   reviewed_by_name?: string | null;
   class_name?: string | null;
   grade_name?: string | null;
+};
+
+export type Exam = {
+  id: string;
+  school_id: string;
+  class_id: string;
+  subject_id: string;
+  exam_type: ExamType;
+  title: string;
+  term: string;
+  exam_date: string;
+  max_marks: number;
+  created_by: string;
+  status: ExamStatus;
+  submitted_at: string | null;
+  finalized_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Mark = {
+  id: string;
+  school_id: string;
+  exam_id: string;
+  student_id: string;
+  class_id: string;
+  subject_id: string;
+  teacher_id: string;
+  marks_obtained: number;
+  grade: string;
+  status: MarkStatus;
+  teacher_comment: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ResultApproval = {
+  id: string;
+  school_id: string;
+  exam_id: string;
+  submitted_by: string;
+  reviewed_by: string | null;
+  status: ResultApprovalStatus;
+  principal_comment: string | null;
+  submitted_at: string;
+  reviewed_at: string | null;
+  created_at: string;
+  updated_at: string;
 };
