@@ -53,3 +53,34 @@ export async function getTeacherClasses(user: AppUser) {
     subject_name: row.subjects?.name
   }));
 }
+
+export async function createClass(user: AppUser, data: { name: string; grade_id: string; section_id?: string | null; academic_year_id: string; room?: string | null }) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("classes").insert({
+    school_id: user.schoolId,
+    name: data.name,
+    grade_id: data.grade_id,
+    section_id: data.section_id || null,
+    academic_year_id: data.academic_year_id,
+    room: data.room || null
+  });
+
+  if (error) throw new Error(error.message);
+}
+
+export async function updateClass(user: AppUser, classId: string, data: { name: string; grade_id: string; section_id?: string | null; academic_year_id: string; room?: string | null }) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("classes")
+    .update({
+      name: data.name,
+      grade_id: data.grade_id,
+      section_id: data.section_id || null,
+      academic_year_id: data.academic_year_id,
+      room: data.room || null
+    })
+    .eq("school_id", user.schoolId)
+    .eq("id", classId);
+
+  if (error) throw new Error(error.message);
+}

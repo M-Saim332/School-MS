@@ -1,6 +1,14 @@
 export type UserRole = "principal" | "teacher" | "student_staff" | "administrator";
-export type StudentStatus = "active" | "graduated" | "transferred" | "archived";
+export type StudentStatus =
+  | "active"
+  | "graduated"
+  | "transferred"
+  | "archived"
+  | "pending_approval"
+  | "pending_cancellation";
 export type AttendanceStatus = "present" | "absent" | "late" | "excused";
+export type ApprovalRequestType = "admission" | "cancellation";
+export type ApprovalRequestStatus = "pending" | "approved" | "denied";
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
@@ -78,4 +86,28 @@ export type AttendanceRosterRow = {
   admission_number: string;
   current_status: AttendanceStatus | null;
   note: string | null;
+};
+
+export type ApprovalRequest = {
+  id: string;
+  school_id: string;
+  request_type: ApprovalRequestType;
+  student_id: string;
+  submitted_by: string;
+  reviewed_by: string | null;
+  status: ApprovalRequestStatus;
+  denial_reason: string | null;
+  submitted_at: string;
+  reviewed_at: string | null;
+  metadata: Json;
+  created_at: string;
+  updated_at: string;
+  // Joined fields
+  student_first_name?: string | null;
+  student_last_name?: string | null;
+  student_admission_number?: string | null;
+  submitted_by_name?: string | null;
+  reviewed_by_name?: string | null;
+  class_name?: string | null;
+  grade_name?: string | null;
 };

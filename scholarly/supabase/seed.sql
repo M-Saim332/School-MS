@@ -106,12 +106,21 @@ declare
   staff_id uuid := '44444444-4444-4444-4444-444444444444';
 begin
   -- Insert into auth.users (password is 'password123' for all)
-  insert into auth.users (id, instance_id, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, role)
-  values 
-    (principal_id, '00000000-0000-0000-0000-000000000000', 'principal@scholarly.test', crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated'),
-    (admin_id, '00000000-0000-0000-0000-000000000000', 'admin@scholarly.test', crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated'),
-    (teacher_id, '00000000-0000-0000-0000-000000000000', 'teacher@scholarly.test', crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated'),
-    (staff_id, '00000000-0000-0000-0000-000000000000', 'staff@scholarly.test', crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated')
+  -- GoTrue requires token columns to be '' not NULL
+  insert into auth.users (
+    id, instance_id, aud, email, encrypted_password,
+    email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+    created_at, updated_at, role,
+    confirmation_token, recovery_token, email_change_token_new,
+    email_change, phone_change, phone_change_token,
+    reauthentication_token, email_change_token_current,
+    is_sso_user, is_anonymous
+  )
+  values
+    (principal_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'principal@scholarly.test', crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated', '', '', '', '', '', '', '', '', false, false),
+    (admin_id,     '00000000-0000-0000-0000-000000000000', 'authenticated', 'admin@scholarly.test',     crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated', '', '', '', '', '', '', '', '', false, false),
+    (teacher_id,   '00000000-0000-0000-0000-000000000000', 'authenticated', 'teacher@scholarly.test',   crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated', '', '', '', '', '', '', '', '', false, false),
+    (staff_id,     '00000000-0000-0000-0000-000000000000', 'authenticated', 'staff@scholarly.test',     crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated', '', '', '', '', '', '', '', '', false, false)
   on conflict (id) do nothing;
 
   if principal_id is not null then

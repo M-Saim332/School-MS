@@ -31,8 +31,12 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
         actions={
           <>
             {hasPermission(user.role, "students:update") ? <ButtonLink href={`/students/${id}/edit`} variant="secondary">Edit</ButtonLink> : null}
-            {hasPermission(user.role, "students:archive") && student.status !== "archived" ? (
-              <ConfirmButton label="Archive" confirmText="Archive this student? This keeps the record but removes it from active lists." action={archive} />
+            {hasPermission(user.role, "students:archive") && student.status !== "archived" && !student.status.startsWith("pending") ? (
+              <ConfirmButton 
+                label={user.role === "student_staff" ? "Request Cancellation" : "Archive"} 
+                confirmText={user.role === "student_staff" ? "Submit a cancellation request for this student to the Principal?" : "Archive this student? This keeps the record but removes it from active lists."} 
+                action={archive} 
+              />
             ) : null}
           </>
         }
@@ -42,7 +46,9 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
         <Card>
           <CardHeader>
             <CardTitle>Profile</CardTitle>
-            <Badge>{student.status}</Badge>
+            <Badge tone={student.status.startsWith("pending") ? "yellow" : student.status === "archived" ? "gray" : "green"}>
+              {student.status.replace("_", " ")}
+            </Badge>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <Info label="Birth date" value={student.date_of_birth} />

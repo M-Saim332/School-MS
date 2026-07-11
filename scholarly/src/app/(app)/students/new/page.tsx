@@ -10,8 +10,12 @@ export default async function NewStudentPage() {
 
   return (
     <>
-      <PageHeader eyebrow="Admissions" title="Add Student" description="Create a validated student record and optional active class enrollment." />
-      <StudentForm classes={academics.classes} onSubmit={createStudentAction} submitLabel="Create student" />
+      <PageHeader 
+        eyebrow="Admissions" 
+        title="Add Student" 
+        description={user.role === "student_staff" ? "Submit a new student admission request for Principal approval." : "Create a validated student record and optional active class enrollment."} 
+      />
+      <StudentForm classes={academics.classes} onSubmit={createStudentAction} submitLabel={user.role === "student_staff" ? "Submit request" : "Create student"} />
     </>
   );
 }

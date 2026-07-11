@@ -2,19 +2,25 @@ import {
   Activity,
   BarChart3,
   CalendarCheck,
+  ClipboardCheck,
   GraduationCap,
   LayoutDashboard,
   Settings,
   Shield,
-  Users
+  UserCog,
+  Users,
+  BookOpen
 } from "lucide-react";
 import type { Permission } from "@/lib/permissions";
 
 export const navItems = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard, permission: "dashboard:view" },
+  { href: "/approvals", label: "Action Center", icon: ClipboardCheck, permission: "approvals:view" },
   { href: "/students", label: "Students", icon: GraduationCap, permission: "students:view" },
   { href: "/attendance", label: "Attendance", icon: CalendarCheck, permission: "attendance:view" },
   { href: "/staff", label: "People", icon: Users, permission: "staff:view" },
+  { href: "/teachers", label: "Teachers", icon: UserCog, permission: "teachers:manage" },
+  { href: "/classes", label: "Classes", icon: BookOpen, permission: "classes:manage" },
   { href: "/academics", label: "Academics", icon: BarChart3, permission: "academics:view" },
   { href: "/reports", label: "Reports", icon: Activity, permission: "reports:view" },
   { href: "/admin", label: "Admin", icon: Shield, permission: "users:manage" },

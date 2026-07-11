@@ -65,6 +65,9 @@ export async function createStudent(user: AppUser, values: StudentFormValues) {
   const parsed = studentSchema.parse(values);
   const supabase = await createClient();
 
+  const isStaff = user.role === "student_staff";
+  const initialStatus = isStaff ? "pending_approval" : parsed.status;
+
   const { data: student, error } = await supabase
     .from("students")
     .insert({
@@ -79,7 +82,7 @@ export async function createStudent(user: AppUser, values: StudentFormValues) {
       phone: parsed.phone || null,
       address: parsed.address || null,
       admission_date: parsed.admission_date,
-      status: parsed.status
+      status: initialStatus
     })
     .select("id")
     .single();
@@ -109,7 +112,7 @@ export async function createStudent(user: AppUser, values: StudentFormValues) {
     is_primary: true
   });
 
-  if (parsed.class_id) {
+  if (parsed.class_id && initialStatus !== "pending_approval") {
     const { data: activeYear } = await supabase
       .from("academic_years")
       .select("id")
@@ -123,12 +126,32 @@ export async function createStudent(user: AppUser, values: StudentFormValues) {
       academic_year_id: activeYear?.id,
       status: "active"
     });
+  } else if (parsed.class_id && initialStatus === "pending_approval") {
+    // We store the requested class assignment in the approval request metadata if needed,
+    // or just rely on the form having passed it. We'll store it in metadata so the principal
+    // can enroll them on approval.
+    const { error: reqError } = await supabase.from("approval_requests").insert({
+      school_id: user.schoolId,
+      request_type: "admission",
+      student_id: student.id,
+      submitted_by: user.id,
+      status: "pending",
+      metadata: { requested_class_id: parsed.class_id }
+    });
+    if (reqError) throw new Error(reqError.message);
+    await logActivity(user, "admission_request_submitted", "approval_request", student.id, {
+      admission_number: parsed.admission_number,
+      name: `${parsed.first_name} ${parsed.last_name}`
+    });
+    return student.id as string;
   }
 
-  await logActivity(user, "student_created", "student", student.id, {
-    admission_number: parsed.admission_number,
-    name: `${parsed.first_name} ${parsed.last_name}`
-  });
+  if (!isStaff) {
+    await logActivity(user, "student_created", "student", student.id, {
+      admission_number: parsed.admission_number,
+      name: `${parsed.first_name} ${parsed.last_name}`
+    });
+  }
 
   return student.id as string;
 }
@@ -160,6 +183,31 @@ export async function updateStudent(user: AppUser, id: string, values: StudentFo
 
 export async function archiveStudent(user: AppUser, id: string) {
   const supabase = await createClient();
+  
+  if (user.role === "student_staff") {
+    // Route to pending cancellation workflow
+    const { error: updateError } = await supabase
+      .from("students")
+      .update({ status: "pending_cancellation" })
+      .eq("school_id", user.schoolId)
+      .eq("id", id);
+      
+    if (updateError) throw new Error(updateError.message);
+
+    const { error: reqError } = await supabase.from("approval_requests").insert({
+      school_id: user.schoolId,
+      request_type: "cancellation",
+      student_id: id,
+      submitted_by: user.id,
+      status: "pending"
+    });
+
+    if (reqError) throw new Error(reqError.message);
+    await logActivity(user, "cancellation_request_submitted", "approval_request", id);
+    return;
+  }
+
+  // Direct archive for principal/admin
   const { error } = await supabase
     .from("students")
     .update({ status: "archived", archived_at: new Date().toISOString() })

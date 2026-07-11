@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BookOpen, LogOut, Menu, Search, X } from "lucide-react";
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { AppUser } from "@/types/database";
 import { hasPermission } from "@/lib/permissions";
 import { cn, initials } from "@/lib/utils";
@@ -14,10 +14,48 @@ import { createClient } from "@/lib/supabase/browser";
 export function AppShell({ user, children }: { user: AppUser; children: ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
   const items = navItems.filter((item) => hasPermission(user.role, item.permission));
+  const supabase = createClient();
+
+  useEffect(() => {
+    if (!hasPermission(user.role, "approvals:review")) return;
+
+    // Fetch initial count
+    async function fetchCount() {
+      const { count } = await supabase
+        .from("approval_requests")
+        .select("*", { count: "exact", head: true })
+        .eq("school_id", user.schoolId)
+        .eq("status", "pending");
+      if (count !== null) setPendingCount(count);
+    }
+    
+    fetchCount();
+
+    // Subscribe to realtime changes
+    const channel = supabase
+      .channel("approval_requests_changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "approval_requests",
+          filter: `school_id=eq.${user.schoolId}`
+        },
+        () => {
+          fetchCount();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user.schoolId, user.role, supabase]);
 
   async function signOut() {
-    const supabase = createClient();
     await supabase.auth.signOut();
     window.location.href = "/sign-in";
   }
@@ -37,18 +75,28 @@ export function AppShell({ user, children }: { user: AppUser; children: ReactNod
         {items.map((item) => {
           const Icon = item.icon;
           const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const isApprovals = item.href === "/approvals";
+          const showBadge = isApprovals && pendingCount > 0 && hasPermission(user.role, "approvals:review");
+
           return (
             <Link
               href={item.href}
               key={item.href}
               onClick={() => setOpen(false)}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition",
+                "flex items-center justify-between gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition",
                 active ? "bg-primary-soft text-primary" : "text-muted hover:bg-surface-low hover:text-primary"
               )}
             >
-              <Icon className="h-5 w-5" aria-hidden="true" />
-              {item.label}
+              <div className="flex items-center gap-3">
+                <Icon className="h-5 w-5" aria-hidden="true" />
+                {item.label}
+              </div>
+              {showBadge && (
+                <span className="flex h-5 items-center justify-center rounded-full bg-danger px-2 text-xs font-bold text-white">
+                  {pendingCount > 99 ? "99+" : pendingCount}
+                </span>
+              )}
             </Link>
           );
         })}

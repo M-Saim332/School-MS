@@ -15,17 +15,26 @@ export type Permission =
   | "reports:view"
   | "activity:view"
   | "settings:manage"
-  | "users:manage";
+  | "users:manage"
+  | "approvals:view"
+  | "approvals:review"
+  | "teachers:manage"
+  | "classes:manage";
 
 const rolePermissions: Record<UserRole, Permission[]> = {
   principal: [
     "dashboard:view",
     "students:view",
+    "students:create",
     "attendance:view",
     "staff:view",
     "academics:view",
     "reports:view",
-    "activity:view"
+    "activity:view",
+    "approvals:view",
+    "approvals:review",
+    "teachers:manage",
+    "classes:manage"
   ],
   teacher: ["dashboard:view", "students:view", "attendance:view", "attendance:submit", "academics:view"],
   student_staff: [
@@ -35,7 +44,8 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "students:update",
     "students:archive",
     "attendance:view",
-    "reports:view"
+    "reports:view",
+    "approvals:view"
   ],
   administrator: [
     "dashboard:view",
@@ -52,7 +62,11 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "reports:view",
     "activity:view",
     "settings:manage",
-    "users:manage"
+    "users:manage",
+    "approvals:view",
+    "approvals:review",
+    "teachers:manage",
+    "classes:manage"
   ]
 };
 
