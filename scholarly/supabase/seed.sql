@@ -124,15 +124,15 @@ begin
   on conflict (id) do nothing;
 
   if principal_id is not null then
-    insert into public.profiles (id, full_name, email) values (principal_id, 'Jane Doe', 'principal@scholarly.test') on conflict (id) do update set full_name = excluded.full_name;
+    insert into public.profiles (id, full_name, email, must_change_password) values (principal_id, 'Jane Doe', 'principal@scholarly.test', true) on conflict (id) do update set full_name = excluded.full_name, must_change_password = excluded.must_change_password;
     insert into public.school_members (school_id, user_id, role, department, job_title) values ('00000000-0000-0000-0000-000000000001', principal_id, 'principal', 'Leadership', 'Principal') on conflict (school_id, user_id) do update set role = excluded.role;
   end if;
   if admin_id is not null then
-    insert into public.profiles (id, full_name, email) values (admin_id, 'Avery Admin', 'admin@scholarly.test') on conflict (id) do update set full_name = excluded.full_name;
+    insert into public.profiles (id, full_name, email, must_change_password) values (admin_id, 'Avery Admin', 'admin@scholarly.test', true) on conflict (id) do update set full_name = excluded.full_name, must_change_password = excluded.must_change_password;
     insert into public.school_members (school_id, user_id, role, department, job_title) values ('00000000-0000-0000-0000-000000000001', admin_id, 'administrator', 'Operations', 'System Administrator') on conflict (school_id, user_id) do update set role = excluded.role;
   end if;
   if teacher_id is not null then
-    insert into public.profiles (id, full_name, email) values (teacher_id, 'Miles Henderson', 'teacher@scholarly.test') on conflict (id) do update set full_name = excluded.full_name;
+    insert into public.profiles (id, full_name, email, must_change_password) values (teacher_id, 'Miles Henderson', 'teacher@scholarly.test', true) on conflict (id) do update set full_name = excluded.full_name, must_change_password = excluded.must_change_password;
     insert into public.school_members (school_id, user_id, role, department, job_title) values ('00000000-0000-0000-0000-000000000001', teacher_id, 'teacher', 'Mathematics', 'Teacher') on conflict (school_id, user_id) do update set role = excluded.role;
     insert into public.teacher_assignments (school_id, teacher_id, class_id, subject_id) values
       ('00000000-0000-0000-0000-000000000001', teacher_id, '50000000-0000-0000-0000-000000000002', '40000000-0000-0000-0000-000000000001'),
@@ -140,7 +140,7 @@ begin
     on conflict do nothing;
   end if;
   if staff_id is not null then
-    insert into public.profiles (id, full_name, email) values (staff_id, 'Sam Registrar', 'staff@scholarly.test') on conflict (id) do update set full_name = excluded.full_name;
+    insert into public.profiles (id, full_name, email, must_change_password) values (staff_id, 'Sam Registrar', 'staff@scholarly.test', true) on conflict (id) do update set full_name = excluded.full_name, must_change_password = excluded.must_change_password;
     insert into public.school_members (school_id, user_id, role, department, job_title) values ('00000000-0000-0000-0000-000000000001', staff_id, 'student_staff', 'Admissions', 'Registrar') on conflict (school_id, user_id) do update set role = excluded.role;
   end if;
 end $$;

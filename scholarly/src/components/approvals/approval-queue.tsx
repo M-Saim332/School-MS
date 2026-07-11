@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { ReviewModal } from "./review-modal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { ApprovalRequest } from "@/types/database";
 
 export function ApprovalQueue({ initialRequests }: { initialRequests: ApprovalRequest[] }) {
-  const [requests, setRequests] = useState<ApprovalRequest[]>(initialRequests);
+  const requests = initialRequests;
   const [selectedRequest, setSelectedRequest] = useState<ApprovalRequest | null>(null);
 
   return (

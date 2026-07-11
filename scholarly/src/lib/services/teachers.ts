@@ -1,13 +1,23 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { AppUser } from "@/types/database";
+import type { AppUser, UserRole } from "@/types/database";
 import { logActivity } from "@/lib/services/activity";
 import { staffFormSchema, type StaffFormValues } from "@/lib/validation/staff";
 
+const creatableRoles: Record<UserRole, UserRole[]> = {
+  administrator: ["administrator", "principal", "teacher", "student_staff"],
+  principal: ["teacher", "student_staff"],
+  teacher: [],
+  student_staff: []
+};
+
 export async function createStaffAccount(user: AppUser, values: StaffFormValues) {
   const parsed = staffFormSchema.parse(values);
-  const supabase = await createClient();
   const adminClient = createAdminClient();
+
+  if (!creatableRoles[user.role].includes(parsed.role)) {
+    throw new Error("You do not have permission to create that role.");
+  }
 
   // 1. Create auth user via admin API
   const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
@@ -28,7 +38,9 @@ export async function createStaffAccount(user: AppUser, values: StaffFormValues)
     .upsert({
       id: authData.user.id,
       full_name: parsed.full_name,
+      email: parsed.email,
       avatar_url: null,
+      must_change_password: true,
     });
 
   if (profileError) throw new Error(profileError.message);

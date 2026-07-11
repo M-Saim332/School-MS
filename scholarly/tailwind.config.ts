@@ -5,16 +5,18 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#faf9fa",
+        background: "#f8f7f4",
         surface: "#ffffff",
-        "surface-low": "#f5f3f4",
-        "surface-mid": "#efedee",
-        "surface-high": "#e9e8e9",
+        "surface-low": "#f2f5f9",
+        "surface-mid": "#e9eef7",
+        "surface-high": "#dee8f4",
         primary: "#3366cc",
         "primary-ink": "#001946",
         "primary-soft": "#d9e2ff",
         tertiary: "#6d5e00",
         "tertiary-soft": "#f9e37a",
+        accent: "#0f766e",
+        "accent-soft": "#ccfbf1",
         ink: "#1b1c1d",
         muted: "#434653",
         outline: "#c3c6d5",

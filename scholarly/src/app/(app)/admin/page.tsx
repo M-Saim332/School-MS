@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { requireUser } from "@/lib/auth/session";
 import { getStaff } from "@/lib/services/staff";
 import { getRolePermissions } from "@/lib/permissions";
+import { StaffFormModal } from "@/components/teachers/staff-form";
 
 export default async function AdminPage() {
   const user = await requireUser("users:manage");
@@ -12,7 +13,12 @@ export default async function AdminPage() {
 
   return (
     <>
-      <PageHeader eyebrow="System" title="Administrator Console" description="Manage user membership, role policy, and school-level settings without exposing service-role credentials." />
+      <PageHeader
+        eyebrow="System"
+        title="Administrator Console"
+        description="Manage user membership, role policy, and school-level settings without exposing service-role credentials."
+        actions={<StaffFormModal allowedRoles={["administrator", "principal", "teacher", "student_staff"]} triggerLabel="Add User" />}
+      />
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <Card>
           <CardHeader>
@@ -27,16 +33,28 @@ export default async function AdminPage() {
                     <th className="py-3 pr-4">Name</th>
                     <th className="py-3 pr-4">Email</th>
                     <th className="py-3 pr-4">Role</th>
+                    <th className="py-3 pr-4">Department</th>
+                    <th className="py-3 pr-4">Phone</th>
                     <th className="py-3 pr-4">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {members.map((member: any) => (
-                    <tr key={member.member_id} className="border-t border-outline/60">
-                      <td className="py-3 pr-4 font-semibold">{member.full_name}</td>
+                    <tr key={member.member_id} className="border-t border-outline/35">
+                      <td className="py-3 pr-4">
+                        <p className="font-semibold">{member.full_name}</p>
+                        <p className="text-xs text-muted">{member.job_title ?? "No title"}</p>
+                      </td>
                       <td className="py-3 pr-4">{member.email}</td>
                       <td className="py-3 pr-4">{member.role.replace("_", " ")}</td>
-                      <td className="py-3 pr-4"><Badge>{member.status}</Badge></td>
+                      <td className="py-3 pr-4">{member.department ?? "Not set"}</td>
+                      <td className="py-3 pr-4">{member.phone ?? "Not set"}</td>
+                      <td className="py-3 pr-4">
+                        <div className="flex flex-wrap gap-2">
+                          <Badge>{member.status}</Badge>
+                          {member.must_change_password ? <Badge tone="yellow">Password reset</Badge> : null}
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

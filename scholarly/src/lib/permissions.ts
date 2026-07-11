@@ -36,7 +36,7 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "teachers:manage",
     "classes:manage"
   ],
-  teacher: ["dashboard:view", "students:view", "attendance:view", "attendance:submit", "academics:view"],
+  teacher: ["academics:view"],
   student_staff: [
     "dashboard:view",
     "students:view",
@@ -80,7 +80,7 @@ export function getRolePermissions(role: UserRole) {
 }
 
 export function roleHome(role: UserRole) {
-  if (role === "teacher") return "/dashboard?role=teacher";
+  if (role === "teacher") return "/academics";
   if (role === "administrator") return "/admin";
   return "/dashboard";
 }

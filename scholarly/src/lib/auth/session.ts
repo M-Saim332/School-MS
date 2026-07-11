@@ -6,6 +6,8 @@ import { hasPermission, type Permission } from "@/lib/permissions";
 type MemberRow = {
   school_id: string;
   role: UserRole;
+  department: string | null;
+  job_title: string | null;
   schools: { name: string } | null;
 };
 
@@ -18,10 +20,10 @@ export async function getCurrentUser(): Promise<AppUser | null> {
   if (!user) return null;
 
   const [profileResult, memberResult] = await Promise.all([
-    supabase.from("profiles").select("full_name,email,avatar_url").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("full_name,email,avatar_url,must_change_password").eq("id", user.id).maybeSingle(),
     supabase
       .from("school_members")
-      .select("school_id, role, schools(name)")
+      .select("school_id, role, department, job_title, schools(name)")
       .eq("user_id", user.id)
       .eq("status", "active")
       .limit(1)
@@ -47,7 +49,10 @@ export async function getCurrentUser(): Promise<AppUser | null> {
     avatarUrl: profile?.avatar_url ?? null,
     schoolId: member.school_id,
     schoolName: member.schools?.name ?? "School",
-    role: member.role
+    role: member.role,
+    department: member.department,
+    jobTitle: member.job_title,
+    mustChangePassword: Boolean(profile?.must_change_password)
   };
 }
 

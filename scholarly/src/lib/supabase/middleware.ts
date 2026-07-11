@@ -27,6 +27,28 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  await supabase.auth.getUser();
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  const path = request.nextUrl.pathname;
+  const isChangePasswordRoute = path === "/change-password";
+  const isAuthRoute = path === "/sign-in" || path === "/forgot-password" || path === "/reset-password";
+
+  if (user && !isChangePasswordRoute && !isAuthRoute) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("must_change_password")
+      .eq("id", user.id)
+      .maybeSingle<{ must_change_password: boolean }>();
+
+    if (profile?.must_change_password) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/change-password";
+      redirectUrl.search = "";
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
   return response;
 }

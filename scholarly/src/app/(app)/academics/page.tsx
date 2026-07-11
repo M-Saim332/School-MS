@@ -4,10 +4,50 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { requireUser } from "@/lib/auth/session";
-import { getAcademicOptions } from "@/lib/services/academics";
+import { getAcademicOptions, getTeacherClasses } from "@/lib/services/academics";
 
 export default async function AcademicsPage() {
   const user = await requireUser("academics:view");
+  if (user.role === "teacher") {
+    const assignments = await getTeacherClasses(user);
+
+    return (
+      <>
+        <PageHeader
+          eyebrow={user.schoolName}
+          title="Teaching Assignments"
+          description="Review the classes and subjects currently assigned to you."
+        />
+        {!assignments.length ? (
+          <Card className="p-8 text-center">
+            <h2 className="font-display text-2xl font-semibold text-ink">No assignments yet</h2>
+            <p className="mt-2 text-sm text-muted">A principal or administrator can assign classes from Class Management.</p>
+          </Card>
+        ) : (
+          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {assignments.map((item: any) => (
+              <Card key={`${item.id}-${item.subject_name ?? "class"}`} className="overflow-hidden">
+                <div className="h-2 bg-gradient-to-r from-primary via-accent to-tertiary-soft" />
+                <div className="p-5">
+                  <Badge tone="blue">{item.subject_name ?? "General"}</Badge>
+                  <h2 className="mt-4 font-display text-2xl font-semibold text-ink">{item.name}</h2>
+                  <p className="mt-2 text-sm leading-6 text-muted">
+                    {item.grade_name}
+                    {item.section_name ? ` - ${item.section_name}` : ""}
+                    {item.room ? ` - ${item.room}` : ""}
+                  </p>
+                  <p className="mt-4 rounded-lg bg-surface-low p-3 text-xs font-bold uppercase tracking-wide text-muted">
+                    {item.academic_year_name ?? "Current academic year"}
+                  </p>
+                </div>
+              </Card>
+            ))}
+          </section>
+        )}
+      </>
+    );
+  }
+
   const academics = await getAcademicOptions(user);
 
   return (

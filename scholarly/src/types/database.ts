@@ -17,6 +17,9 @@ export type Profile = {
   full_name: string;
   email: string | null;
   avatar_url: string | null;
+  phone: string | null;
+  bio: string | null;
+  must_change_password: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -39,6 +42,9 @@ export type AppUser = {
   schoolId: string;
   schoolName: string;
   role: UserRole;
+  department: string | null;
+  jobTitle: string | null;
+  mustChangePassword: boolean;
 };
 
 export type Student = {

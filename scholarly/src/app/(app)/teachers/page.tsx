@@ -18,12 +18,13 @@ export default async function TeachersPage() {
         eyebrow="Staff" 
         title="Teacher & Staff Management" 
         description="Manage teaching and administrative staff accounts, statuses, and class assignments."
-        actions={<StaffFormModal />}
+        actions={<StaffFormModal allowedRoles={["teacher", "student_staff"]} triggerLabel="Add User" />}
       />
 
       <div className="grid gap-6">
         {managedStaff.map((member: any) => (
-          <Card key={member.member_id}>
+          <Card key={member.member_id} className="overflow-hidden">
+            <div className="h-2 bg-gradient-to-r from-primary via-accent to-tertiary-soft" />
             <CardHeader>
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -42,6 +43,8 @@ export default async function TeachersPage() {
                   <p className="mt-1 text-sm text-ink"><span className="font-semibold">Role:</span> {member.role.replace("_", " ")}</p>
                   <p className="mt-1 text-sm text-ink"><span className="font-semibold">Department:</span> {member.department ?? "None"}</p>
                   <p className="mt-1 text-sm text-ink"><span className="font-semibold">Title:</span> {member.job_title ?? "None"}</p>
+                  <p className="mt-1 text-sm text-ink"><span className="font-semibold">Phone:</span> {member.phone ?? "None"}</p>
+                  {member.bio ? <p className="mt-3 rounded-lg bg-surface-low p-3 text-sm leading-6 text-muted">{member.bio}</p> : null}
                 </div>
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-muted">Class Assignments</p>

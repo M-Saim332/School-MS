@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/session";
-import { createClass, updateClass } from "@/lib/services/academics";
+import { createClass } from "@/lib/services/academics";
 import { assignTeacherToClass, unassignTeacherFromClass } from "@/lib/services/teachers";
 import { z } from "zod";
 

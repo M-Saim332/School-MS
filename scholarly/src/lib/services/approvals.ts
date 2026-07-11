@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import type { AppUser, ApprovalRequestType, ApprovalRequestStatus } from "@/types/database";
+import type { AppUser, ApprovalRequestStatus } from "@/types/database";
 import { logActivity } from "@/lib/services/activity";
 
 export type ApprovalFilters = {
