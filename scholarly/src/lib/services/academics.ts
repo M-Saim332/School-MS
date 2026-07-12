@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { AppUser } from "@/types/database";
+import { logActivity } from "@/lib/services/activity";
+
 
 export async function getAcademicOptions(user: AppUser) {
   const supabase = await createClient();
@@ -133,4 +135,92 @@ export async function updateClass(user: AppUser, classId: string, data: { name: 
     .eq("id", classId);
 
   if (error) throw new Error(error.message);
+}
+
+export async function deleteClass(user: AppUser, classId: string) {
+  const supabase = await createClient();
+
+  // Check for active enrollments before deleting
+  const { count } = await supabase
+    .from("enrollments")
+    .select("id", { count: "exact", head: true })
+    .eq("school_id", user.schoolId)
+    .eq("class_id", classId)
+    .eq("status", "active");
+
+  if (count && count > 0) {
+    throw new Error(`Cannot delete class with ${count} active enrollment(s). Withdraw or transfer students first.`);
+  }
+
+  // Delete teacher assignments for this class
+  await supabase
+    .from("teacher_assignments")
+    .delete()
+    .eq("school_id", user.schoolId)
+    .eq("class_id", classId);
+
+  // Delete the class itself
+  const { error } = await supabase
+    .from("classes")
+    .delete()
+    .eq("school_id", user.schoolId)
+    .eq("id", classId);
+
+  if (error) throw new Error(error.message);
+  await logActivity(user, "class_deleted", "class", classId);
+}
+
+export async function getClassTeachersAndAttendance(user: AppUser) {
+  const supabase = await createClient();
+
+  // Fetch teacher assignments with teacher name + subject
+  const { data: assignments } = await supabase
+    .from("teacher_assignments")
+    .select("id,class_id,teacher_id,profiles!teacher_assignments_teacher_id_fkey(full_name),subjects(name)")
+    .eq("school_id", user.schoolId);
+
+  // Fetch attendance stats per class (total sessions, present/absent counts)
+  const { data: sessions } = await supabase
+    .from("attendance_sessions")
+    .select("class_id,attendance_date")
+    .eq("school_id", user.schoolId)
+    .order("attendance_date", { ascending: false });
+
+  const { data: records } = await supabase
+    .from("attendance_records")
+    .select("class_id,status")
+    .eq("school_id", user.schoolId);
+
+  // Group assignments by class_id
+  const teachersByClass: Record<string, Array<{ id: string; teacher_id: string; teacher_name: string; subject_name: string | null }>> = {};
+  for (const row of assignments ?? []) {
+    const a = row as any;
+    const classId = a.class_id;
+    if (!teachersByClass[classId]) teachersByClass[classId] = [];
+    teachersByClass[classId].push({
+      id: a.id,
+      teacher_id: a.teacher_id,
+      teacher_name: a.profiles?.full_name ?? "Unknown",
+      subject_name: a.subjects?.name ?? null
+    });
+  }
+
+  // Group attendance stats by class_id
+  const attendanceByClass: Record<string, { total_sessions: number; present: number; absent: number; late: number; excused: number }> = {};
+  for (const s of sessions ?? []) {
+    const classId = (s as any).class_id;
+    if (!attendanceByClass[classId]) attendanceByClass[classId] = { total_sessions: 0, present: 0, absent: 0, late: 0, excused: 0 };
+    attendanceByClass[classId].total_sessions++;
+  }
+  for (const r of records ?? []) {
+    const rec = r as any;
+    const classId = rec.class_id;
+    if (!attendanceByClass[classId]) attendanceByClass[classId] = { total_sessions: 0, present: 0, absent: 0, late: 0, excused: 0 };
+    if (rec.status === "present") attendanceByClass[classId].present++;
+    else if (rec.status === "absent") attendanceByClass[classId].absent++;
+    else if (rec.status === "late") attendanceByClass[classId].late++;
+    else if (rec.status === "excused") attendanceByClass[classId].excused++;
+  }
+
+  return { teachersByClass, attendanceByClass };
 }

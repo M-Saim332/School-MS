@@ -178,6 +178,50 @@ export async function updateStudent(user: AppUser, id: string, values: StudentFo
     .eq("id", id);
 
   if (error) throw new Error(error.message);
+
+  // Handle class assignment: upsert or withdraw enrollment
+  if (parsed.class_id) {
+    const { data: activeYear } = await supabase
+      .from("academic_years")
+      .select("id")
+      .eq("school_id", user.schoolId)
+      .eq("is_active", true)
+      .maybeSingle();
+
+    // Withdraw any other active enrollments first
+    await supabase
+      .from("enrollments")
+      .update({ status: "withdrawn" })
+      .eq("school_id", user.schoolId)
+      .eq("student_id", id)
+      .eq("status", "active")
+      .neq("class_id", parsed.class_id);
+
+    // Upsert the new enrollment
+    const { error: enrollError } = await supabase
+      .from("enrollments")
+      .upsert(
+        {
+          school_id: user.schoolId,
+          student_id: id,
+          class_id: parsed.class_id,
+          academic_year_id: activeYear?.id ?? null,
+          status: "active"
+        },
+        { onConflict: "school_id,student_id,class_id,academic_year_id", ignoreDuplicates: false }
+      );
+
+    if (enrollError) throw new Error(enrollError.message);
+  } else {
+    // No class selected — withdraw any active enrollments
+    await supabase
+      .from("enrollments")
+      .update({ status: "withdrawn" })
+      .eq("school_id", user.schoolId)
+      .eq("student_id", id)
+      .eq("status", "active");
+  }
+
   await logActivity(user, "student_updated", "student", id, { admission_number: parsed.admission_number });
 }
 

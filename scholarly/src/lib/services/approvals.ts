@@ -111,6 +111,31 @@ export async function reviewRequest(user: AppUser, requestId: string, decision: 
 
   if (studentError) throw new Error(studentError.message);
 
+  // On admission approval: create the enrollment if a class was requested
+  if (decision === "approved" && request.request_type === "admission") {
+    const requestedClassId = request.metadata?.requested_class_id as string | undefined;
+    if (requestedClassId) {
+      const { data: activeYear } = await supabase
+        .from("academic_years")
+        .select("id")
+        .eq("school_id", user.schoolId)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      const { error: enrollError } = await supabase
+        .from("enrollments")
+        .insert({
+          school_id: user.schoolId,
+          student_id: request.student_id,
+          class_id: requestedClassId,
+          academic_year_id: activeYear?.id ?? null,
+          status: "active"
+        });
+
+      if (enrollError) throw new Error(enrollError.message);
+    }
+  }
+
   // Update request
   const { error: updateError } = await supabase
     .from("approval_requests")
@@ -132,3 +157,4 @@ export async function reviewRequest(user: AppUser, requestId: string, decision: 
     { request_type: request.request_type }
   );
 }
+

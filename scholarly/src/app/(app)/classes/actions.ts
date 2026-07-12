@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/session";
-import { createClass, updateClass } from "@/lib/services/academics";
+import { createClass, updateClass, deleteClass } from "@/lib/services/academics";
 import { assignTeacherToClass, unassignTeacherFromClass } from "@/lib/services/teachers";
 import { z } from "zod";
 
@@ -63,4 +63,11 @@ export async function unassignTeacherClassAction(assignmentId: string) {
   await unassignTeacherFromClass(user, assignmentId);
   revalidatePath("/classes");
   revalidatePath("/teachers");
+}
+
+export async function deleteClassAction(classId: string) {
+  const user = await requireUser("classes:manage");
+  await deleteClass(user, classId);
+  revalidatePath("/classes");
+  revalidatePath("/academics");
 }
