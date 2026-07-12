@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Scholarly | People Directory</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Serif:wght@400;600;700&amp;family=Public+Sans:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#d9e2ff",
+                    "tertiary-container": "#bfab49",
+                    "on-secondary-fixed-variant": "#42474b",
+                    "surface-container-low": "#f5f3f4",
+                    "surface-container-high": "#e9e8e9",
+                    "secondary-fixed-dim": "#c2c7cc",
+                    "on-tertiary-container": "#4a3f00",
+                    "surface-container-highest": "#e3e2e3",
+                    "on-tertiary-fixed-variant": "#524600",
+                    "tertiary-fixed-dim": "#dcc661",
+                    "on-error": "#ffffff",
+                    "surface-variant": "#e3e2e3",
+                    "primary-fixed-dim": "#b1c5ff",
+                    "on-background": "#1b1c1d",
+                    "surface-tint": "#2259bf",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed": "#f9e37a",
+                    "on-primary-container": "#e7ebff",
+                    "on-tertiary-fixed": "#211b00",
+                    "outline": "#737784",
+                    "inverse-on-surface": "#f2f0f1",
+                    "secondary": "#5a5f63",
+                    "background": "#faf9fa",
+                    "on-surface-variant": "#434653",
+                    "outline-variant": "#c3c6d5",
+                    "surface-dim": "#dbdadb",
+                    "on-secondary-container": "#606569",
+                    "surface": "#faf9fa",
+                    "on-surface": "#1b1c1d",
+                    "on-error-container": "#93000a",
+                    "inverse-primary": "#b1c5ff",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed": "#dfe3e8",
+                    "tertiary": "#6d5e00",
+                    "on-secondary": "#ffffff",
+                    "primary-container": "#3366cc",
+                    "primary": "#3366cc",
+                    "on-primary": "#ffffff",
+                    "inverse-surface": "#303031",
+                    "on-tertiary": "#ffffff",
+                    "surface-bright": "#faf9fa",
+                    "on-primary-fixed": "#001946",
+                    "secondary-container": "#dfe3e8",
+                    "on-primary-fixed-variant": "#00419d",
+                    "surface-container": "#efedee",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary-fixed": "#171c20"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif"],
+                    "display": ["Noto Serif"],
+                    "body": ["Inter"],
+                    "label": ["Public Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #faf9fa; }
+        h1, h2, h3, h4, .font-headline { font-family: 'Noto Serif', serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #c3c6d5; border-radius: 10px; }
+        .drawer-transition { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+</head>
+<body class="bg-background text-on-surface overflow-hidden">
+<!-- Sidebar Wrapper (Fixed Left) -->
+<aside class="fixed left-0 top-0 h-full w-[280px] bg-surface-container-lowest border-r border-outline-variant flex flex-col py-8 px-4 z-30 transition-all duration-200 ease-in-out">
+<div class="flex items-center gap-2 mb-12">
+<div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">book</span>
+</div>
+<div>
+<h1 class="text-xl font-bold text-primary leading-none">Scholarly</h1>
+<span class="text-xs font-label text-on-surface-variant uppercase tracking-wider">Education Portal</span>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-4 p-3 rounded-xl transition-all text-on-surface-variant hover:bg-surface-container-low hover:text-primary group" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body text-sm font-medium">Overview</span>
+</a>
+<a class="flex items-center gap-4 p-3 rounded-xl transition-all text-on-surface-variant hover:bg-surface-container-low hover:text-primary" href="#">
+<span class="material-symbols-outlined">school</span>
+<span class="font-body text-sm font-medium">Academics</span>
+</a>
+<!-- Active Tab: People -->
+<a class="flex items-center gap-4 p-3 rounded-xl transition-all text-primary font-bold bg-primary/5" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="font-body text-sm">People</span>
+</a>
+<a class="flex items-center gap-4 p-3 rounded-xl transition-all text-on-surface-variant hover:bg-surface-container-low hover:text-primary" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-body text-sm font-medium">Finance</span>
+</a>
+<a class="flex items-center gap-4 p-3 rounded-xl transition-all text-on-surface-variant hover:bg-surface-container-low hover:text-primary" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body text-sm font-medium">Settings</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-outline-variant pt-4">
+<button class="flex items-center gap-4 p-3 w-full rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined">menu_open</span>
+<span class="font-body text-sm font-medium">Collapse</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-[280px] h-screen flex flex-col relative">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center h-16 px-8 bg-surface border-b border-outline-variant sticky top-0 z-20">
+<div class="flex items-center gap-4 flex-1">
+<h2 class="text-xl font-bold text-on-surface">People Directory</h2>
+<div class="relative w-full max-w-md ml-8">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-full pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary/20" placeholder="Search by name, ID or email..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-surface-container transition-all">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="px-4 py-2 border border-outline-variant rounded-xl font-label text-sm hover:bg-surface-container transition-all">Log Absence</button>
+<button class="px-4 py-2 bg-primary text-white rounded-xl font-label text-sm hover:opacity-90 transition-all">New Student</button>
+<div class="flex items-center gap-3 ml-4 pl-4 border-l border-outline-variant">
+<div class="text-right hidden xl:block">
+<p class="font-label text-sm font-semibold text-on-surface">Jane Doe</p>
+<p class="font-label text-xs text-on-surface-variant">Principal</p>
+</div>
+<img alt="Jane Doe" class="w-10 h-10 rounded-full border-2 border-white shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAoLtm-4uXO7H4L-139qHyXHps-r5cyIOoB2zYP0gC6aVsKq315f4fLCRU5BGSQcOHRRXvRXyWgZO6WglNK9k4Y7Co943NiIKzGkRchTgN01rxKtSyuuR8UnNS0HtM1JbqcyohqEhG7pHJBpOpnla4alhAeKu7oHjdgisHn0ozFgZOqUCsyzBVdhJHZv6sQrCxswOuNKn1b6ZxlnWWzP5aTVvtdGbsWenBeyUdV6dD5k1leojYWB3Qz"/>
+</div>
+</div>
+</header>
+<!-- Directory Canvas -->
+<div class="flex-1 p-8 overflow-y-auto custom-scrollbar">
+<!-- Filters Bar -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 mb-8 shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-4">
+<!-- Tabs -->
+<div class="flex bg-surface-container-low p-1 rounded-xl">
+<button class="px-6 py-1.5 rounded-lg font-label text-sm bg-white text-primary shadow-sm font-semibold">Students</button>
+<button class="px-6 py-1.5 rounded-lg font-label text-sm text-on-surface-variant hover:text-primary">Teachers</button>
+<button class="px-6 py-1.5 rounded-lg font-label text-sm text-on-surface-variant hover:text-primary">Staff</button>
+</div>
+<!-- Dropdowns and Actions -->
+<div class="flex items-center gap-2">
+<select class="bg-surface-container-low border-none rounded-xl px-4 py-2 text-sm focus:ring-0">
+<option>All Grades</option>
+<option>Grade 9</option>
+<option>Grade 10</option>
+<option>Grade 11</option>
+<option>Grade 12</option>
+</select>
+<select class="bg-surface-container-low border-none rounded-xl px-4 py-2 text-sm focus:ring-0">
+<option>Any Status</option>
+<option>Active</option>
+<option>On Leave</option>
+</select>
+<button class="flex items-center gap-1 px-4 py-2 border border-outline-variant rounded-xl font-label text-sm hover:bg-surface-container transition-all">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                            Export CSV
+                        </button>
+</div>
+</div>
+</div>
+<!-- Data Table Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low/30 border-b border-outline-variant">
+<th class="px-8 py-4 font-label text-xs uppercase tracking-wider text-on-surface-variant">Name</th>
+<th class="px-8 py-4 font-label text-xs uppercase tracking-wider text-on-surface-variant">Student ID</th>
+<th class="px-8 py-4 font-label text-xs uppercase tracking-wider text-on-surface-variant">Grade</th>
+<th class="px-8 py-4 font-label text-xs uppercase tracking-wider text-on-surface-variant">Status</th>
+<th class="px-8 py-4 font-label text-xs uppercase tracking-wider text-on-surface-variant text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Active Student Row -->
+<tr class="hover:bg-surface-container-low/50 transition-all cursor-pointer group bg-primary/[0.02]">
+<td class="px-8 py-5">
+<div class="flex items-center gap-4">
+<img alt="Alex Rivera" class="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXwUycbZYUwguDE5XyaV6HFkPm1OeQ1EX_HonQKEjcVnOIKaKfPgP3Lkxx2tjsaZo4LqNo23oAdpfy2HvIQuq8q44jKBaz2ldTBi8U9nljCkzC2YBi2Vprs-bVCsvf8s-nT28okIx4ENzin0ofp3vkyb8c0Lkt-JEVmz622bwcfqIQEEqqK5gK9elL4hvn2msV6Rxsy_b-LQfY3k5gBYUt7hhPmO_-9GGa5l1KpzWkd94iQT4mvTmP"/>
+<div>
+<p class="font-body text-sm font-semibold text-on-surface">Alex Rivera</p>
+<p class="text-xs text-on-surface-variant">alex.rivera@scholarly.edu</p>
+</div>
+</div>
+</td>
+<td class="px-8 py-5 text-sm text-on-surface-variant">#2024-8812</td>
+<td class="px-8 py-5 text-sm text-on-surface">Grade 11</td>
+<td class="px-8 py-5">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">Active</span>
+</td>
+<td class="px-8 py-5 text-right">
+<button class="p-2 rounded-full hover:bg-surface-container text-on-surface-variant">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Repeat Rows -->
+<tr class="hover:bg-surface-container-low/50 transition-all cursor-pointer group">
+<td class="px-8 py-5">
+<div class="flex items-center gap-4">
+<img alt="Sarah Jenkins" class="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAE1x05O8okn8-trjCv4RR0LWgVWalJjyAN-MN3FwwdTqSYZ6YFoMN5anK1z5gEuqideoiAHVJLLTjmSo69ZPnNsupyvNE6rkZkaMTkq-S4f2RJ683wy-Qk09zKTSM8MHZISr0TUeGkkPXMXu2QbAW5elN7mNPlvjJF9MO5547We0UqzVl6PTtp3-hwEMBRTf_esjz89zVPP3inDc9CbxGRmvTOTNt2Dgzf2jAW74q45P26qobtmDHy"/>
+<div>
+<p class="font-body text-sm font-semibold text-on-surface">Sarah Jenkins</p>
+<p class="text-xs text-on-surface-variant">s.jenkins@scholarly.edu</p>
+</div>
+</div>
+</td>
+<td class="px-8 py-5 text-sm text-on-surface-variant">#2024-9104</td>
+<td class="px-8 py-5 text-sm text-on-surface">Grade 12</td>
+<td class="px-8 py-5">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">Leave</span>
+</td>
+<td class="px-8 py-5 text-right">
+<button class="p-2 rounded-full hover:bg-surface-container text-on-surface-variant">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low/50 transition-all cursor-pointer group">
+<td class="px-8 py-5">
+<div class="flex items-center gap-4">
+<img alt="Michael Chen" class="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuCfVRxURTy4BqNcdOhUR3fr0IHjfoW1LBScAvSOi7g4ZYgOx6-_Y8Ic8PdxROC1EUu_4aH3PEwc_RdA7G4qOycQHyLUYMdzKzm6U81TuzGxhe3gpaqSMFZKy0yMcoTcryPoD2hE5_R7N7BZqoJB137mmcSVncjPynZ24tVbnLKwMX9Lgi7ZCg5VGZRJDjRTBkE1qIYyKTcqJAfjT2HvGnuzuSmyaBoG6Lm9keTBTVHoaUFXSTAVHG"/>
+<div>
+<p class="font-body text-sm font-semibold text-on-surface">Michael Chen</p>
+<p class="text-xs text-on-surface-variant">m.chen@scholarly.edu</p>
+</div>
+</div>
+</td>
+<td class="px-8 py-5 text-sm text-on-surface-variant">#2024-7723</td>
+<td class="px-8 py-5 text-sm text-on-surface">Grade 10</td>
+<td class="px-8 py-5">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">Active</span>
+</td>
+<td class="px-8 py-5 text-right">
+<button class="p-2 rounded-full hover:bg-surface-container text-on-surface-variant">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- Pagination -->
+<div class="px-8 py-4 bg-surface-container-low/30 border-t border-outline-variant flex items-center justify-between">
+<span class="text-sm text-on-surface-variant">Showing 1-10 of 428 students</span>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-xl border border-outline-variant hover:bg-surface-container transition-all disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="px-3 py-1.5 rounded-xl bg-primary text-white font-semibold text-sm">1</button>
+<button class="px-3 py-1.5 rounded-xl hover:bg-surface-container text-sm font-medium">2</button>
+<button class="px-3 py-1.5 rounded-xl hover:bg-surface-container text-sm font-medium">3</button>
+<button class="p-2 rounded-xl border border-outline-variant hover:bg-surface-container transition-all">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Profile Detail Drawer (Slide-out) -->
+<div class="fixed top-0 right-0 h-full w-[460px] bg-white shadow-2xl border-l border-outline-variant z-40 transform drawer-transition flex flex-col" id="detailDrawer">
+<!-- Drawer Header -->
+<div class="px-8 py-6 border-b border-outline-variant flex items-center justify-between">
+<h3 class="text-xl font-bold text-on-surface">Profile Detail</h3>
+<button class="p-2 rounded-full hover:bg-surface-container-low text-on-surface-variant" onclick="toggleDrawer()">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar px-8 py-6">
+<!-- Profile Overview Card -->
+<div class="text-center mb-8">
+<div class="relative inline-block">
+<img alt="Alex Rivera" class="w-32 h-32 rounded-3xl object-cover border-4 border-white shadow-lg mb-4 mx-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5r4zQTjqcRZQzZpbTiyYV4z1cey1N-elLXAg0T6dMIsWY6OipXvmtKp-J2XkZDLDVkQZBGad7AYt6u9ndFq6rJaOCVvi7L2V1hkiVuYvEmq9glotlDEmnQLqAwrbvKMmgCiOdS6G_GY02MNcI7FCeOnOeIPvEz4EdP33K2OUOYf6Htj95HOJle1yAlI5O7UKepZ6AdtYTWfgyA_Q7iF_Vm0GoJGY1Aki08ChIwWuiZNC6rDblcGMb"/>
+<span class="absolute bottom-2 right-0 w-6 h-6 bg-green-500 border-4 border-white rounded-full"></span>
+</div>
+<h4 class="text-2xl font-bold text-on-surface">Alex Rivera</h4>
+<p class="text-on-surface-variant font-medium">Grade 11 • Section A</p>
+<div class="flex justify-center gap-3 mt-6">
+<button class="px-6 py-2 bg-primary text-white rounded-xl font-semibold text-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]">mail</span>
+                        Message
+                    </button>
+<button class="p-2 border border-outline-variant rounded-xl hover:bg-surface-container-low">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</div>
+</div>
+<!-- Sections -->
+<div class="space-y-8">
+<!-- Contact Info -->
+<section>
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary">contact_page</span>
+<h5 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Contact Information</h5>
+</div>
+<div class="space-y-4 bg-surface-container-low/50 p-6 rounded-2xl border border-outline-variant/50">
+<div class="flex justify-between items-center">
+<span class="text-on-surface-variant text-sm">Email</span>
+<span class="text-on-surface text-sm font-semibold">alex.rivera@scholarly.edu</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-on-surface-variant text-sm">Phone</span>
+<span class="text-on-surface text-sm font-semibold">+1 (555) 234-5678</span>
+</div>
+<div class="flex justify-between gap-4">
+<span class="text-on-surface-variant text-sm whitespace-nowrap">Home Address</span>
+<span class="text-on-surface text-sm font-semibold text-right leading-relaxed">742 Maplewood Dr,<br/>Springfield, IL</span>
+</div>
+</div>
+</section>
+<!-- Emergency Contacts -->
+<section>
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-error">emergency</span>
+<h5 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Emergency Contacts</h5>
+</div>
+<div class="space-y-3">
+<div class="flex items-center gap-4 border border-outline-variant p-4 rounded-2xl hover:border-primary/50 transition-colors">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">MR</div>
+<div class="flex-1">
+<p class="text-sm font-bold">Maria Rivera</p>
+<p class="text-xs text-on-surface-variant">Mother • +1 (555) 987-6543</p>
+</div>
+</div>
+<div class="flex items-center gap-4 border border-outline-variant p-4 rounded-2xl hover:border-primary/50 transition-colors">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">JR</div>
+<div class="flex-1">
+<p class="text-sm font-bold">Juan Rivera</p>
+<p class="text-xs text-on-surface-variant">Father • +1 (555) 987-6544</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Digital Locker -->
+<section>
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">inventory_2</span>
+<h5 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Digital Locker</h5>
+</div>
+<button class="text-primary text-xs font-bold hover:underline">+ Upload</button>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div class="p-3 bg-white rounded-xl border border-outline-variant hover:border-primary hover:shadow-sm transition-all cursor-pointer">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-red-500 text-[20px]">picture_as_pdf</span>
+<span class="text-xs font-bold truncate">Health_Form.pdf</span>
+</div>
+<p class="text-[10px] text-on-surface-variant">Oct 12, 2026</p>
+</div>
+<div class="p-3 bg-white rounded-xl border border-outline-variant hover:border-primary hover:shadow-sm transition-all cursor-pointer">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-[20px]">description</span>
+<span class="text-xs font-bold truncate">Transcripts_Q1.pdf</span>
+</div>
+<p class="text-[10px] text-on-surface-variant">Nov 01, 2026</p>
+</div>
+</div>
+</section>
+</div>
+</div>
+<!-- Drawer Footer -->
+<div class="px-8 py-6 border-t border-outline-variant bg-surface-container-lowest">
+<button class="w-full py-3.5 bg-primary text-white rounded-xl font-bold hover:opacity-90 transition-all flex items-center justify-center gap-3">
+                View Academic Profile
+                <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Overlay for Drawer -->
+<div class="fixed inset-0 bg-black/30 backdrop-blur-[2px] z-30 hidden opacity-0 transition-opacity duration-300" id="drawerOverlay" onclick="toggleDrawer()"></div>
+<script>
+        function toggleDrawer() {
+            const drawer = document.getElementById('detailDrawer');
+            const overlay = document.getElementById('drawerOverlay');
+            
+            if (drawer.style.transform === 'translateX(0px)') {
+                drawer.style.transform = 'translateX(100%)';
+                overlay.classList.add('hidden');
+                overlay.classList.remove('opacity-100');
+            } else {
+                drawer.style.transform = 'translateX(0px)';
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.add('opacity-100'), 10);
+            }
+        }
+
+        // Initialize state
+        window.onload = () => {
+            const drawer = document.getElementById('detailDrawer');
+            // Starts open
+            drawer.style.transform = 'translateX(0px)';
+            const overlay = document.getElementById('drawerOverlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('opacity-100');
+        };
+    </script>
+</body></html>

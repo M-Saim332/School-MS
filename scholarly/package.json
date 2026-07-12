@@ -1,0 +1,54 @@
+{
+  "name": "gocampusflow",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "dev:local": "powershell.exe -ExecutionPolicy Bypass -File .\\scripts\\dev-local.ps1",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "setup:docker-prereqs": "powershell.exe -ExecutionPolicy Bypass -File .\\scripts\\enable-docker-prereqs.ps1",
+    "setup:local": "powershell.exe -ExecutionPolicy Bypass -File .\\scripts\\setup-local.ps1",
+    "supabase:reset": "npx supabase db reset --local --yes",
+    "supabase:start": "npx supabase start",
+    "supabase:status": "npx supabase status -o pretty",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.9.1",
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.46.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.468.0",
+    "next": "^15.0.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.53.2",
+    "recharts": "^2.13.3",
+    "tailwind-merge": "^2.5.4",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.1.0",
+    "@types/node": "^22.10.1",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.2",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^15.0.3",
+    "jsdom": "^25.0.1",
+    "postcss": "^8.4.49",
+    "supabase": "^2.109.1",
+    "tailwindcss": "^3.4.16",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "allowScripts": {
+    "esbuild@0.21.5": true,
+    "sharp@0.34.5": true,
+    "unrs-resolver@1.12.2": true
+  }
+}
