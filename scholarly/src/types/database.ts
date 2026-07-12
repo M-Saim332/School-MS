@@ -45,6 +45,9 @@ export type AppUser = {
   avatarUrl: string | null;
   schoolId: string;
   schoolName: string;
+  schoolShortName: string | null;
+  schoolLogoUrl: string | null;
+  schoolFaviconUrl: string | null;
   role: UserRole;
   department: string | null;
   jobTitle: string | null;

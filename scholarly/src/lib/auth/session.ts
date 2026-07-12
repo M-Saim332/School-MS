@@ -8,7 +8,12 @@ type MemberRow = {
   role: UserRole;
   department: string | null;
   job_title: string | null;
-  schools: { name: string } | null;
+  schools: { 
+    name: string;
+    short_name: string | null;
+    logo_url: string | null;
+    favicon_url: string | null;
+  } | null;
 };
 
 export async function getCurrentUser(): Promise<AppUser | null> {
@@ -23,7 +28,7 @@ export async function getCurrentUser(): Promise<AppUser | null> {
     supabase.from("profiles").select("full_name,email,avatar_url,must_change_password").eq("id", user.id).maybeSingle(),
     supabase
       .from("school_members")
-      .select("school_id, role, department, job_title, schools(name)")
+      .select("school_id, role, department, job_title, schools(name, short_name, logo_url, favicon_url)")
       .eq("user_id", user.id)
       .eq("status", "active")
       .limit(1)
@@ -49,6 +54,9 @@ export async function getCurrentUser(): Promise<AppUser | null> {
     avatarUrl: profile?.avatar_url ?? null,
     schoolId: member.school_id,
     schoolName: member.schools?.name ?? "School",
+    schoolShortName: member.schools?.short_name ?? null,
+    schoolLogoUrl: member.schools?.logo_url ?? null,
+    schoolFaviconUrl: member.schools?.favicon_url ?? null,
     role: member.role,
     department: member.department,
     jobTitle: member.job_title,

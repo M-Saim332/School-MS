@@ -1,5 +1,5 @@
 import { PageHeader } from "@/components/layout/page-header";
-import { ProfileForm } from "@/components/profile/profile-form";
+import { ProfileView } from "@/components/profile/profile-view";
 import { requireUser } from "@/lib/auth/session";
 import { getProfileDetails } from "@/lib/services/profile";
 
@@ -12,9 +12,9 @@ export default async function ProfilePage() {
       <PageHeader
         eyebrow="My account"
         title="Profile"
-        description="Keep your school profile current so administrators can see the right contact, department, and role context."
+        description="View your profile details."
       />
-      <ProfileForm profile={profile} />
+      <ProfileView profile={profile} />
     </>
   );
 }

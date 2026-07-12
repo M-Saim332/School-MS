@@ -39,7 +39,8 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "approvals:view",
     "approvals:review",
     "teachers:manage",
-    "classes:manage"
+    "classes:manage",
+    "settings:manage"
   ],
   teacher: ["dashboard:view", "students:view", "attendance:view", "attendance:submit", "academics:view", "marks:manage"],
   student_staff: [

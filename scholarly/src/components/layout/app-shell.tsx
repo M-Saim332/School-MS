@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, BriefcaseBusiness, ChevronDown, LogOut, Menu, Search, UserRound, X } from "lucide-react";
+import { BookOpen, BriefcaseBusiness, ChevronDown, LogOut, Menu, Search, UserRound, X, Building } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { AppUser } from "@/types/database";
@@ -23,6 +23,18 @@ export function AppShell({ user, children }: { user: AppUser; children: ReactNod
   useEffect(() => {
     setProfileOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (user.schoolFaviconUrl) {
+      let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
+      if (!link) {
+        link = document.createElement("link");
+        link.rel = "icon";
+        document.head.appendChild(link);
+      }
+      link.href = user.schoolFaviconUrl;
+    }
+  }, [user.schoolFaviconUrl]);
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
@@ -91,12 +103,21 @@ export function AppShell({ user, children }: { user: AppUser; children: ReactNod
   const sidebar = (
     <aside className="flex h-full w-[280px] flex-col bg-white p-4">
       <div className="mb-8 flex items-center gap-3 px-2">
-        <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-[#2d7dd2] text-white shadow-soft">
-          <BookOpen aria-hidden="true" />
+        <div className="flex h-11 w-11 shrink-0 overflow-hidden items-center justify-center rounded-lg bg-gradient-to-br from-primary to-[#2d7dd2] text-white shadow-soft">
+          {user.schoolLogoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={user.schoolLogoUrl} alt={user.schoolName} className="h-full w-full object-cover" />
+          ) : (
+            <BookOpen aria-hidden="true" />
+          )}
         </div>
-        <div>
-          <p className="font-display text-2xl font-bold leading-tight text-primary">GoCampusFlow</p>
-          <p className="font-label text-xs font-semibold uppercase tracking-wider text-muted">{user.schoolName}</p>
+        <div className="min-w-0">
+          <p className="font-display text-xl font-bold leading-tight text-primary truncate" title={user.schoolName}>
+            {user.schoolShortName ?? "GoCampusFlow"}
+          </p>
+          <p className="font-label text-[10px] font-semibold uppercase tracking-wider text-muted truncate">
+            {user.schoolName}
+          </p>
         </div>
       </div>
       <nav className="flex-1 space-y-1 overflow-y-auto">
@@ -218,7 +239,16 @@ export function AppShell({ user, children }: { user: AppUser; children: ReactNod
                   role="menuitem"
                 >
                   <UserRound className="h-4 w-4" aria-hidden="true" />
-                  Profile
+                  Personal Profile
+                </Link>
+                <Link
+                  href="/school-profile"
+                  onClick={() => setProfileOpen(false)}
+                  className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-muted transition hover:bg-surface-low hover:text-primary"
+                  role="menuitem"
+                >
+                  <Building className="h-4 w-4" aria-hidden="true" />
+                  School Profile
                 </Link>
                 <button
                   type="button"

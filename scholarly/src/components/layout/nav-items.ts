@@ -28,6 +28,5 @@ export const navItems = [
   { href: "/classes", label: "Classes", icon: BookOpen, permission: "classes:manage" },
   { href: "/academics", label: "Academics", icon: BarChart3, permission: "academics:view" },
   { href: "/reports", label: "Reports", icon: Activity, permission: "reports:view" },
-  { href: "/admin", label: "Admin", icon: Shield, permission: "users:manage" },
-  { href: "/settings", label: "Settings", icon: Settings, permission: "settings:manage" }
+  { href: "/admin", label: "Admin", icon: Shield, permission: "users:manage" }
 ] satisfies Array<{ href: string; label: string; icon: typeof LayoutDashboard; permission: Permission }>;

@@ -45,6 +45,7 @@ declare
   admin_id uuid := '22222222-2222-2222-2222-222222222222';
   teacher_id uuid := '33333333-3333-3333-3333-333333333333';
   staff_id uuid := '44444444-4444-4444-4444-444444444444';
+  msaad_id uuid := '55555555-5555-5555-5555-555555555555';
 begin
   insert into auth.users (
     id, instance_id, aud, email, encrypted_password,
@@ -59,21 +60,24 @@ begin
     (principal_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'principal@scholarly.test', crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated', '', '', '', '', '', '', '', '', false, false),
     (admin_id,     '00000000-0000-0000-0000-000000000000', 'authenticated', 'admin@scholarly.test',     crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated', '', '', '', '', '', '', '', '', false, false),
     (teacher_id,   '00000000-0000-0000-0000-000000000000', 'authenticated', 'teacher@scholarly.test',   crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated', '', '', '', '', '', '', '', '', false, false),
-    (staff_id,     '00000000-0000-0000-0000-000000000000', 'authenticated', 'staff@scholarly.test',     crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated', '', '', '', '', '', '', '', '', false, false)
+    (staff_id,     '00000000-0000-0000-0000-000000000000', 'authenticated', 'staff@scholarly.test',     crypt('password123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated', '', '', '', '', '', '', '', '', false, false),
+    (msaad_id,     '00000000-0000-0000-0000-000000000000', 'authenticated', 'msaad.profile@gmail.com',  crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), 'authenticated', '', '', '', '', '', '', '', '', false, false)
   on conflict (id) do nothing;
 
   insert into public.profiles (id, full_name, email, must_change_password) values
     (principal_id, 'Jane Doe', 'principal@scholarly.test', true),
     (admin_id, 'Avery Admin', 'admin@scholarly.test', true),
     (teacher_id, 'Miles Henderson', 'teacher@scholarly.test', true),
-    (staff_id, 'Sam Registrar', 'staff@scholarly.test', true)
+    (staff_id, 'Sam Registrar', 'staff@scholarly.test', true),
+    (msaad_id, 'MSaad', 'msaad.profile@gmail.com', true)
   on conflict (id) do update set full_name = excluded.full_name, must_change_password = excluded.must_change_password;
 
   insert into public.school_members (school_id, user_id, role, department, job_title) values
     ('00000000-0000-0000-0000-000000000001', principal_id, 'principal', 'Leadership', 'Principal'),
     ('00000000-0000-0000-0000-000000000001', admin_id, 'administrator', 'Operations', 'System Administrator'),
     ('00000000-0000-0000-0000-000000000001', teacher_id, 'teacher', 'Mathematics', 'Teacher'),
-    ('00000000-0000-0000-0000-000000000001', staff_id, 'student_staff', 'Admissions', 'Registrar')
+    ('00000000-0000-0000-0000-000000000001', staff_id, 'student_staff', 'Admissions', 'Registrar'),
+    ('00000000-0000-0000-0000-000000000001', msaad_id, 'administrator', 'Operations', 'System Administrator')
   on conflict (school_id, user_id) do update set role = excluded.role;
 end $$;
 
