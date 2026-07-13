@@ -1,19 +1,21 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { BriefcaseBusiness, CheckCircle2, IdCard, Mail, Phone, Sparkles } from "lucide-react";
+import { BriefcaseBusiness, IdCard, Mail, Phone, Sparkles } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Field, Input, Textarea } from "@/components/ui/form-field";
 import { updateProfileAction } from "@/app/(app)/profile/actions";
+import { getFriendlyErrorMessage } from "@/lib/errors";
 import { profileFormSchema, type ProfileFormValues } from "@/lib/validation/profile";
 import type { ProfileDetails } from "@/lib/services/profile";
 import { initials } from "@/lib/utils";
 
 export function ProfileForm({ profile }: { profile: ProfileDetails }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const {
@@ -37,14 +39,14 @@ export function ProfileForm({ profile }: { profile: ProfileDetails }) {
   const avatarUrl = watch("avatarUrl");
 
   function onSubmit(values: ProfileFormValues) {
-    setMessage(null);
     setError(null);
     startTransition(async () => {
       try {
         await updateProfileAction(values);
-        setMessage("Profile updated. Administrators will see the latest staff details.");
+        router.push("/profile?saved=profile");
+        router.refresh();
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Profile could not be updated.");
+        setError(getFriendlyErrorMessage(err, "Profile could not be updated."));
       }
     });
   }
@@ -109,12 +111,6 @@ export function ProfileForm({ profile }: { profile: ProfileDetails }) {
           </div>
         </div>
 
-        {message ? (
-          <div className="mb-5 flex items-center gap-2 rounded-lg bg-success-soft px-3 py-2 text-sm font-semibold text-success">
-            <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-            {message}
-          </div>
-        ) : null}
         {error ? <div className="mb-5 rounded-lg bg-danger-soft px-3 py-2 text-sm font-semibold text-danger">{error}</div> : null}
 
         <div className="grid gap-4 md:grid-cols-2">

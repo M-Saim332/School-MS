@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
+import { cache } from "react";
 
 type CookieToSet = {
   name: string;
@@ -7,7 +8,7 @@ type CookieToSet = {
   options?: Parameters<Awaited<ReturnType<typeof cookies>>["set"]>[2];
 };
 
-export async function createClient() {
+export const createClient = cache(async () => {
   const cookieStore = await cookies();
 
   return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
@@ -24,4 +25,4 @@ export async function createClient() {
       }
     }
   });
-}
+});

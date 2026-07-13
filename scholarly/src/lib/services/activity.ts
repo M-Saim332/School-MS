@@ -12,3 +12,16 @@ export async function logActivity(user: AppUser, action: string, entityType: str
     metadata
   });
 }
+
+export async function getActivityLogs(user: AppUser, limit = 50) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("activity_logs")
+    .select("id, action, entity_type, created_at, metadata, profiles(full_name)")
+    .eq("school_id", user.schoolId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}

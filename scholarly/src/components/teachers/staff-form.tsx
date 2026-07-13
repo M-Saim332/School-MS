@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/form-field";
 import { staffFormSchema, type StaffFormValues } from "@/lib/validation/staff";
 import { createStaffAction } from "@/app/(app)/teachers/actions";
+import { getFriendlyErrorMessage } from "@/lib/errors";
 import { Plus, X } from "lucide-react";
 import type { UserRole } from "@/types/database";
 
@@ -40,8 +41,8 @@ export function StaffFormModal({
         await createStaffAction(data);
         reset();
         setOpen(false);
-      } catch (err: any) {
-        setError(err.message || "Failed to create account.");
+      } catch (err) {
+        setError(getFriendlyErrorMessage(err, "Account could not be created."));
       }
     });
   };

@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/form-field";
 import { assignTeacherClassAction } from "@/app/(app)/classes/actions";
+import { getFriendlyErrorMessage } from "@/lib/errors";
 import { UserPlus, X } from "lucide-react";
 
 export function TeacherAssignmentModal({
@@ -36,8 +37,8 @@ export function TeacherAssignmentModal({
         await assignTeacherClassAction(formData);
         reset();
         setOpen(false);
-      } catch (err: any) {
-        setError(err.message || "Failed to assign teacher.");
+      } catch (err) {
+        setError(getFriendlyErrorMessage(err, "Teacher could not be assigned."));
       }
     });
   };

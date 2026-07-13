@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/form-field";
 import { getSupabaseBrowserErrorMessage } from "@/lib/supabase/browser-error";
+import { getFriendlyErrorMessage } from "@/lib/errors";
 import { createClient } from "@/lib/supabase/browser";
 
 export default function ResetPasswordPage() {
@@ -29,7 +30,7 @@ export default function ResetPasswordPage() {
     try {
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) {
-        setError(updateError.message);
+        setError(getFriendlyErrorMessage(updateError, "Unable to update your password right now. Please try again."));
         return;
       }
       router.replace("/sign-in?message=Password updated. Please sign in again.");

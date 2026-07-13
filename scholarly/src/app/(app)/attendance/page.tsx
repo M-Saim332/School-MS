@@ -1,13 +1,29 @@
 import { PageHeader } from "@/components/layout/page-header";
 import { AttendanceForm } from "@/components/attendance/attendance-form";
+import { AttendanceOverview } from "@/components/attendance/attendance-overview";
 import { requireUser } from "@/lib/auth/session";
-import { getAttendanceContext } from "@/lib/services/attendance";
+import { getAttendanceContext, getAttendanceOverview } from "@/lib/services/attendance";
 import { hasPermission } from "@/lib/permissions";
 import { submitAttendanceAction } from "@/app/(app)/attendance/actions";
 
 export default async function AttendancePage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const params = await searchParams;
   const user = await requireUser("attendance:view");
+  if (user.role !== "teacher") {
+    const overview = await getAttendanceOverview(user);
+
+    return (
+      <>
+        <PageHeader
+          eyebrow="Attendance intelligence"
+          title="Attendance"
+          description="Review running attendance percentage, marked attendance days, and class-by-class attendance health."
+        />
+        <AttendanceOverview overview={overview} />
+      </>
+    );
+  }
+
   const context = await getAttendanceContext(user, params.classId, params.date);
   const selectedClass = context.classes.find((item) => item.id === context.selectedClassId);
 

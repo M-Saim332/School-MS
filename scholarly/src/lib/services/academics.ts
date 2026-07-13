@@ -39,6 +39,23 @@ export async function getAcademicOptions(user: AppUser) {
   };
 }
 
+export async function getClassOptions(user: AppUser) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("classes")
+    .select("id,name,grades(name),sections(name)")
+    .eq("school_id", user.schoolId)
+    .order("name");
+
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((row: any) => ({
+    id: row.id,
+    name: row.name,
+    grade_name: row.grades?.name ?? "Unassigned",
+    section_name: row.sections?.name ?? null,
+  }));
+}
+
 export async function getTeacherSubjectAssignments(user: AppUser) {
   const supabase = await createClient();
   let query = supabase

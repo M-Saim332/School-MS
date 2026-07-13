@@ -15,8 +15,11 @@ import { formatPercent } from "@/lib/utils";
 
 export default async function DashboardPage() {
   const user = await requireUser("dashboard:view");
-  const [dashboard, headTeacherClasses] = await Promise.all([getDashboardData(user), getTeacherHeadClasses(user)]);
   const isTeacher = user.role === "teacher";
+  const [dashboard, headTeacherClasses] = await Promise.all([
+    getDashboardData(user),
+    isTeacher ? getTeacherHeadClasses(user) : Promise.resolve([]),
+  ]);
   const canCreateStudents = hasPermission(user.role, "students:create");
   const canViewAttendance = hasPermission(user.role, "attendance:view");
   const canManageMarks = hasPermission(user.role, "marks:manage");

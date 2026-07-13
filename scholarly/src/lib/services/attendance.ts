@@ -3,6 +3,30 @@ import type { AppUser } from "@/types/database";
 import { attendanceSubmissionSchema, type AttendanceSubmission } from "@/lib/validation/attendance";
 import { logActivity } from "@/lib/services/activity";
 
+export type AttendanceOverviewClass = {
+  id: string;
+  name: string;
+  grade_name: string | null;
+  section_name: string | null;
+  active_students: number;
+  marked_sessions: number;
+  latest_marked_date: string | null;
+  total_records: number;
+  present: number;
+  late: number;
+  absent: number;
+  excused: number;
+  attendance_rate: number | null;
+};
+
+export type AttendanceOverview = {
+  total_classes: number;
+  total_students: number;
+  marked_sessions: number;
+  running_attendance_rate: number | null;
+  classes: AttendanceOverviewClass[];
+};
+
 export async function getAttendanceContext(user: AppUser, classId?: string, date?: string) {
   const supabase = await createClient();
   const attendanceDate = date ?? new Date().toISOString().slice(0, 10);
@@ -33,7 +57,7 @@ export async function getAttendanceContext(user: AppUser, classId?: string, date
 
   const { data: classes } = await classQuery;
   const selectedClassId = classId ?? classes?.[0]?.id;
-  const [enrollments, records] = selectedClassId
+  const [enrollments, records, session] = selectedClassId
     ? await Promise.all([
         supabase
           .from("enrollments")
@@ -47,9 +71,16 @@ export async function getAttendanceContext(user: AppUser, classId?: string, date
           .select("student_id,status,note")
           .eq("school_id", user.schoolId)
           .eq("class_id", selectedClassId)
+          .eq("attendance_date", attendanceDate),
+        supabase
+          .from("attendance_sessions")
+          .select("*")
+          .eq("school_id", user.schoolId)
+          .eq("class_id", selectedClassId)
           .eq("attendance_date", attendanceDate)
+          .maybeSingle()
       ])
-    : [{ data: [] }, { data: [] }];
+    : [{ data: [] }, { data: [] }, { data: null }];
 
   const recordMap = new Map((records.data ?? []).map((record: any) => [record.student_id, record]));
   const roster = (enrollments.data ?? [])
@@ -67,16 +98,6 @@ export async function getAttendanceContext(user: AppUser, classId?: string, date
     .filter((row) => row.student_id)
     .sort((a, b) => a.student_name.localeCompare(b.student_name));
 
-  const session = selectedClassId
-    ? await supabase
-        .from("attendance_sessions")
-        .select("*")
-        .eq("school_id", user.schoolId)
-        .eq("class_id", selectedClassId)
-        .eq("attendance_date", attendanceDate)
-        .maybeSingle()
-    : { data: null };
-
   return {
     classes: (classes ?? []).map((row: any) => ({
       id: row.id,
@@ -91,6 +112,97 @@ export async function getAttendanceContext(user: AppUser, classId?: string, date
     attendanceDate,
     roster,
     session: session.data
+  };
+}
+
+export async function getAttendanceOverview(user: AppUser): Promise<AttendanceOverview> {
+  const supabase = await createClient();
+  const [classes, enrollments, sessions, records] = await Promise.all([
+    supabase
+      .from("classes")
+      .select("id,name,grades(name),sections(name)")
+      .eq("school_id", user.schoolId)
+      .order("name"),
+    supabase
+      .from("enrollments")
+      .select("class_id")
+      .eq("school_id", user.schoolId)
+      .eq("status", "active"),
+    supabase
+      .from("attendance_sessions")
+      .select("class_id,attendance_date")
+      .eq("school_id", user.schoolId)
+      .order("attendance_date", { ascending: false }),
+    supabase
+      .from("attendance_records")
+      .select("class_id,status")
+      .eq("school_id", user.schoolId)
+  ]);
+
+  if (classes.error) throw new Error(classes.error.message);
+  if (enrollments.error) throw new Error(enrollments.error.message);
+  if (sessions.error) throw new Error(sessions.error.message);
+  if (records.error) throw new Error(records.error.message);
+
+  const studentsByClass = new Map<string, number>();
+  for (const row of enrollments.data ?? []) {
+    const classId = (row as any).class_id;
+    if (!classId) continue;
+    studentsByClass.set(classId, (studentsByClass.get(classId) ?? 0) + 1);
+  }
+
+  const sessionsByClass = new Map<string, { count: number; latest: string | null }>();
+  for (const row of sessions.data ?? []) {
+    const item = row as any;
+    const current = sessionsByClass.get(item.class_id) ?? { count: 0, latest: null };
+    current.count += 1;
+    if (!current.latest || item.attendance_date > current.latest) current.latest = item.attendance_date;
+    sessionsByClass.set(item.class_id, current);
+  }
+
+  const recordsByClass = new Map<string, { total: number; present: number; late: number; absent: number; excused: number }>();
+  for (const row of records.data ?? []) {
+    const item = row as any;
+    const current = recordsByClass.get(item.class_id) ?? { total: 0, present: 0, late: 0, absent: 0, excused: 0 };
+    current.total += 1;
+    if (item.status === "present") current.present += 1;
+    if (item.status === "late") current.late += 1;
+    if (item.status === "absent") current.absent += 1;
+    if (item.status === "excused") current.excused += 1;
+    recordsByClass.set(item.class_id, current);
+  }
+
+  let totalRecords = 0;
+  let totalPresentLike = 0;
+  const overviewClasses = (classes.data ?? []).map((row: any) => {
+    const stats = recordsByClass.get(row.id) ?? { total: 0, present: 0, late: 0, absent: 0, excused: 0 };
+    const sessionStats = sessionsByClass.get(row.id) ?? { count: 0, latest: null };
+    totalRecords += stats.total;
+    totalPresentLike += stats.present + stats.late;
+
+    return {
+      id: row.id,
+      name: row.name,
+      grade_name: row.grades?.name ?? null,
+      section_name: row.sections?.name ?? null,
+      active_students: studentsByClass.get(row.id) ?? 0,
+      marked_sessions: sessionStats.count,
+      latest_marked_date: sessionStats.latest,
+      total_records: stats.total,
+      present: stats.present,
+      late: stats.late,
+      absent: stats.absent,
+      excused: stats.excused,
+      attendance_rate: stats.total ? Math.round(((stats.present + stats.late) / stats.total) * 100) : null
+    };
+  });
+
+  return {
+    total_classes: overviewClasses.length,
+    total_students: overviewClasses.reduce((sum, item) => sum + item.active_students, 0),
+    marked_sessions: (sessions.data ?? []).length,
+    running_attendance_rate: totalRecords ? Math.round((totalPresentLike / totalRecords) * 100) : null,
+    classes: overviewClasses
   };
 }
 

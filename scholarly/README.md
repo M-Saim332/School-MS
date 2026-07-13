@@ -96,9 +96,9 @@ npm install
 
 1. Create a Supabase project.
 2. Copy the project URL and anon key into `.env.local`.
-3. Apply the migration in `supabase/migrations/202607110001_initial_schema.sql`.
-4. Run `supabase/seed.sql` for demo school, academic structure, students, guardians, enrollments, and activity logs.
-5. Create demo Auth users in Supabase Auth, then re-run `supabase/seed.sql` so the final block can bind their Auth IDs to school memberships.
+3. Apply every SQL file in `supabase/migrations` in filename order, not just `202607110001_initial_schema.sql`.
+4. Run `supabase/seed.sql` for demo school, academic structure, students, guardians, enrollments, activity logs, demo Auth users, profiles, and school memberships.
+5. If you are using the local Docker-backed Supabase stack, prefer `npm.cmd run setup:local` for first-time setup because it writes `.env.local`, starts Supabase, applies all migrations, and reloads `supabase/seed.sql`.
 
 Suggested demo users:
 
@@ -110,6 +110,28 @@ staff@scholarly.test
 ```
 
 Use secure temporary passwords in Supabase Auth. Do not commit credentials.
+
+## Team Pull Workflow
+
+If someone pulls changes that touch `supabase/migrations`, `supabase/seed.sql`, auth flows, or tenant/session logic, they should refresh their local backend before testing sign in.
+
+Windows PowerShell:
+
+```powershell
+npx.cmd supabase db reset --local --yes
+```
+
+Or, for a full first-time/local rebuild:
+
+```powershell
+npm.cmd run setup:local
+```
+
+Typical failure pattern after a pull:
+
+- The frontend code expects a new column, policy, or seeded row.
+- Another machine still has the old local database shape or old demo users.
+- Sign-in then fails outright, or succeeds but redirects back to `/sign-in` because the matching `profiles` or active `school_members` row is missing or outdated.
 
 ## Row Level Security
 
@@ -234,6 +256,8 @@ Deploy to any Node-compatible host that supports Next.js, such as Vercel, Netlif
 
 ## Common Troubleshooting
 
+- If sign-in breaks right after pulling from GitHub, check whether new files were added under `supabase/migrations` or `supabase/seed.sql` changed. If yes, refresh the local database with `npx.cmd supabase db reset --local --yes`.
+- If one machine works and another does not, compare `.env.local` values and confirm both machines are pointing at the same Supabase project or both are using the local Docker stack.
 - If sign-in succeeds but redirects back to sign in, verify the Auth user has a matching `profiles` and active `school_members` row.
 - If a teacher sees no classes, confirm `teacher_assignments` has rows for that teacher’s Auth user ID.
 - If student creation fails, check the current user role and the `students_insert_staff` RLS policy.

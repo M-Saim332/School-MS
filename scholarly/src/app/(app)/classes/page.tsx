@@ -13,13 +13,11 @@ export default async function ClassesPage() {
   const user = await requireUser("classes:manage");
   
   // Fetch academic data (classes, grades, sections, years, subjects)
-  const [academicData, classDetails] = await Promise.all([
+  const [academicData, classDetails, allStaff] = await Promise.all([
     getAcademicOptions(user),
-    getClassTeachersAndAttendance(user)
+    getClassTeachersAndAttendance(user),
+    getStaff(user)
   ]);
-  
-  // Fetch teachers to populate class ownership and assignment dropdowns.
-  const allStaff = await getStaff(user);
   const teachers = allStaff.filter((s: any) => s.role === "teacher");
 
   // Group classes by grade

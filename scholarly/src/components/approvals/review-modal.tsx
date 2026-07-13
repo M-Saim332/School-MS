@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/form-field";
 import type { ApprovalRequest } from "@/types/database";
 import { reviewRequestAction } from "@/app/(app)/approvals/actions";
+import { getFriendlyErrorMessage } from "@/lib/errors";
 
 export function ReviewModal({ request, onClose }: { request: ApprovalRequest; onClose: () => void }) {
   const [pending, startTransition] = useTransition();
@@ -21,11 +22,15 @@ export function ReviewModal({ request, onClose }: { request: ApprovalRequest; on
     }
     
     startTransition(async () => {
-      const result = await reviewRequestAction(request.id, formData);
-      if (result?.error) {
-        setError(result.error);
-      } else {
-        onClose();
+      try {
+        const result = await reviewRequestAction(request.id, formData);
+        if (result?.error) {
+          setError(getFriendlyErrorMessage(result.error, "Request could not be processed."));
+        } else {
+          onClose();
+        }
+      } catch (error) {
+        setError(getFriendlyErrorMessage(error, "Request could not be processed."));
       }
     });
   }

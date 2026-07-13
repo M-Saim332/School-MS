@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/form-field";
 import { createClassAction, updateClassAction } from "@/app/(app)/classes/actions";
+import { getFriendlyErrorMessage } from "@/lib/errors";
 import { Pencil, Plus, X } from "lucide-react";
 
 export function ClassFormModal({
@@ -62,8 +63,8 @@ export function ClassFormModal({
         else await createClassAction(formData);
         reset();
         setOpen(false);
-      } catch (err: any) {
-        setError(err.message || "Failed to create class.");
+      } catch (err) {
+        setError(getFriendlyErrorMessage(err, "Class could not be saved."));
       }
     });
   };

@@ -4,6 +4,7 @@ import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Trash2, X as XIcon } from "lucide-react";
 import { deleteClassAction, unassignTeacherClassAction } from "@/app/(app)/classes/actions";
+import { getFriendlyErrorMessage } from "@/lib/errors";
 
 export function DeleteClassButton({ classId, className }: { classId: string; className: string }) {
   const [pending, startTransition] = useTransition();
@@ -19,8 +20,8 @@ export function DeleteClassButton({ classId, className }: { classId: string; cla
         startTransition(async () => {
           try {
             await deleteClassAction(classId);
-          } catch (err: any) {
-            alert(err.message || "Failed to delete class.");
+          } catch (err) {
+            alert(getFriendlyErrorMessage(err, "Class could not be deleted."));
           }
         });
       }}
@@ -45,8 +46,8 @@ export function RemoveAssignmentButton({ assignmentId }: { assignmentId: string 
         startTransition(async () => {
           try {
             await unassignTeacherClassAction(assignmentId);
-          } catch (err: any) {
-            alert(err.message || "Failed to remove assignment.");
+          } catch (err) {
+            alert(getFriendlyErrorMessage(err, "Teacher assignment could not be removed."));
           }
         });
       }}

@@ -7,7 +7,6 @@ import {
   FileText,
   GraduationCap,
   LayoutDashboard,
-  Settings,
   Shield,
   UserCog,
   Users,

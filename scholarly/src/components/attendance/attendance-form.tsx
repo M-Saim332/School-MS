@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input, Select } from "@/components/ui/form-field";
+import { getFriendlyErrorMessage } from "@/lib/errors";
 import type { AttendanceStatus } from "@/types/database";
 import type { AttendanceSubmission } from "@/lib/validation/attendance";
 
@@ -35,6 +36,7 @@ export function AttendanceForm({
   const searchParams = useSearchParams();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
   const [records, setRecords] = useState(() =>
     roster.map((student) => ({
       student_id: student.student_id,
@@ -63,6 +65,7 @@ export function AttendanceForm({
   function submit() {
     if (!selectedClassId) return;
     setError(null);
+    setMessage(null);
     startTransition(async () => {
       try {
         await onSubmit({
@@ -70,9 +73,10 @@ export function AttendanceForm({
           attendance_date: attendanceDate,
           records: records.map((record) => ({ ...record, note: record.note || null }))
         });
+        setMessage("Attendance saved successfully.");
         router.refresh();
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Attendance could not be submitted.");
+        setError(getFriendlyErrorMessage(err, "Attendance could not be submitted."));
       }
     });
   }
@@ -96,6 +100,7 @@ export function AttendanceForm({
           </Button>
         </div>
         {restrictionMessage ? <div className="mt-3 rounded-lg bg-warning-soft px-3 py-2 text-sm font-semibold text-warning">{restrictionMessage}</div> : null}
+        {message ? <div className="mt-3 rounded-lg bg-success-soft px-3 py-2 text-sm font-semibold text-success">{message}</div> : null}
         {error ? <div className="mt-3 rounded-lg bg-danger-soft px-3 py-2 text-sm font-semibold text-danger">{error}</div> : null}
       </Card>
 

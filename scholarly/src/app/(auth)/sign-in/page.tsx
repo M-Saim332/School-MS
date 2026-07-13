@@ -1,14 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/form-field";
 import { signInAction } from "@/app/(auth)/sign-in/actions";
+import { getFriendlyErrorMessage } from "@/lib/errors";
 
 export default function SignInPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
 
@@ -23,7 +25,7 @@ export default function SignInPage() {
         router.replace("/");
         router.refresh();
       } catch (error) {
-        setError(error instanceof Error ? error.message : "Unable to sign in right now. Please try again.");
+        setError(getFriendlyErrorMessage(error, "Unable to sign in right now. Please try again."));
       }
     });
   }
@@ -32,6 +34,7 @@ export default function SignInPage() {
     <>
       <h1 className="font-display text-3xl font-semibold text-ink">Sign in</h1>
       <p className="mt-2 text-sm leading-6 text-muted">Use your school invitation or Supabase Auth account to enter GoCampusFlow.</p>
+      {searchParams.get("message") ? <div className="mt-4 rounded-lg bg-success-soft px-4 py-3 text-sm font-semibold text-success">{searchParams.get("message")}</div> : null}
       {error ? <div className="mt-4 rounded-lg bg-danger-soft px-4 py-3 text-sm font-semibold text-danger">{error}</div> : null}
       <form className="mt-6 grid gap-4" action={onSubmit}>
         <Field label="Email address">

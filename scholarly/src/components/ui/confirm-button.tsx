@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import { getFriendlyErrorMessage } from "@/lib/errors";
 
 export function ConfirmButton({
   label,
@@ -24,7 +25,11 @@ export function ConfirmButton({
       onClick={() => {
         if (!window.confirm(confirmText)) return;
         startTransition(async () => {
-          await action();
+          try {
+            await action();
+          } catch (error) {
+            alert(getFriendlyErrorMessage(error));
+          }
         });
       }}
     >

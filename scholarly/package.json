@@ -14,7 +14,7 @@
     "supabase:start": "npx supabase start",
     "supabase:status": "npx supabase status -o pretty",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run --no-cache"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

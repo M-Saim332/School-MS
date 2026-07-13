@@ -2,20 +2,17 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth/session";
+import { getMissingColumnName } from "@/lib/supabase/errors";
+import { getSchoolMetadata, optionalSchoolColumns } from "@/lib/supabase/school-metadata";
 import { schoolProfileSchema, type SchoolProfileFormValues } from "@/lib/validation/school";
 
 export async function getSchoolProfile() {
   const user = await getCurrentUser();
   if (!user) throw new Error("Unauthorized");
 
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("schools")
-    .select("name, short_name, motto, address, phone, email, website, logo_url, favicon_url")
-    .eq("id", user.schoolId)
-    .single();
+  const { data, error } = await getSchoolMetadata(user.schoolId);
 
-  if (error) throw new Error(error.message);
+  if (error || !data) throw new Error(error?.message ?? "School profile not found.");
 
   return {
     name: data.name,
@@ -38,21 +35,38 @@ export async function updateSchoolProfile(values: SchoolProfileFormValues) {
 
   const parsed = schoolProfileSchema.parse(values);
   const supabase = await createClient();
+  let updates: Record<string, string | null> = {
+    name: parsed.name,
+    short_name: parsed.shortName ?? null,
+    motto: parsed.motto ?? null,
+    address: parsed.address ?? null,
+    phone: parsed.phone ?? null,
+    email: parsed.email === "" ? null : (parsed.email ?? null),
+    website: parsed.website === "" ? null : (parsed.website ?? null),
+    logo_url: parsed.logoUrl ?? null,
+    favicon_url: parsed.faviconUrl ?? null,
+  };
 
-  const { error } = await supabase
+  let { error } = await supabase
     .from("schools")
-    .update({
-      name: parsed.name,
-      short_name: parsed.shortName,
-      motto: parsed.motto,
-      address: parsed.address,
-      phone: parsed.phone,
-      email: parsed.email === "" ? null : parsed.email,
-      website: parsed.website === "" ? null : parsed.website,
-      logo_url: parsed.logoUrl,
-      favicon_url: parsed.faviconUrl,
-    })
+    .update(updates)
     .eq("id", user.schoolId);
+
+  while (error) {
+    const missingColumn = getMissingColumnName(error, optionalSchoolColumns);
+    if (!missingColumn) break;
+
+    const remainingUpdates = { ...updates };
+    delete remainingUpdates[missingColumn];
+    updates = remainingUpdates;
+
+    error = (
+      await supabase
+        .from("schools")
+        .update(updates)
+        .eq("id", user.schoolId)
+    ).error;
+  }
 
   if (error) throw new Error(error.message);
 }

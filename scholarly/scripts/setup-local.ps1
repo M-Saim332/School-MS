@@ -5,14 +5,45 @@ Set-Location $repoRoot
 
 $dockerDesktopPath = Join-Path $env:LOCALAPPDATA "Programs\DockerDesktop\Docker Desktop.exe"
 $envFilePath = Join-Path $repoRoot ".env.local"
-$envContents = @"
-NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
+
+function Get-StatusValue {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string[]]$StatusLines,
+    [Parameter(Mandatory = $true)]
+    [string]$Name
+  )
+
+  $line = $StatusLines | Where-Object { $_ -like "$Name=*" } | Select-Object -First 1
+  if (-not $line) {
+    throw "Could not read $Name from Supabase status output."
+  }
+
+  $value = ($line -split "=", 2)[1].Trim()
+  if ($value.StartsWith('"') -and $value.EndsWith('"')) {
+    $value = $value.Substring(1, $value.Length - 2)
+  }
+
+  return $value
+}
+
+function Write-LocalEnv {
+  $statusLines = & npx.cmd supabase status -o env
+  if ($LASTEXITCODE -ne 0) {
+    throw "Could not read local Supabase status."
+  }
+
+  $apiUrl = Get-StatusValue -StatusLines $statusLines -Name "API_URL"
+  $anonKey = Get-StatusValue -StatusLines $statusLines -Name "ANON_KEY"
+  $serviceRoleKey = Get-StatusValue -StatusLines $statusLines -Name "SERVICE_ROLE_KEY"
+
+  $envContents = @"
+NEXT_PUBLIC_SUPABASE_URL=$apiUrl
+NEXT_PUBLIC_SUPABASE_ANON_KEY=$anonKey
+SUPABASE_SERVICE_ROLE_KEY=$serviceRoleKey
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 "@
 
-function Write-LocalEnv {
   Set-Content -LiteralPath $envFilePath -Value $envContents
 }
 
@@ -50,7 +81,6 @@ function Test-DockerReady {
   }
 }
 
-Write-LocalEnv
 Start-DockerDesktopIfPresent
 
 if (-not (Test-DockerReady)) {
@@ -85,6 +115,7 @@ After the restart:
 }
 
 Invoke-Native -FilePath "npx.cmd" -ArgumentList @("supabase", "start")
+Write-LocalEnv
 Invoke-Native -FilePath "npx.cmd" -ArgumentList @("supabase", "db", "reset", "--local", "--yes")
 
 Write-Host ""

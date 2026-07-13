@@ -6,6 +6,7 @@ import { ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/form-field";
 import { changePasswordAction } from "@/app/(auth)/change-password/actions";
+import { getFriendlyErrorMessage } from "@/lib/errors";
 
 export function ChangePasswordForm() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export function ChangePasswordForm() {
         router.replace("/");
         router.refresh();
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Password could not be changed.");
+        setError(getFriendlyErrorMessage(err, "Password could not be changed."));
       }
     });
   }

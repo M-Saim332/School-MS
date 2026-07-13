@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, BriefcaseBusiness, ChevronDown, LogOut, Menu, Search, UserRound, X, Building } from "lucide-react";
+import { BookOpen, BriefcaseBusiness, ChevronDown, LogOut, Menu, UserRound, X, Building } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { AppUser } from "@/types/database";
@@ -193,10 +193,6 @@ export function AppShell({ user, children }: { user: AppUser; children: ReactNod
             <button className="rounded-lg p-2 hover:bg-surface-low lg:hidden" onClick={() => setOpen(true)} aria-label="Open navigation">
               <Menu className="h-5 w-5" />
             </button>
-            <div className="hidden min-w-[220px] max-w-md flex-1 items-center gap-2 rounded-lg bg-surface-low px-3 py-2 ring-1 ring-outline/25 sm:flex">
-              <Search className="h-4 w-4 text-muted" aria-hidden="true" />
-              <input className="w-full bg-transparent text-sm outline-none" placeholder="Search records..." aria-label="Search records" />
-            </div>
           </div>
           <div className="relative flex items-center gap-3" ref={menuRef}>
             <button

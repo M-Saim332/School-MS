@@ -1,3 +1,5 @@
+import { getFriendlyErrorMessage } from "@/lib/errors";
+
 const LOCAL_SUPABASE_HOSTS = new Set(["127.0.0.1", "localhost"]);
 
 function getSupabaseUrl() {
@@ -22,7 +24,7 @@ export function getSupabaseBrowserErrorMessage(error: unknown, fallbackMessage: 
       return "Unable to reach the authentication service right now. Please try again in a moment.";
     }
 
-    if (error.message) return error.message;
+    if (error.message) return getFriendlyErrorMessage(error, fallbackMessage);
   }
 
   return fallbackMessage;

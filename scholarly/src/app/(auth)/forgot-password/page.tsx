@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/form-field";
 import { getSupabaseBrowserErrorMessage } from "@/lib/supabase/browser-error";
+import { getFriendlyErrorMessage } from "@/lib/errors";
 import { createClient } from "@/lib/supabase/browser";
 
 export default function ForgotPasswordPage() {
@@ -24,7 +25,7 @@ export default function ForgotPasswordPage() {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`
       });
-      if (resetError) setError(resetError.message);
+      if (resetError) setError(getFriendlyErrorMessage(resetError, "Unable to send a reset link right now. Please try again."));
       else setMessage("Password reset instructions have been sent if an account exists for that email.");
     } catch (error) {
       setError(getSupabaseBrowserErrorMessage(error, "Unable to send a reset link right now. Please try again."));

@@ -6,13 +6,21 @@ import { ButtonLink } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmButton } from "@/components/ui/confirm-button";
+import { SuccessMessage } from "@/components/ui/status-message";
 import { requireUser } from "@/lib/auth/session";
 import { getStudent } from "@/lib/services/students";
 import { hasPermission } from "@/lib/permissions";
 import { archiveStudentAction } from "@/app/(app)/students/actions";
 
-export default async function StudentProfilePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function StudentProfilePage({
+  params,
+  searchParams
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
   const { id } = await params;
+  const query = await searchParams;
   const user = await requireUser("students:view");
   const { student, guardians, attendance } = await getStudent(user, id);
   if (!student) notFound();
@@ -41,6 +49,8 @@ export default async function StudentProfilePage({ params }: { params: Promise<{
           </>
         }
       />
+      {query.saved === "created" ? <SuccessMessage>Student saved successfully.</SuccessMessage> : null}
+      {query.saved === "updated" ? <SuccessMessage>Student updated successfully.</SuccessMessage> : null}
 
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.8fr)]">
         <Card>

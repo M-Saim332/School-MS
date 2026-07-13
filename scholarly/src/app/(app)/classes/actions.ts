@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/session";
 import { createClass, updateClass, deleteClass } from "@/lib/services/academics";
 import { assignTeacherToClass, unassignTeacherFromClass } from "@/lib/services/teachers";
+import { throwFriendlyError } from "@/lib/errors";
 import { z } from "zod";
 
 const classSchema = z.object({
@@ -16,58 +17,78 @@ const classSchema = z.object({
 });
 
 export async function createClassAction(formData: FormData) {
-  const user = await requireUser("classes:manage");
-  const data = classSchema.parse({
-    name: formData.get("name"),
-    grade_id: formData.get("grade_id"),
-    section_id: formData.get("section_id") || undefined,
-    academic_year_id: formData.get("academic_year_id"),
-    room: formData.get("room") || undefined,
-    head_teacher_id: formData.get("head_teacher_id")
-  });
+  try {
+    const user = await requireUser("classes:manage");
+    const data = classSchema.parse({
+      name: formData.get("name"),
+      grade_id: formData.get("grade_id"),
+      section_id: formData.get("section_id") || undefined,
+      academic_year_id: formData.get("academic_year_id"),
+      room: formData.get("room") || undefined,
+      head_teacher_id: formData.get("head_teacher_id")
+    });
 
-  await createClass(user, { ...data, section_id: data.section_id || null });
-  revalidatePath("/classes");
-  revalidatePath("/academics");
+    await createClass(user, { ...data, section_id: data.section_id || null });
+    revalidatePath("/classes");
+    revalidatePath("/academics");
+  } catch (error) {
+    throwFriendlyError(error, "Class could not be created.");
+  }
 }
 
 export async function updateClassAction(classId: string, formData: FormData) {
-  const user = await requireUser("classes:manage");
-  const data = classSchema.parse({
-    name: formData.get("name"),
-    grade_id: formData.get("grade_id"),
-    section_id: formData.get("section_id") || undefined,
-    academic_year_id: formData.get("academic_year_id"),
-    room: formData.get("room") || undefined,
-    head_teacher_id: formData.get("head_teacher_id")
-  });
+  try {
+    const user = await requireUser("classes:manage");
+    const data = classSchema.parse({
+      name: formData.get("name"),
+      grade_id: formData.get("grade_id"),
+      section_id: formData.get("section_id") || undefined,
+      academic_year_id: formData.get("academic_year_id"),
+      room: formData.get("room") || undefined,
+      head_teacher_id: formData.get("head_teacher_id")
+    });
 
-  await updateClass(user, classId, { ...data, section_id: data.section_id || null });
-  revalidatePath("/classes");
-  revalidatePath("/academics");
+    await updateClass(user, classId, { ...data, section_id: data.section_id || null });
+    revalidatePath("/classes");
+    revalidatePath("/academics");
+  } catch (error) {
+    throwFriendlyError(error, "Class could not be updated.");
+  }
 }
 
 export async function assignTeacherClassAction(formData: FormData) {
-  const user = await requireUser("classes:manage");
-  const teacherId = formData.get("teacher_id") as string;
-  const classId = formData.get("class_id") as string;
-  const subjectId = formData.get("subject_id") as string | undefined;
+  try {
+    const user = await requireUser("classes:manage");
+    const teacherId = formData.get("teacher_id") as string;
+    const classId = formData.get("class_id") as string;
+    const subjectId = formData.get("subject_id") as string | undefined;
 
-  await assignTeacherToClass(user, teacherId, classId, subjectId || undefined);
-  revalidatePath("/classes");
-  revalidatePath("/teachers");
+    await assignTeacherToClass(user, teacherId, classId, subjectId || undefined);
+    revalidatePath("/classes");
+    revalidatePath("/teachers");
+  } catch (error) {
+    throwFriendlyError(error, "Teacher could not be assigned.");
+  }
 }
 
 export async function unassignTeacherClassAction(assignmentId: string) {
-  const user = await requireUser("classes:manage");
-  await unassignTeacherFromClass(user, assignmentId);
-  revalidatePath("/classes");
-  revalidatePath("/teachers");
+  try {
+    const user = await requireUser("classes:manage");
+    await unassignTeacherFromClass(user, assignmentId);
+    revalidatePath("/classes");
+    revalidatePath("/teachers");
+  } catch (error) {
+    throwFriendlyError(error, "Teacher assignment could not be removed.");
+  }
 }
 
 export async function deleteClassAction(classId: string) {
-  const user = await requireUser("classes:manage");
-  await deleteClass(user, classId);
-  revalidatePath("/classes");
-  revalidatePath("/academics");
+  try {
+    const user = await requireUser("classes:manage");
+    await deleteClass(user, classId);
+    revalidatePath("/classes");
+    revalidatePath("/academics");
+  } catch (error) {
+    throwFriendlyError(error, "Class could not be deleted.");
+  }
 }

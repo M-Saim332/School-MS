@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Upload } from "lucide-react";
 import { createClient } from "@/lib/supabase/browser";
+import { getFriendlyErrorMessage } from "@/lib/errors";
 import { schoolProfileSchema, type SchoolProfileFormValues } from "@/lib/validation/school";
 import { updateSchoolProfile } from "@/lib/services/school";
 import { Button } from "@/components/ui/button";
@@ -55,8 +56,8 @@ export function SchoolProfileForm({ user, initialData }: { user: AppUser; initia
       } = supabase.storage.from("branding").getPublicUrl(filePath);
 
       setValue(field, publicUrl, { shouldDirty: true });
-    } catch (e: any) {
-      setError(e.message || "Failed to upload file");
+    } catch (e) {
+      setError(getFriendlyErrorMessage(e, "File could not be uploaded."));
     }
   };
 
@@ -65,10 +66,10 @@ export function SchoolProfileForm({ user, initialData }: { user: AppUser; initia
       setIsSaving(true);
       setError(null);
       await updateSchoolProfile(values);
-      router.push("/school-profile");
+      router.push("/school-profile?saved=profile");
       router.refresh();
-    } catch (e: any) {
-      setError(e.message || "Failed to save profile");
+    } catch (e) {
+      setError(getFriendlyErrorMessage(e, "School profile could not be saved."));
     } finally {
       setIsSaving(false);
     }

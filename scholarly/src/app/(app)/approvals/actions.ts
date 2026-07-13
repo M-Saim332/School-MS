@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/session";
 import { reviewRequest } from "@/lib/services/approvals";
 import { reviewRequestSchema } from "@/lib/validation/approvals";
+import { getFriendlyErrorMessage } from "@/lib/errors";
 
 export async function reviewRequestAction(requestId: string, formData: FormData) {
   const user = await requireUser("approvals:review");
@@ -24,7 +25,7 @@ export async function reviewRequestAction(requestId: string, formData: FormData)
     revalidatePath("/approvals");
     revalidatePath("/students");
     return { success: true };
-  } catch (err: any) {
-    return { error: err.message || "Failed to process request" };
+  } catch (err) {
+    return { error: getFriendlyErrorMessage(err, "Request could not be processed.") };
   }
 }
