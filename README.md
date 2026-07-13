@@ -96,7 +96,25 @@ npm install
 
 1. Create a Supabase project.
 2. Copy the project URL and anon key into `.env.local`.
-3. Apply the migration in `supabase/migrations/202607110001_initial_schema.sql`.
+3. Apply **all** migrations in `supabase/migrations/` in filename order. In the Supabase Dashboard SQL Editor, run each file one at a time:
+   - `202607110001_initial_schema.sql`
+   - `202607110002_add_grants.sql`
+   - `202607110003_approval_workflow.sql`
+   - `202607110004_fix_principal_student_update.sql`
+   - `202607110005_profile_details.sql`
+   - `202607110006_user_password_security.sql`
+   - `202607110007_head_teacher_attendance_rules.sql`
+   - `202607110008_exam_marks_results.sql`
+   - `202607120001_principal_class_management.sql`
+   - `202607120002_exam_results_workflow.sql`
+   - `202607130001_finance_module.sql`
+
+   If you use the Supabase CLI with a linked project you can run all migrations at once:
+
+   ```bash
+   supabase db push
+   ```
+
 4. Run `supabase/seed.sql` for demo school, academic structure, students, guardians, enrollments, and activity logs.
 5. Create demo Auth users in Supabase Auth, then re-run `supabase/seed.sql` so the final block can bind their Auth IDs to school memberships.
 
@@ -235,10 +253,11 @@ Deploy to any Node-compatible host that supports Next.js, such as Vercel, Netlif
 ## Common Troubleshooting
 
 - If sign-in succeeds but redirects back to sign in, verify the Auth user has a matching `profiles` and active `school_members` row.
-- If a teacher sees no classes, confirm `teacher_assignments` has rows for that teacher’s Auth user ID.
+- If a teacher sees no classes, confirm `teacher_assignments` has rows for that teacher's Auth user ID.
 - If student creation fails, check the current user role and the `students_insert_staff` RLS policy.
 - If charts are empty, submit attendance records or add enrollments first.
 - If PowerShell blocks `npm`, use `npm.cmd` as shown above.
+- **"Could not find the table 'public.fee_structures'" or "public.student_fee_directory" errors**: The finance module migration has not been applied. Run `supabase/migrations/202607130001_finance_module.sql` in the Supabase Dashboard SQL Editor (or run `supabase db push` with the CLI) and restart the dev server.
 
 ## Remaining Operational Notes
 
