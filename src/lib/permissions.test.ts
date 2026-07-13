@@ -28,4 +28,20 @@ describe("role permissions", () => {
     expect(roleHome("principal")).toBe("/dashboard");
     expect(roleHome("student_staff")).toBe("/students");
   });
+
+  it("restricts finance actions correctly based on user roles", () => {
+    // Principal & Admin can view and manage finance
+    expect(hasPermission("principal", "finance:view")).toBe(true);
+    expect(hasPermission("principal", "finance:manage")).toBe(true);
+    expect(hasPermission("administrator", "finance:view")).toBe(true);
+    expect(hasPermission("administrator", "finance:manage")).toBe(true);
+
+    // Registrar (student_staff) can view but cannot manage finance
+    expect(hasPermission("student_staff", "finance:view")).toBe(true);
+    expect(hasPermission("student_staff", "finance:manage")).toBe(false);
+
+    // Teachers have no access to finance
+    expect(hasPermission("teacher", "finance:view")).toBe(false);
+    expect(hasPermission("teacher", "finance:manage")).toBe(false);
+  });
 });

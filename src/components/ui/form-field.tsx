@@ -20,10 +20,14 @@ export function Field({
 }
 
 export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
+  const isDateInput = props.type === "date";
+
   return (
     <input
       className={cn(
         "min-h-11 w-full rounded-lg border border-outline/60 bg-white px-3 py-2 text-sm text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] placeholder:text-muted/70 focus:border-primary focus:ring-0 disabled:bg-surface-low",
+        isDateInput &&
+          "pr-10 [color-scheme:light] [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-70",
         className
       )}
       {...props}

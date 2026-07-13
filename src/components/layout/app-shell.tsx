@@ -16,6 +16,7 @@ export function AppShell({ user, children }: { user: AppUser; children: ReactNod
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
+  const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({});
   const menuRef = useRef<HTMLDivElement>(null);
   const items = navItems.filter((item) => hasPermission(user.role, item.permission));
   const supabase = useMemo(() => createClient(), []);
@@ -23,6 +24,22 @@ export function AppShell({ user, children }: { user: AppUser; children: ReactNod
   useEffect(() => {
     setProfileOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    // Auto-expand the current module when navigating inside it.
+    setExpandedModules((current) => {
+      let next = current;
+      for (const item of items) {
+        if (!item.subItems) continue;
+        if (pathname === item.href || pathname.startsWith(`${item.href}/`)) {
+          if (current[item.href]) continue;
+          if (next === current) next = { ...current };
+          next[item.href] = true;
+        }
+      }
+      return next;
+    });
+  }, [items, pathname]);
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
@@ -105,6 +122,63 @@ export function AppShell({ user, children }: { user: AppUser; children: ReactNod
           const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
           const isApprovals = item.href === "/approvals";
           const showBadge = isApprovals && pendingCount > 0 && hasPermission(user.role, "approvals:review");
+
+          if (item.subItems) {
+            const allowedSubItems = item.subItems.filter(sub => hasPermission(user.role, sub.permission));
+            if (allowedSubItems.length === 0) return null;
+            const expanded = expandedModules[item.href] ?? active;
+            return (
+              <div key={item.href} className="space-y-1">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setExpandedModules((current) => ({ ...current, [item.href]: !(current[item.href] ?? active) }))
+                  }
+                  className={cn(
+                    "group flex w-full items-center justify-between gap-3 rounded-lg px-3 py-3 text-left text-sm font-semibold transition",
+                    active ? "bg-primary-soft text-primary shadow-[inset_3px_0_0_#3366cc]" : "text-muted hover:bg-surface-low hover:text-primary"
+                  )}
+                  aria-expanded={expanded}
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={cn(
+                        "flex h-8 w-8 items-center justify-center rounded-lg transition",
+                        active ? "bg-white/80 text-primary" : "bg-surface-low text-muted group-hover:bg-white group-hover:text-primary"
+                      )}
+                    >
+                      <Icon className="h-4 w-4" aria-hidden="true" />
+                    </span>
+                    {item.label}
+                  </div>
+                  <ChevronDown className={cn("h-4 w-4 transition", expanded ? "rotate-180" : "")} aria-hidden="true" />
+                </button>
+
+                {expanded && (
+                  <div className="ml-5 space-y-0.5 border-l border-outline/40 pl-2">
+                    {allowedSubItems.map((sub) => {
+                      const isSubActive = pathname === sub.href || pathname.startsWith(`${sub.href}/`);
+                      return (
+                        <Link
+                          href={sub.href}
+                          key={sub.href}
+                          onClick={() => setOpen(false)}
+                          className={cn(
+                            "flex items-center gap-2 rounded-md px-3 py-2.5 text-xs font-semibold transition",
+                            isSubActive
+                              ? "bg-primary-soft text-primary font-bold shadow-[inset_2px_0_0_#3366cc]"
+                              : "text-muted hover:bg-surface-low hover:text-primary"
+                          )}
+                        >
+                          {sub.label}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          }
 
           return (
             <Link
