@@ -388,7 +388,8 @@ export async function getFinanceDashboard(user: AppUser) {
   const [accountsRes, todayPaymentsRes, monthPaymentsRes] = await Promise.all([
     supabase
       .from("student_fee_directory")
-      .select("total_payable, amount_paid, remaining_balance, payment_status, discount_type, discount_value, fee_structure_id, class_name, grade_name"),
+      .select("total_payable, amount_paid, remaining_balance, payment_status, discount_type, discount_value, fee_structure_id, class_name, grade_name")
+      .eq("school_id", user.schoolId),
     supabase
       .from("fee_payments")
       .select("amount")
