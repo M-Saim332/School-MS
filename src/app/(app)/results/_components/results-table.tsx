@@ -25,9 +25,10 @@ type ResultRow = {
   subjects?: { name?: string };
 };
 
+import { formatDateTimePK } from "@/lib/utils";
+
 function formatDateTime(value: string | null) {
-  if (!value) return "—";
-  return new Date(value).toLocaleString();
+  return formatDateTimePK(value);
 }
 
 export function ResultsTable({

@@ -196,3 +196,110 @@ export type ResultApproval = {
   created_at: string;
   updated_at: string;
 };
+
+// ─── Payroll & Salary Types ───────────────────────────────────────────────────
+
+export type EmploymentStatus = "active" | "inactive" | "archived";
+export type PaymentMethod = "cash" | "bank_transfer" | "cheque";
+export type SalaryActionType = "initial" | "increase" | "decrease";
+export type AdjustmentType = "bonus" | "deduction";
+export type PayrollStatus = "generated" | "paid";
+
+export type TeacherEmploymentDetails = {
+  teacher_id: string;
+  school_id: string;
+  designation: string | null;
+  department: string | null;
+  joining_date: string;
+  monthly_salary: number;
+  payment_method: PaymentMethod;
+  salary_start_date: string;
+  employment_status: EmploymentStatus;
+  created_at: string;
+  updated_at: string;
+};
+
+export type SalaryHistory = {
+  id: string;
+  school_id: string;
+  teacher_id: string;
+  previous_salary: number;
+  new_salary: number;
+  action_type: SalaryActionType;
+  effective_date: string;
+  approved_by: string | null;
+  remarks: string | null;
+  created_at: string;
+};
+
+export type SalaryAdjustment = {
+  id: string;
+  school_id: string;
+  teacher_id: string;
+  amount: number;
+  type: AdjustmentType;
+  reason: string;
+  effective_date: string;
+  approved_by: string | null;
+  created_at: string;
+};
+
+export type Payroll = {
+  id: string;
+  school_id: string;
+  teacher_id: string;
+  month: string;
+  base_salary: number;
+  total_bonus: number;
+  total_deductions: number;
+  net_salary: number;
+  status: PayrollStatus;
+  payment_date: string | null;
+  approved_by: string | null;
+  remarks: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type PayrollRow = Payroll & {
+  teacher_name?: string | null;
+  teacher_email?: string | null;
+};
+
+// ─── Announcement Types ───────────────────────────────────────────────────────
+
+export type AnnouncementPriority = "low" | "medium" | "high" | "critical";
+export type AnnouncementType = "general" | "academic" | "holiday" | "emergency" | "meeting" | "examination" | "urgent";
+export type AnnouncementAudienceType = "all" | "teachers" | "registrar" | "admin" | "class" | "department" | "roles";
+
+export type Announcement = {
+  id: string;
+  school_id: string;
+  title: string;
+  description: string;
+  priority: AnnouncementPriority;
+  type: AnnouncementType;
+  audience_type: AnnouncementAudienceType;
+  audience_value: string | null;
+  publish_date: string;
+  expiry_date: string | null;
+  attachment_url: string | null;
+  is_archived: boolean;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AnnouncementRead = {
+  id: string;
+  school_id: string;
+  announcement_id: string;
+  user_id: string;
+  read_at: string;
+};
+
+export type AnnouncementWithRead = Announcement & {
+  is_read?: boolean;
+  created_by_name?: string | null;
+};
+

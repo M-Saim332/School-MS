@@ -25,3 +25,70 @@ export function toCsv(rows: Array<Record<string, string | number | null | undefi
   const escape = (value: unknown) => `"${String(value ?? "").replaceAll('"', '""')}"`;
   return [keys.join(","), ...rows.map((row) => keys.map((key) => escape(row[key])).join(","))].join("\n");
 }
+
+// ─── Pakistan Localization ────────────────────────────────────────────────────
+
+const PK_LOCALE = "en-PK";
+const PK_TZ = "Asia/Karachi";
+
+/**
+ * Format a number as Pakistani Rupees.
+ * Output: "Rs. 5,000" or "Rs. 1,25,000"
+ */
+export function formatPKR(amount: number | null | undefined): string {
+  if (amount === null || amount === undefined || Number.isNaN(amount)) return "Rs. 0";
+  return new Intl.NumberFormat(PK_LOCALE, {
+    style: "currency",
+    currency: "PKR",
+    maximumFractionDigits: 0,
+    currencyDisplay: "narrowSymbol"
+  }).format(amount);
+}
+
+/**
+ * Format a date string or Date object as "14 Jul 2026" (DD MMM YYYY) in PKT.
+ */
+export function formatDatePK(value: string | Date | null | undefined): string {
+  if (!value) return "—";
+  const d = typeof value === "string" ? new Date(value) : value;
+  if (Number.isNaN(d.getTime())) return "—";
+  return new Intl.DateTimeFormat(PK_LOCALE, {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    timeZone: PK_TZ
+  }).format(d);
+}
+
+/**
+ * Format a timestamp as "14 Jul 2026, 11:32 AM" in PKT.
+ */
+export function formatDateTimePK(value: string | Date | null | undefined): string {
+  if (!value) return "—";
+  const d = typeof value === "string" ? new Date(value) : value;
+  if (Number.isNaN(d.getTime())) return "—";
+  return new Intl.DateTimeFormat(PK_LOCALE, {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: PK_TZ
+  }).format(d);
+}
+
+/**
+ * Format a date as numeric "14/07/2026" in PKT.
+ */
+export function formatDateNumericPK(value: string | Date | null | undefined): string {
+  if (!value) return "—";
+  const d = typeof value === "string" ? new Date(value) : value;
+  if (Number.isNaN(d.getTime())) return "—";
+  return new Intl.DateTimeFormat(PK_LOCALE, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: PK_TZ
+  }).format(d);
+}

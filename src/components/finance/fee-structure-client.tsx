@@ -8,6 +8,7 @@ import { Input, Select, Field } from "@/components/ui/form-field";
 import { createFeeStructureAction, updateFeeStructureAction, deleteFeeStructureAction } from "@/app/(app)/finance/actions";
 import { hasPermission } from "@/lib/permissions";
 import type { AppUser } from "@/types/database";
+import { formatPKR } from "@/lib/utils";
 
 interface FeeStructureClientProps {
   user: AppUser;
@@ -168,14 +169,14 @@ export function FeeStructureClient({ user, structures, years, classes }: FeeStru
                     <td className="px-4 py-4 font-semibold text-ink">
                       {struct.classes?.grade_name} • {struct.classes?.name}
                     </td>
-                    <td className="px-4 py-4">${Number(struct.tuition_fee).toLocaleString()}</td>
-                    <td className="px-4 py-4">${Number(struct.admission_fee).toLocaleString()}</td>
-                    <td className="px-4 py-4">${Number(struct.examination_fee).toLocaleString()}</td>
-                    <td className="px-4 py-4">${Number(struct.library_fee).toLocaleString()}</td>
-                    <td className="px-4 py-4">${Number(struct.laboratory_fee).toLocaleString()}</td>
-                    <td className="px-4 py-4">${Number(struct.transport_fee).toLocaleString()}</td>
-                    <td className="px-4 py-4">${Number(struct.miscellaneous_charges).toLocaleString()}</td>
-                    <td className="px-4 py-4 font-bold text-ink">${total.toLocaleString()}</td>
+                    <td className="px-4 py-4">{formatPKR(Number(struct.tuition_fee))}</td>
+                    <td className="px-4 py-4">{formatPKR(Number(struct.admission_fee))}</td>
+                    <td className="px-4 py-4">{formatPKR(Number(struct.examination_fee))}</td>
+                    <td className="px-4 py-4">{formatPKR(Number(struct.library_fee))}</td>
+                    <td className="px-4 py-4">{formatPKR(Number(struct.laboratory_fee))}</td>
+                    <td className="px-4 py-4">{formatPKR(Number(struct.transport_fee))}</td>
+                    <td className="px-4 py-4">{formatPKR(Number(struct.miscellaneous_charges))}</td>
+                    <td className="px-4 py-4 font-bold text-ink">{formatPKR(total)}</td>
                     {canManage && (
                       <td className="px-4 py-4 text-right">
                         <div className="flex justify-end gap-2">
@@ -255,39 +256,39 @@ export function FeeStructureClient({ user, structures, years, classes }: FeeStru
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label="Tuition Fee ($)">
+                  <Field label="Tuition Fee (PKR)">
                     <Input type="number" min="0" value={tuition} onChange={(e) => setTuition(e.target.value)} required />
                   </Field>
-                  <Field label="Admission Fee ($)">
+                  <Field label="Admission Fee (PKR)">
                     <Input type="number" min="0" value={admission} onChange={(e) => setAdmission(e.target.value)} required />
                   </Field>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label="Examination Fee ($)">
+                  <Field label="Examination Fee (PKR)">
                     <Input type="number" min="0" value={exam} onChange={(e) => setExam(e.target.value)} required />
                   </Field>
-                  <Field label="Library Fee ($)">
+                  <Field label="Library Fee (PKR)">
                     <Input type="number" min="0" value={library} onChange={(e) => setLibrary(e.target.value)} required />
                   </Field>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label="Laboratory Fee ($)">
+                  <Field label="Laboratory Fee (PKR)">
                     <Input type="number" min="0" value={lab} onChange={(e) => setLab(e.target.value)} required />
                   </Field>
-                  <Field label="Transport Fee ($)">
+                  <Field label="Transport Fee (PKR)">
                     <Input type="number" min="0" value={transport} onChange={(e) => setTransport(e.target.value)} required />
                   </Field>
                 </div>
 
-                <Field label="Miscellaneous Charges ($)">
+                <Field label="Miscellaneous Charges (PKR)">
                   <Input type="number" min="0" value={misc} onChange={(e) => setMisc(e.target.value)} required />
                 </Field>
 
                 <div className="mt-2 rounded-lg bg-surface-low p-3 flex justify-between items-center">
                   <span className="text-sm font-semibold text-muted">Calculated Total Fee:</span>
-                  <span className="font-display text-lg font-bold text-ink">${totalFee.toLocaleString()}</span>
+                  <span className="font-display text-lg font-bold text-ink">{formatPKR(totalFee)}</span>
                 </div>
               </div>
 

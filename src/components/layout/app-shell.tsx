@@ -10,6 +10,7 @@ import { hasPermission } from "@/lib/permissions";
 import { cn, initials } from "@/lib/utils";
 import { navItems } from "@/components/layout/nav-items";
 import { createClient } from "@/lib/supabase/browser";
+import { AnnouncementBell } from "@/components/layout/announcement-bell";
 
 export function AppShell({ user, children }: { user: AppUser; children: ReactNode }) {
   const pathname = usePathname();
@@ -252,6 +253,9 @@ export function AppShell({ user, children }: { user: AppUser; children: ReactNod
             </div>
           </div>
           <div className="relative flex items-center gap-3" ref={menuRef}>
+            {hasPermission(user.role, "announcements:view") && (
+              <AnnouncementBell user={user} />
+            )}
             <button
               type="button"
               onClick={() => setProfileOpen((value) => !value)}

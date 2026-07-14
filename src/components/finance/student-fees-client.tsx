@@ -9,7 +9,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { applyDiscountAction } from "@/app/(app)/finance/actions";
 import { hasPermission } from "@/lib/permissions";
 import type { AppUser } from "@/types/database";
-import { format } from "date-fns";
+import { formatPKR, formatDatePK } from "@/lib/utils";
 
 interface StudentFeesClientProps {
   user: AppUser;
@@ -167,7 +167,7 @@ export function StudentFeesClient({ user, accounts, classes, sessions }: Student
                   acc.discount_type === "percentage"
                     ? `${acc.discount_value}%`
                     : acc.discount_type === "fixed"
-                    ? `$${acc.discount_value}`
+                    ? formatPKR(acc.discount_value)
                     : "None";
 
                 return (
@@ -192,15 +192,15 @@ export function StudentFeesClient({ user, accounts, classes, sessions }: Student
                         <span className="text-muted">None</span>
                       )}
                     </td>
-                    <td className="px-4 py-4 font-semibold">${Number(acc.total_payable).toLocaleString()}</td>
+                    <td className="px-4 py-4 font-semibold">{formatPKR(Number(acc.total_payable))}</td>
                     <td className="px-4 py-4 font-semibold text-success">
-                      ${Number(acc.amount_paid).toLocaleString()}
+                      {formatPKR(Number(acc.amount_paid))}
                     </td>
                     <td className="px-4 py-4 font-bold text-danger">
-                      ${Number(acc.remaining_balance).toLocaleString()}
+                      {formatPKR(Number(acc.remaining_balance))}
                     </td>
                     <td className="px-4 py-4 text-muted">
-                      {format(new Date(acc.due_date), "MMM d, yyyy")}
+                      {formatDatePK(acc.due_date)}
                     </td>
                     <td className="px-4 py-4">
                       <Badge tone={statusTone[acc.payment_status as keyof typeof statusTone] ?? "gray"}>

@@ -4,9 +4,9 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { OutstandingByClassChart, CollectionMethodChart } from "@/components/finance/finance-dashboard-charts";
-import { format } from "date-fns";
 import Link from "next/link";
-import { DollarSign, Wallet, ArrowDownCircle, Percent, ClipboardList, AlertCircle } from "lucide-react";
+import { Wallet, ArrowDownCircle, Percent, ClipboardList, AlertCircle, Banknote } from "lucide-react";
+import { formatPKR, formatDatePK } from "@/lib/utils";
 
 export default async function FinanceDashboardPage() {
   const user = await requireUser("finance:view");
@@ -15,42 +15,42 @@ export default async function FinanceDashboardPage() {
   const stats = [
     {
       label: "Total Expected Fees",
-      value: `$${data.totalExpected.toLocaleString()}`,
+      value: formatPKR(data.totalExpected),
       description: "Aggregated academic fee structures",
-      icon: DollarSign,
+      icon: Banknote,
       color: "text-primary bg-primary-soft"
     },
     {
       label: "Collected Fees",
-      value: `$${data.totalCollected.toLocaleString()}`,
+      value: formatPKR(data.totalCollected),
       description: "Total payments recorded to date",
       icon: Wallet,
       color: "text-success bg-success-soft"
     },
     {
       label: "Outstanding Fees",
-      value: `$${data.totalOutstanding.toLocaleString()}`,
+      value: formatPKR(data.totalOutstanding),
       description: "Remaining unpaid invoices",
       icon: AlertCircle,
       color: "text-danger bg-danger-soft"
     },
     {
       label: "Today's Collection",
-      value: `$${data.todayCollection.toLocaleString()}`,
+      value: formatPKR(data.todayCollection),
       description: "Captured during current calendar day",
       icon: ArrowDownCircle,
       color: "text-primary bg-primary-soft"
     },
     {
       label: "Monthly Collection",
-      value: `$${data.monthlyCollection.toLocaleString()}`,
+      value: formatPKR(data.monthlyCollection),
       description: "Cumulative for this calendar month",
       icon: ArrowDownCircle,
       color: "text-success bg-success-soft"
     },
     {
       label: "Total Discounts",
-      value: `$${data.totalDiscounts.toLocaleString()}`,
+      value: formatPKR(data.totalDiscounts),
       description: "Scholarships & special adjustments",
       icon: Percent,
       color: "text-warning bg-warning-soft"
@@ -169,11 +169,11 @@ export default async function FinanceDashboardPage() {
                         <Badge tone="blue">{p.payment_method.replace("_", " ")}</Badge>
                       </td>
                       <td className="px-4 py-4 font-semibold text-success">
-                        ${Number(p.amount).toLocaleString()}
+                        {formatPKR(Number(p.amount))}
                       </td>
                       <td className="px-4 py-4 text-muted">{p.received_by_name}</td>
                       <td className="px-4 py-4 text-muted">
-                        {format(new Date(p.payment_date), "MMM d, yyyy")}
+                        {formatDatePK(p.payment_date)}
                       </td>
                     </tr>
                   ))}

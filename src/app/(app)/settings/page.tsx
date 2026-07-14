@@ -1,35 +1,34 @@
-import { PageHeader } from "@/components/layout/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field, Input, Select } from "@/components/ui/form-field";
 import { requireUser } from "@/lib/auth/session";
+import { getProfileDetails } from "@/lib/services/profile";
+import { getSchoolSettings, getAcademicYears, getSchoolMembers } from "@/lib/services/settings";
+import { PageHeader } from "@/components/layout/page-header";
+import { SettingsTabs } from "@/components/settings/settings-tabs";
 
 export default async function SettingsPage() {
-  await requireUser("settings:manage");
+  const user = await requireUser("settings:manage");
+
+  const [profile, schoolSettings, academicYears, members] = await Promise.all([
+    getProfileDetails(user),
+    getSchoolSettings(user),
+    getAcademicYears(user),
+    user.role === "administrator" ? getSchoolMembers(user) : Promise.resolve([])
+  ]);
+
   return (
     <>
-      <PageHeader eyebrow="Configuration" title="School Settings" description="School-level settings are stored in `school_settings` and isolated by `school_id`." />
-      <Card>
-        <CardHeader>
-          <CardTitle>Application Settings</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-2">
-          <Field label="School display name">
-            <Input defaultValue="Alexandria Academy" />
-          </Field>
-          <Field label="Default academic year">
-            <Select defaultValue="2026-2027">
-              <option>2026-2027</option>
-              <option>2027-2028</option>
-            </Select>
-          </Field>
-          <Field label="Attendance edit window">
-            <Input defaultValue="7 days" />
-          </Field>
-          <Field label="Locale">
-            <Input defaultValue="en-US" />
-          </Field>
-        </CardContent>
-      </Card>
+      <PageHeader
+        eyebrow="Configuration"
+        title="Account & School Settings"
+        description="Configure your personal profile details, security settings, notification preferences, school settings, and user roles."
+      />
+
+      <SettingsTabs
+        user={user}
+        profile={profile}
+        schoolSettings={schoolSettings}
+        academicYears={academicYears}
+        members={members}
+      />
     </>
   );
 }

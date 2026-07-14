@@ -25,13 +25,19 @@ export type Permission =
   | "teachers:manage"
   | "classes:manage"
   | "finance:view"
-  | "finance:manage";
+  | "finance:manage"
+  | "payroll:view"
+  | "payroll:manage"
+  | "announcements:view"
+  | "announcements:manage";
 
 const rolePermissions: Record<UserRole, Permission[]> = {
   principal: [
     "dashboard:view",
     "students:view",
     "students:create",
+    "students:update",
+    "students:archive",
     "attendance:view",
     "staff:view",
     "academics:view",
@@ -45,21 +51,33 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "teachers:manage",
     "classes:manage",
     "finance:view",
-    "finance:manage"
+    "finance:manage",
+    "payroll:view",
+    "payroll:manage",
+    "announcements:view",
+    "announcements:manage"
   ],
-  teacher: ["dashboard:view", "students:view", "attendance:view", "attendance:submit", "academics:view", "marks:manage", "results:view"],
+  teacher: [
+    "dashboard:view",
+    "students:view",
+    "attendance:view",
+    "attendance:submit",
+    "academics:view",
+    "marks:manage",
+    "results:view",
+    "payroll:view",
+    "announcements:view"
+  ],
   student_staff: [
     "dashboard:view",
     "students:view",
-    "students:create",
-    "students:update",
-    "students:archive",
     "attendance:view",
     "results:view",
     "results:generate",
     "reports:view",
     "approvals:view",
-    "finance:view"
+    "finance:view",
+    "announcements:view"
   ],
   administrator: [
     "dashboard:view",
@@ -83,7 +101,10 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "teachers:manage",
     "classes:manage",
     "finance:view",
-    "finance:manage"
+    "finance:manage",
+    "payroll:view",
+    "payroll:manage",
+    "announcements:view"
   ]
 };
 
@@ -97,8 +118,5 @@ export function getRolePermissions(role: UserRole) {
 }
 
 export function roleHome(role: UserRole) {
-  if (role === "teacher") return "/dashboard";
-  if (role === "administrator") return "/admin";
-  if (role === "student_staff") return "/students";
   return "/dashboard";
 }

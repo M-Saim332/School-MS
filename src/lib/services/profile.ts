@@ -9,6 +9,9 @@ type ProfileDetailsRow = {
   avatar_url: string | null;
   phone: string | null;
   bio: string | null;
+  address: string | null;
+  emergency_contact_name: string | null;
+  emergency_contact_phone: string | null;
 };
 
 type MemberDetailsRow = {
@@ -28,7 +31,7 @@ export async function getProfileDetails(user: AppUser): Promise<ProfileDetails> 
   const [profileResult, memberResult] = await Promise.all([
     supabase
       .from("profiles")
-      .select("full_name,email,avatar_url,phone,bio")
+      .select("full_name,email,avatar_url,phone,bio,address,emergency_contact_name,emergency_contact_phone")
       .eq("id", user.id)
       .maybeSingle<ProfileDetailsRow>(),
     supabase
@@ -53,6 +56,9 @@ export async function getProfileDetails(user: AppUser): Promise<ProfileDetails> 
     bio: profile?.bio ?? null,
     department: member?.department ?? user.department,
     jobTitle: member?.job_title ?? user.jobTitle,
+    address: profile?.address ?? null,
+    emergencyContactName: profile?.emergency_contact_name ?? null,
+    emergencyContactPhone: profile?.emergency_contact_phone ?? null,
     role: user.role,
     schoolName: user.schoolName
   };
@@ -69,7 +75,10 @@ export async function updateProfileDetails(user: AppUser, values: ProfileFormVal
         full_name: parsed.fullName,
         avatar_url: parsed.avatarUrl,
         phone: parsed.phone,
-        bio: parsed.bio
+        bio: parsed.bio,
+        address: parsed.address,
+        emergency_contact_name: parsed.emergencyContactName,
+        emergency_contact_phone: parsed.emergencyContactPhone
       })
       .eq("id", user.id),
     adminClient

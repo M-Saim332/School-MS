@@ -23,7 +23,10 @@ export const profileFormSchema = z.object({
   phone: optionalText(40),
   bio: optionalText(280),
   department: optionalText(100),
-  jobTitle: optionalText(100)
+  jobTitle: optionalText(100),
+  address: optionalText(500),
+  emergencyContactName: optionalText(100),
+  emergencyContactPhone: optionalText(40)
 });
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>;
