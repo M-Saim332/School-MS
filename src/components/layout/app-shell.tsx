@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, BriefcaseBusiness, ChevronDown, LogOut, Menu, Search, UserRound, X } from "lucide-react";
+import { BookOpen, BriefcaseBusiness, Building2, ChevronDown, LogOut, Menu, Search, UserRound, X } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { AppUser } from "@/types/database";
@@ -11,15 +11,27 @@ import { cn, initials } from "@/lib/utils";
 import { navItems } from "@/components/layout/nav-items";
 import { createClient } from "@/lib/supabase/browser";
 import { AnnouncementBell } from "@/components/layout/announcement-bell";
+import { BrandingFaviconSync } from "@/components/layout/branding-favicon-sync";
 
-export function AppShell({ user, children }: { user: AppUser; children: ReactNode }) {
+type SchoolBranding = {
+  logoUrl: string | null;
+  faviconUrl: string | null;
+};
+
+export function AppShell({ user, branding, children }: { user: AppUser; branding: SchoolBranding; children: ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
   const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({});
   const menuRef = useRef<HTMLDivElement>(null);
-  const items = navItems.filter((item) => hasPermission(user.role, item.permission, user.permissions));
+  const items = navItems.filter((item) => {
+    if (item.href === "/academics" && hasPermission(user.role, "classes:manage", user.permissions)) {
+      return false;
+    }
+
+    return hasPermission(user.role, item.permission, user.permissions);
+  });
   const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
@@ -88,7 +100,7 @@ export function AppShell({ user, children }: { user: AppUser; children: ReactNod
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user.schoolId, user.role, supabase]);
+  }, [user.permissions, user.schoolId, user.role, supabase]);
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -109,8 +121,13 @@ export function AppShell({ user, children }: { user: AppUser; children: ReactNod
   const sidebar = (
     <aside className="flex h-full w-[280px] flex-col bg-white p-4">
       <div className="mb-8 flex items-center gap-3 px-2">
-        <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-[#2d7dd2] text-white shadow-soft">
-          <BookOpen aria-hidden="true" />
+        <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-primary to-[#2d7dd2] text-white shadow-soft">
+          {branding.logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={branding.logoUrl} alt={`${user.schoolName} logo`} className="h-full w-full object-cover" />
+          ) : (
+            <BookOpen aria-hidden="true" />
+          )}
         </div>
         <div>
           <p className="font-display text-2xl font-bold leading-tight text-primary">GoCampusFlow</p>
@@ -225,6 +242,7 @@ export function AppShell({ user, children }: { user: AppUser; children: ReactNod
 
   return (
     <div className="min-h-screen bg-background text-ink">
+      <BrandingFaviconSync faviconUrl={branding.faviconUrl} />
       <div className="fixed inset-y-0 left-0 z-40 hidden w-[280px] bg-white/95 shadow-[1px_0_0_rgba(195,198,213,0.32)] backdrop-blur lg:block">{sidebar}</div>
       <div className={cn("fixed inset-0 z-50 bg-black/30 lg:hidden", open ? "block" : "hidden")} onClick={() => setOpen(false)} />
       <div
@@ -297,6 +315,14 @@ export function AppShell({ user, children }: { user: AppUser; children: ReactNod
                 >
                   <UserRound className="h-4 w-4" aria-hidden="true" />
                   Profile
+                </Link>
+                <Link
+                  href="/school-profile"
+                  className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-muted transition hover:bg-surface-low hover:text-primary"
+                  role="menuitem"
+                >
+                  <Building2 className="h-4 w-4" aria-hidden="true" />
+                  School Profile
                 </Link>
                 <button
                   type="button"

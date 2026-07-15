@@ -96,17 +96,17 @@ export async function updateProfileDetails(user: AppUser, values: ProfileFormVal
 
   const memberUpdate: Record<string, unknown> = {};
 
-  // Only administrators can change department
-  if (user.role === "administrator") {
+  // Only principals can change department
+  if (user.role === "principal") {
     memberUpdate.department = parsed.department;
   }
 
-  // Job title is always read-only for users — only update if administrator
-  if (user.role === "administrator") {
+  // Job title is always read-only for users — only principals can update it
+  if (user.role === "principal") {
     memberUpdate.job_title = parsed.jobTitle;
   }
 
-  const updates: Promise<{ error: any }>[] = [
+  const updates = [
     adminClient.from("profiles").update(profileUpdate).eq("id", user.id)
   ];
 

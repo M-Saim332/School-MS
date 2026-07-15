@@ -1,11 +1,13 @@
+import { readPublicSupabaseEnv } from "@/lib/supabase/env";
+
 const LOCAL_SUPABASE_HOSTS = new Set(["127.0.0.1", "localhost"]);
 
 function getSupabaseUrl() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (!url) return null;
+  const env = readPublicSupabaseEnv();
+  if (!env) return null;
 
   try {
-    return new URL(url);
+    return new URL(env.url);
   } catch {
     return null;
   }

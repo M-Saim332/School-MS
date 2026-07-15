@@ -29,7 +29,7 @@ const TYPE_LABELS: Record<string, string> = {
 
 export default async function AnnouncementsPage() {
   const user = await requireUser("announcements:view");
-  const canManage = hasPermission(user.role, "announcements:manage");
+  const canManage = hasPermission(user.role, "announcements:manage", user.permissions);
   const announcements = await getAnnouncements(user);
 
   return (

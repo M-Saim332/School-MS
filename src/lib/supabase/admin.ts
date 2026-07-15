@@ -1,18 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
+import { requireSupabaseAdminEnv } from "@/lib/supabase/env";
 
 /**
  * Admin client with service_role key to bypass RLS and use Admin APIs.
  * MUST NEVER BE USED ON THE CLIENT.
  */
 export function createAdminClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const { url, serviceRoleKey } = requireSupabaseAdminEnv();
 
-  if (!supabaseUrl || !supabaseServiceKey) {
-    throw new Error("Missing Supabase admin environment variables.");
-  }
-
-  return createClient(supabaseUrl, supabaseServiceKey, {
+  return createClient(url, serviceRoleKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,

@@ -1,8 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Bell } from "lucide-react";
 import { createClient } from "@/lib/supabase/browser";
+import { CreateAnnouncementDialog } from "@/components/announcements/create-announcement-dialog";
+import { hasPermission } from "@/lib/permissions";
 import { cn, formatDatePK } from "@/lib/utils";
 import type { AppUser, AnnouncementWithRead, AnnouncementPriority } from "@/types/database";
 
@@ -26,6 +29,7 @@ export function AnnouncementBell({ user }: { user: AppUser }) {
   const [loading, setLoading] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const supabase = useCallback(() => createClient(), []);
+  const canManage = hasPermission(user.role, "announcements:manage", user.permissions);
 
   const unreadCount = announcements.filter((a) => !a.is_read).length;
 
@@ -107,22 +111,30 @@ export function AnnouncementBell({ user }: { user: AppUser }) {
         aria-label="Announcements panel"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-outline/40 px-4 py-3">
+        <div className="flex items-center justify-between gap-3 border-b border-outline/40 px-4 py-3">
           <div>
             <p className="font-semibold text-ink">Announcements</p>
             {unreadCount > 0 && (
               <p className="text-xs text-muted">{unreadCount} unread</p>
             )}
           </div>
-          {unreadCount > 0 && (
-            <button
-              type="button"
-              onClick={handleMarkAllRead}
-              className="text-xs font-semibold text-primary hover:underline"
+          <div className="flex items-center gap-2">
+            <Link
+              href="/announcements"
+              className="inline-flex h-8 items-center rounded-lg bg-surface-low px-3 text-xs font-semibold text-primary ring-1 ring-outline/25 transition hover:bg-primary-soft"
             >
-              Mark all read
-            </button>
-          )}
+              History
+            </Link>
+            {unreadCount > 0 && (
+              <button
+                type="button"
+                onClick={handleMarkAllRead}
+                className="text-xs font-semibold text-primary hover:underline"
+              >
+                Mark all read
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Body */}
@@ -180,10 +192,21 @@ export function AnnouncementBell({ user }: { user: AppUser }) {
         </div>
 
         {/* Footer */}
-        <div className="border-t border-outline/40 px-4 py-2.5">
-          <a href="/announcements" className="text-xs font-semibold text-primary hover:underline">
-            View all announcements →
-          </a>
+        <div className="border-t border-outline/40 px-4 py-3">
+          {canManage ? (
+            <CreateAnnouncementDialog
+              triggerLabel="Make Announcement"
+              triggerClassName="inline-flex h-10 w-full items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-white shadow-soft hover:brightness-105"
+              onSuccess={fetchAnnouncements}
+            />
+          ) : (
+            <Link
+              href="/announcements"
+              className="inline-flex h-10 w-full items-center justify-center rounded-lg bg-surface-low px-4 text-sm font-semibold text-primary ring-1 ring-outline/25 transition hover:bg-primary-soft"
+            >
+              Announcement History
+            </Link>
+          )}
         </div>
       </div>
     </div>

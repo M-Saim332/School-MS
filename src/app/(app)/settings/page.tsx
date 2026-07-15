@@ -9,7 +9,12 @@ import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/layout/page-header";
 import { SettingsTabs } from "@/components/settings/settings-tabs";
 
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
+  const params = await searchParams;
   const user = await requireUser("settings:manage");
 
   const supabase = await createClient();
@@ -45,6 +50,7 @@ export default async function SettingsPage() {
         customRoles={customRoles}
         rolePermissions={rolePermissions}
         userOverrides={userOverrides}
+        initialTab={params.tab}
       />
     </>
   );

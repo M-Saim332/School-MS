@@ -113,12 +113,19 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "finance:manage",
     "payroll:view",
     "payroll:manage",
-    "announcements:view"
+    "announcements:view",
+    "announcements:manage"
   ]
 };
 
 export function hasPermission(role: UserRole | undefined, permission: Permission, userPermissions?: string[] | null) {
   if (!role) return false;
+  if (permission === "announcements:manage" && (role === "principal" || role === "administrator")) {
+    return true;
+  }
+  if (permission === "settings:manage" && (role === "principal" || role === "administrator")) {
+    return true;
+  }
   // If we have a resolved permission list from the DB, use that
   if (userPermissions != null) return userPermissions.includes(permission);
   // Fall back to static lookup

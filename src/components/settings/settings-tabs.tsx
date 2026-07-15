@@ -24,14 +24,18 @@ interface Props {
   customRoles: any[];
   rolePermissions: any[];
   userOverrides: any[];
+  initialTab?: string;
 }
 
-export function SettingsTabs({ user, profile, schoolSettings, academicYears, members, customRoles, rolePermissions, userOverrides }: Props) {
-  const [activeTab, setActiveTab] = useState("profile");
+export function SettingsTabs({ user, profile, schoolSettings, academicYears, members, customRoles, rolePermissions, userOverrides, initialTab = "profile" }: Props) {
+  const allowedTabs = new Set(["profile", "password", "notifications", "school", "academics", "theme", "roles"]);
+  const startingTab = allowedTabs.has(initialTab) ? initialTab : "profile";
+  const [activeTab, setActiveTab] = useState(startingTab);
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const isAdmin = user.role === "administrator";
+  const canManageSchoolProfile = user.role === "administrator" || user.role === "principal";
 
   // Tab 1 Form State (Profile)
   const [profileForm, setProfileForm] = useState({
@@ -188,34 +192,40 @@ export function SettingsTabs({ user, profile, schoolSettings, academicYears, mem
           Notifications
         </button>
 
-        {isAdmin && (
+        {canManageSchoolProfile && (
           <>
             <div className="h-px bg-outline/40 my-2" />
-            <span className="px-4 text-[10px] font-bold uppercase tracking-wider text-muted mb-1">Admin Only</span>
+            <span className="px-4 text-[10px] font-bold uppercase tracking-wider text-muted mb-1">
+              {isAdmin ? "Admin Only" : "School Management"}
+            </span>
             <button
               onClick={() => { setActiveTab("school"); setMessage(null); }}
               className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition ${activeTab === "school" ? "bg-primary text-white" : "hover:bg-surface-low text-muted"}`}
             >
               School Profile
             </button>
-            <button
-              onClick={() => { setActiveTab("academics"); setMessage(null); }}
-              className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition ${activeTab === "academics" ? "bg-primary text-white" : "hover:bg-surface-low text-muted"}`}
-            >
-              Academic Sessions
-            </button>
-            <button
-              onClick={() => { setActiveTab("theme"); setMessage(null); }}
-              className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition ${activeTab === "theme" ? "bg-primary text-white" : "hover:bg-surface-low text-muted"}`}
-            >
-              Theme Settings
-            </button>
-            <button
-              onClick={() => { setActiveTab("roles"); setMessage(null); }}
-              className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition ${activeTab === "roles" ? "bg-primary text-white" : "hover:bg-surface-low text-muted"}`}
-            >
-              Role Management
-            </button>
+            {isAdmin && (
+              <>
+                <button
+                  onClick={() => { setActiveTab("academics"); setMessage(null); }}
+                  className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition ${activeTab === "academics" ? "bg-primary text-white" : "hover:bg-surface-low text-muted"}`}
+                >
+                  Academic Sessions
+                </button>
+                <button
+                  onClick={() => { setActiveTab("theme"); setMessage(null); }}
+                  className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition ${activeTab === "theme" ? "bg-primary text-white" : "hover:bg-surface-low text-muted"}`}
+                >
+                  Theme Settings
+                </button>
+                <button
+                  onClick={() => { setActiveTab("roles"); setMessage(null); }}
+                  className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition ${activeTab === "roles" ? "bg-primary text-white" : "hover:bg-surface-low text-muted"}`}
+                >
+                  Role Management
+                </button>
+              </>
+            )}
           </>
         )}
       </div>

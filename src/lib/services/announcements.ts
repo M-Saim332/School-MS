@@ -96,8 +96,8 @@ export async function createAnnouncement(
     "title" | "description" | "priority" | "type" | "audience_type" | "publish_date" | "expiry_date" | "audience_value"
   >
 ) {
-  if (!hasPermission(user.role, "announcements:manage")) {
-    throw new Error("Only the Principal can create announcements");
+  if (!hasPermission(user.role, "announcements:manage", user.permissions)) {
+    throw new Error("Only principals and administrators can create announcements");
   }
   const supabase = await createClient();
   const { error } = await supabase.from("announcements").insert({
@@ -113,7 +113,7 @@ export async function updateAnnouncement(
   id: string,
   values: Partial<Pick<Announcement, "title" | "description" | "priority" | "type" | "audience_type" | "publish_date" | "expiry_date" | "audience_value" | "is_archived">>
 ) {
-  if (!hasPermission(user.role, "announcements:manage")) throw new Error("Unauthorized");
+  if (!hasPermission(user.role, "announcements:manage", user.permissions)) throw new Error("Unauthorized");
   const supabase = await createClient();
   const { error } = await supabase
     .from("announcements")
@@ -128,7 +128,7 @@ export async function archiveAnnouncement(user: AppUser, id: string) {
 }
 
 export async function deleteAnnouncement(user: AppUser, id: string) {
-  if (!hasPermission(user.role, "announcements:manage")) throw new Error("Unauthorized");
+  if (!hasPermission(user.role, "announcements:manage", user.permissions)) throw new Error("Unauthorized");
   const supabase = await createClient();
   const { error } = await supabase
     .from("announcements")

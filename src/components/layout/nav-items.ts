@@ -2,7 +2,6 @@ import {
   Activity,
   BarChart3,
   Banknote,
-  Bell,
   CalendarCheck,
   ClipboardCheck,
   FileCheck2,
@@ -56,14 +55,13 @@ export const navItems: NavItem[] = [
       { href: "/payroll/dashboard", label: "Dashboard", permission: "payroll:view" },
       { href: "/payroll/salary-slips", label: "Salary Slips", permission: "payroll:view" },
       { href: "/payroll/adjustments", label: "Adjustments", permission: "payroll:manage" },
-      { href: "/payroll/history", label: "History", permission: "payroll:view" }
+  { href: "/payroll/history", label: "History", permission: "payroll:view" }
     ]
   },
   { href: "/staff", label: "Staff", icon: Users, permission: "staff:view" },
   { href: "/classes", label: "Classes", icon: BookOpen, permission: "classes:manage" },
   { href: "/academics", label: "Academics", icon: BarChart3, permission: "academics:view" },
   { href: "/reports", label: "Reports", icon: Activity, permission: "reports:view" },
-  { href: "/announcements", label: "Announcements", icon: Bell, permission: "announcements:view" },
   { href: "/admin", label: "Admin", icon: Shield, permission: "users:manage" },
   { href: "/settings", label: "Settings", icon: Settings, permission: "settings:manage" }
 ];

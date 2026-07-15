@@ -3,15 +3,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { AppUser } from "@/types/database";
 import { hasPermission } from "@/lib/permissions";
 
-export async function getSchoolSettings(user: AppUser) {
-  if (!hasPermission(user.role, "settings:manage")) {
-    throw new Error("Unauthorized to access school settings");
-  }
-  const supabase = await createClient();
+async function loadSchoolProfile(user: AppUser) {
+  const adminClient = createAdminClient();
 
   const [schoolRes, settingsRes] = await Promise.all([
-    supabase.from("schools").select("*").eq("id", user.schoolId).maybeSingle(),
-    supabase.from("school_settings").select("*").eq("school_id", user.schoolId).maybeSingle()
+    adminClient.from("schools").select("*").eq("id", user.schoolId).maybeSingle(),
+    adminClient.from("school_settings").select("*").eq("school_id", user.schoolId).maybeSingle()
   ]);
 
   if (schoolRes.error) throw new Error(schoolRes.error.message);
@@ -23,16 +20,40 @@ export async function getSchoolSettings(user: AppUser) {
   };
 }
 
+export async function getSchoolProfile(user: AppUser) {
+  return loadSchoolProfile(user);
+}
+
+export async function getSchoolSettings(user: AppUser) {
+  if (!hasPermission(user.role, "settings:manage", user.permissions)) {
+    throw new Error("Unauthorized to access school settings");
+  }
+  return loadSchoolProfile(user);
+}
+
 export async function updateSchoolSettings(
   user: AppUser,
   name: string,
   timezone: string,
   settings: Record<string, any>
 ) {
-  if (!hasPermission(user.role, "settings:manage")) {
+  if (!hasPermission(user.role, "settings:manage", user.permissions)) {
     throw new Error("Unauthorized to manage school settings");
   }
   const adminClient = createAdminClient();
+
+  const { data: currentSettingsRow, error: currentSettingsError } = await adminClient
+    .from("school_settings")
+    .select("settings")
+    .eq("school_id", user.schoolId)
+    .maybeSingle();
+
+  if (currentSettingsError) throw new Error(currentSettingsError.message);
+
+  const mergedSettings = {
+    ...(currentSettingsRow?.settings ?? {}),
+    ...settings
+  };
 
   const { error: schoolError } = await adminClient
     .from("schools")
@@ -45,7 +66,7 @@ export async function updateSchoolSettings(
     .from("school_settings")
     .upsert({
       school_id: user.schoolId,
-      settings
+      settings: mergedSettings
     });
 
   if (settingsError) throw new Error(settingsError.message);

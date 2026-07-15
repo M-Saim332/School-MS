@@ -16,7 +16,7 @@ export function ProfileForm({ profile }: { profile: ProfileDetails }) {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const isAdmin = profile.role === "administrator";
+  const canEditRoleDetails = profile.role === "principal";
 
   const {
     register,
@@ -166,13 +166,13 @@ export function ProfileForm({ profile }: { profile: ProfileDetails }) {
             />
           </Field>
 
-          {/* Department — read-only unless administrator */}
+          {/* Department — editable only for principals */}
           <Field
             label="Department"
-            hint={!isAdmin ? "Contact an administrator to change your department." : undefined}
+            hint={!canEditRoleDetails ? "Only the principal can change department details." : undefined}
             error={errors.department?.message}
           >
-            {isAdmin ? (
+            {canEditRoleDetails ? (
               <Input {...register("department")} placeholder="Admissions, Mathematics, Operations..." />
             ) : (
               <div className="flex items-center gap-2 rounded-lg border border-outline/60 bg-surface-low px-3 py-2.5 text-sm">
@@ -182,13 +182,13 @@ export function ProfileForm({ profile }: { profile: ProfileDetails }) {
             )}
           </Field>
 
-          {/* Job Title — always read-only for non-admins */}
+          {/* Job Title — editable only for principals */}
           <Field
             label="Job Title"
-            hint={!isAdmin ? "Job title is set by your administrator." : undefined}
+            hint={!canEditRoleDetails ? "Only the principal can change job title details." : undefined}
             error={errors.jobTitle?.message}
           >
-            {isAdmin ? (
+            {canEditRoleDetails ? (
               <Input {...register("jobTitle")} placeholder="Registrar, Teacher, Principal..." />
             ) : (
               <div className="flex items-center gap-2 rounded-lg border border-outline/60 bg-surface-low px-3 py-2.5 text-sm">

@@ -1,13 +1,19 @@
 import { BookOpenCheck, CalendarDays, GraduationCap, Layers3 } from "lucide-react";
 import type { ReactNode } from "react";
+import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { requireUser } from "@/lib/auth/session";
+import { hasPermission } from "@/lib/permissions";
 import { getAcademicOptions, getTeacherSubjectAssignments } from "@/lib/services/academics";
 
 export default async function AcademicsPage() {
   const user = await requireUser("academics:view");
+  if (hasPermission(user.role, "classes:manage", user.permissions)) {
+    redirect("/classes");
+  }
+
   if (user.role === "teacher") {
     const assignments = await getTeacherSubjectAssignments(user);
 
