@@ -50,6 +50,36 @@ export type SchoolMember = {
   status: "active" | "invited" | "disabled";
   department: string | null;
   job_title: string | null;
+  custom_role_id: string | null;
+};
+
+export type CustomRole = {
+  id: string;
+  school_id: string;
+  name: string;
+  base_role: UserRole;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type UserPermissionOverride = {
+  id: string;
+  school_id: string;
+  user_id: string;
+  permission: string;
+  granted: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type RolePermission = {
+  id: string;
+  school_id: string;
+  role_key: string;
+  permission: string;
+  granted: boolean;
+  created_at: string;
 };
 
 export type AppUser = {
@@ -63,6 +93,9 @@ export type AppUser = {
   department: string | null;
   jobTitle: string | null;
   mustChangePassword: boolean;
+  /** Resolved permission list (base role + custom role + overrides). Null means "use static defaults". */
+  permissions: string[] | null;
+  customRoleId: string | null;
 };
 
 export type Student = {

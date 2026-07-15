@@ -109,3 +109,117 @@ export async function updateMemberStatusAction(memberId: string, newStatus: stri
     return { error: err.message };
   }
 }
+
+export async function createCustomRoleAction(name: string, baseRole: string, permissions: string[]) {
+  try {
+    const user = await requireUser("settings:manage");
+    const adminClient = createAdminClient();
+    
+    // Create the custom role
+    const { data: customRole, error: roleError } = await adminClient
+      .from("custom_roles")
+      .insert({ school_id: user.schoolId, name, base_role: baseRole })
+      .select("id")
+      .single();
+    if (roleError) throw roleError;
+    
+    // Add its initial permissions
+    const permissionRows = permissions.map(p => ({
+      school_id: user.schoolId,
+      role_key: customRole.id,
+      permission: p,
+      granted: true
+    }));
+    
+    if (permissionRows.length > 0) {
+      const { error: permError } = await adminClient.from("role_permissions").insert(permissionRows);
+      if (permError) throw permError;
+    }
+    
+    revalidatePath("/settings");
+    return { ok: true };
+  } catch (err: any) {
+    return { error: err.message };
+  }
+}
+
+export async function deleteCustomRoleAction(id: string) {
+  try {
+    const user = await requireUser("settings:manage");
+    const adminClient = createAdminClient();
+    const { error } = await adminClient.from("custom_roles").delete().eq("school_id", user.schoolId).eq("id", id);
+    if (error) throw error;
+    revalidatePath("/settings");
+    return { ok: true };
+  } catch (err: any) {
+    return { error: err.message };
+  }
+}
+
+export async function assignCustomRoleToUserAction(memberId: string, customRoleId: string | null) {
+  try {
+    const user = await requireUser("users:manage");
+    const adminClient = createAdminClient();
+    const { error } = await adminClient
+      .from("school_members")
+      .update({ custom_role_id: customRoleId })
+      .eq("school_id", user.schoolId)
+      .eq("id", memberId);
+    if (error) throw error;
+    revalidatePath("/settings");
+    return { ok: true };
+  } catch (err: any) {
+    return { error: err.message };
+  }
+}
+
+export async function updateRolePermissionsAction(roleKey: string, permissions: string[]) {
+  try {
+    const user = await requireUser("settings:manage");
+    const adminClient = createAdminClient();
+    
+    // Delete all current role permissions for this roleKey
+    await adminClient.from("role_permissions").delete().eq("school_id", user.schoolId).eq("role_key", roleKey);
+    
+    // Insert new ones
+    if (permissions.length > 0) {
+      const rows = permissions.map(p => ({
+        school_id: user.schoolId,
+        role_key: roleKey,
+        permission: p,
+        granted: true
+      }));
+      const { error } = await adminClient.from("role_permissions").insert(rows);
+      if (error) throw error;
+    }
+    
+    revalidatePath("/settings");
+    return { ok: true };
+  } catch (err: any) {
+    return { error: err.message };
+  }
+}
+
+export async function updateUserPermissionOverridesAction(targetUserId: string, granted: string[], revoked: string[]) {
+  try {
+    const user = await requireUser("settings:manage");
+    const adminClient = createAdminClient();
+    
+    // Delete existing overrides for this user
+    await adminClient.from("user_permission_overrides").delete().eq("school_id", user.schoolId).eq("user_id", targetUserId);
+    
+    const rows: any[] = [];
+    granted.forEach(p => rows.push({ school_id: user.schoolId, user_id: targetUserId, permission: p, granted: true }));
+    revoked.forEach(p => rows.push({ school_id: user.schoolId, user_id: targetUserId, permission: p, granted: false }));
+    
+    if (rows.length > 0) {
+      const { error } = await adminClient.from("user_permission_overrides").insert(rows);
+      if (error) throw error;
+    }
+    
+    revalidatePath("/settings");
+    return { ok: true };
+  } catch (err: any) {
+    return { error: err.message };
+  }
+}

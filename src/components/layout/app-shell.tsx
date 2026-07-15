@@ -19,7 +19,7 @@ export function AppShell({ user, children }: { user: AppUser; children: ReactNod
   const [pendingCount, setPendingCount] = useState(0);
   const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({});
   const menuRef = useRef<HTMLDivElement>(null);
-  const items = navItems.filter((item) => hasPermission(user.role, item.permission));
+  const items = navItems.filter((item) => hasPermission(user.role, item.permission, user.permissions));
   const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
@@ -54,7 +54,7 @@ export function AppShell({ user, children }: { user: AppUser; children: ReactNod
   }, []);
 
   useEffect(() => {
-    if (!hasPermission(user.role, "approvals:review")) return;
+    if (!hasPermission(user.role, "approvals:review", user.permissions)) return;
 
     // Fetch initial count
     async function fetchCount() {
@@ -122,10 +122,10 @@ export function AppShell({ user, children }: { user: AppUser; children: ReactNod
           const Icon = item.icon;
           const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
           const isApprovals = item.href === "/approvals";
-          const showBadge = isApprovals && pendingCount > 0 && hasPermission(user.role, "approvals:review");
+          const showBadge = isApprovals && pendingCount > 0 && hasPermission(user.role, "approvals:review", user.permissions);
 
           if (item.subItems) {
-            const allowedSubItems = item.subItems.filter(sub => hasPermission(user.role, sub.permission));
+            const allowedSubItems = item.subItems.filter(sub => hasPermission(user.role, sub.permission, user.permissions));
             if (allowedSubItems.length === 0) return null;
             const expanded = expandedModules[item.href] ?? active;
             return (
@@ -253,7 +253,7 @@ export function AppShell({ user, children }: { user: AppUser; children: ReactNod
             </div>
           </div>
           <div className="relative flex items-center gap-3" ref={menuRef}>
-            {hasPermission(user.role, "announcements:view") && (
+            {hasPermission(user.role, "announcements:view", user.permissions) && (
               <AnnouncementBell user={user} />
             )}
             <button

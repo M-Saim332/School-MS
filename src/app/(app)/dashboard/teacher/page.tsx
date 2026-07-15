@@ -9,7 +9,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ButtonLink } from "@/components/ui/button";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { formatDatePK } from "@/lib/utils";
-import { GraduationCap, UserRoundCheck, Users, CalendarX2 } from "lucide-react";
+import { GraduationCap, UserRoundCheck, Users, CalendarX2, CalendarCheck, BookOpen } from "lucide-react";
 import Link from "next/link";
 
 export default async function TeacherDashboardPage() {
@@ -31,6 +31,37 @@ export default async function TeacherDashboardPage() {
         title="Teacher Dashboard"
         description="View your assigned classes, register student attendance, update quiz/test marks, and view announcements."
       />
+
+      {/* Quick Actions */}
+      <section className="mb-6">
+        <h3 className="mb-3 font-display text-base font-bold text-muted uppercase tracking-wide">Quick Actions</h3>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Link
+            href="/attendance"
+            className="group flex items-center gap-3 rounded-xl border border-outline/40 bg-surface-low p-4 transition hover:border-primary hover:bg-primary-soft/10"
+          >
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary group-hover:bg-primary group-hover:text-white transition">
+              <CalendarCheck className="h-5 w-5" aria-hidden="true" />
+            </div>
+            <div>
+              <p className="font-semibold text-ink text-sm">Mark Attendance</p>
+              <p className="text-xs text-muted">Record today&apos;s class attendance</p>
+            </div>
+          </Link>
+          <Link
+            href="/academics"
+            className="group flex items-center gap-3 rounded-xl border border-outline/40 bg-surface-low p-4 transition hover:border-accent hover:bg-accent/5"
+          >
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent group-hover:bg-accent group-hover:text-white transition">
+              <BookOpen className="h-5 w-5" aria-hidden="true" />
+            </div>
+            <div>
+              <p className="font-semibold text-ink text-sm">My Classes</p>
+              <p className="text-xs text-muted">View subject assignments</p>
+            </div>
+          </Link>
+        </div>
+      </section>
 
       <div className="mb-6 rounded-lg bg-danger-soft p-4 text-danger">
         <p className="text-sm font-semibold">Attendance is locked to the assigned class head teacher and can be submitted once per class per day.</p>

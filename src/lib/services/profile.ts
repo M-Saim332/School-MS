@@ -8,7 +8,7 @@ type ProfileDetailsRow = {
   email: string | null;
   avatar_url: string | null;
   phone: string | null;
-  bio: string | null;
+  personal_email: string | null;
   address: string | null;
   emergency_contact_name: string | null;
   emergency_contact_phone: string | null;
@@ -21,9 +21,24 @@ type MemberDetailsRow = {
 
 export type ProfileDetails = ProfileFormValues & {
   email: string | null;
+  avatarUrl: string | null;
   role: AppUser["role"];
   schoolName: string;
 };
+
+/** Strip +92 prefix so the UI only shows the 10-digit local number */
+function stripCountryCode(phone: string | null): string | null {
+  if (!phone) return null;
+  const stripped = phone.replace(/^\+92/, "").replace(/^0/, "");
+  return stripped || null;
+}
+
+/** Add +92 prefix for storage if the number doesn't already have it */
+function withCountryCode(phone: string | null): string | null {
+  if (!phone) return null;
+  if (phone.startsWith("+92")) return phone;
+  return `+92${phone}`;
+}
 
 export async function getProfileDetails(user: AppUser): Promise<ProfileDetails> {
   const supabase = await createClient();
@@ -31,7 +46,7 @@ export async function getProfileDetails(user: AppUser): Promise<ProfileDetails> 
   const [profileResult, memberResult] = await Promise.all([
     supabase
       .from("profiles")
-      .select("full_name,email,avatar_url,phone,bio,address,emergency_contact_name,emergency_contact_phone")
+      .select("full_name,email,avatar_url,phone,personal_email,address,emergency_contact_name,emergency_contact_phone")
       .eq("id", user.id)
       .maybeSingle<ProfileDetailsRow>(),
     supabase
@@ -52,8 +67,9 @@ export async function getProfileDetails(user: AppUser): Promise<ProfileDetails> 
     fullName: profile?.full_name ?? user.fullName,
     email: profile?.email ?? user.email,
     avatarUrl: profile?.avatar_url ?? user.avatarUrl,
-    phone: profile?.phone ?? null,
-    bio: profile?.bio ?? null,
+    // Strip +92 prefix so users see their 10-digit local number
+    phone: stripCountryCode(profile?.phone ?? null),
+    personalEmail: profile?.personal_email ?? null,
     department: member?.department ?? user.department,
     jobTitle: member?.job_title ?? user.jobTitle,
     address: profile?.address ?? null,
@@ -68,29 +84,44 @@ export async function updateProfileDetails(user: AppUser, values: ProfileFormVal
   const parsed = profileFormSchema.parse(values);
   const adminClient = createAdminClient();
 
-  const [{ error: profileError }, { error: memberError }] = await Promise.all([
-    adminClient
-      .from("profiles")
-      .update({
-        full_name: parsed.fullName,
-        avatar_url: parsed.avatarUrl,
-        phone: parsed.phone,
-        bio: parsed.bio,
-        address: parsed.address,
-        emergency_contact_name: parsed.emergencyContactName,
-        emergency_contact_phone: parsed.emergencyContactPhone
-      })
-      .eq("id", user.id),
-    adminClient
-      .from("school_members")
-      .update({
-        department: parsed.department,
-        job_title: parsed.jobTitle
-      })
-      .eq("school_id", user.schoolId)
-      .eq("user_id", user.id)
-  ]);
+  const profileUpdate: Record<string, unknown> = {
+    full_name: parsed.fullName,
+    // Prepend +92 before saving to DB
+    phone: withCountryCode(parsed.phone ?? null),
+    personal_email: parsed.personalEmail ?? null,
+    address: parsed.address,
+    emergency_contact_name: parsed.emergencyContactName,
+    emergency_contact_phone: parsed.emergencyContactPhone
+  };
 
-  if (profileError) throw new Error(profileError.message);
-  if (memberError) throw new Error(memberError.message);
+  const memberUpdate: Record<string, unknown> = {};
+
+  // Only administrators can change department
+  if (user.role === "administrator") {
+    memberUpdate.department = parsed.department;
+  }
+
+  // Job title is always read-only for users — only update if administrator
+  if (user.role === "administrator") {
+    memberUpdate.job_title = parsed.jobTitle;
+  }
+
+  const updates: Promise<{ error: any }>[] = [
+    adminClient.from("profiles").update(profileUpdate).eq("id", user.id)
+  ];
+
+  if (Object.keys(memberUpdate).length > 0) {
+    updates.push(
+      adminClient
+        .from("school_members")
+        .update(memberUpdate)
+        .eq("school_id", user.schoolId)
+        .eq("user_id", user.id)
+    );
+  }
+
+  const results = await Promise.all(updates);
+  for (const { error } of results) {
+    if (error) throw new Error(error.message);
+  }
 }

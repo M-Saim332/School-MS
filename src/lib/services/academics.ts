@@ -191,6 +191,13 @@ export async function getClassTeachersAndAttendance(user: AppUser) {
     .select("class_id,status")
     .eq("school_id", user.schoolId);
 
+  // Fetch active student counts
+  const { data: enrollments } = await supabase
+    .from("enrollments")
+    .select("class_id")
+    .eq("school_id", user.schoolId)
+    .eq("status", "active");
+
   // Group assignments by class_id
   const teachersByClass: Record<string, Array<{ id: string; teacher_id: string; teacher_name: string; subject_name: string | null }>> = {};
   for (const row of assignments ?? []) {
@@ -222,5 +229,12 @@ export async function getClassTeachersAndAttendance(user: AppUser) {
     else if (rec.status === "excused") attendanceByClass[classId].excused++;
   }
 
-  return { teachersByClass, attendanceByClass };
+  // Group student counts by class_id
+  const studentsByClass: Record<string, number> = {};
+  for (const e of enrollments ?? []) {
+    const classId = (e as any).class_id;
+    studentsByClass[classId] = (studentsByClass[classId] || 0) + 1;
+  }
+
+  return { teachersByClass, attendanceByClass, studentsByClass };
 }

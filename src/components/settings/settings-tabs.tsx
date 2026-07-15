@@ -13,6 +13,7 @@ import {
 } from "@/app/(app)/settings/actions";
 import { Badge } from "@/components/ui/badge";
 import { formatMonth } from "@/lib/services/payroll";
+import { RolesTab } from "@/components/settings/roles-tab";
 
 interface Props {
   user: any;
@@ -20,9 +21,12 @@ interface Props {
   schoolSettings: any;
   academicYears: any[];
   members: any[];
+  customRoles: any[];
+  rolePermissions: any[];
+  userOverrides: any[];
 }
 
-export function SettingsTabs({ user, profile, schoolSettings, academicYears, members }: Props) {
+export function SettingsTabs({ user, profile, schoolSettings, academicYears, members, customRoles, rolePermissions, userOverrides }: Props) {
   const [activeTab, setActiveTab] = useState("profile");
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -32,9 +36,8 @@ export function SettingsTabs({ user, profile, schoolSettings, academicYears, mem
   // Tab 1 Form State (Profile)
   const [profileForm, setProfileForm] = useState({
     fullName: profile.fullName || "",
-    avatarUrl: profile.avatarUrl || "",
+    personalEmail: profile.personalEmail || "",
     phone: profile.phone || "",
-    bio: profile.bio || "",
     department: profile.department || "",
     jobTitle: profile.jobTitle || "",
     address: profile.address || "",
@@ -242,28 +245,29 @@ export function SettingsTabs({ user, profile, schoolSettings, academicYears, mem
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-1">Avatar URL</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-1">Personal Email</label>
                 <input
-                  value={profileForm.avatarUrl}
-                  onChange={(e) => setProfileForm({ ...profileForm, avatarUrl: e.target.value })}
+                  type="email"
+                  value={profileForm.personalEmail}
+                  onChange={(e) => setProfileForm({ ...profileForm, personalEmail: e.target.value })}
                   className="w-full rounded-lg border border-outline/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  placeholder="personal@gmail.com"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-1">Phone Number</label>
-                <input
-                  value={profileForm.phone}
-                  onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
-                  className="w-full rounded-lg border border-outline/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-1">Bio / Profile Description</label>
-                <input
-                  value={profileForm.bio}
-                  onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })}
-                  className="w-full rounded-lg border border-outline/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
+                <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-1">Phone Number (Pakistani)</label>
+                <div className="flex">
+                  <span className="inline-flex items-center rounded-l-lg border border-r-0 border-outline/60 bg-surface-low px-3 text-sm font-semibold text-muted">
+                    +92
+                  </span>
+                  <input
+                    value={profileForm.phone}
+                    onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+                    className="w-full rounded-r-lg border border-outline/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    placeholder="3001234567"
+                    maxLength={10}
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-1">Department</label>
@@ -600,61 +604,12 @@ export function SettingsTabs({ user, profile, schoolSettings, academicYears, mem
 
         {/* Tab 7: Role Management */}
         {activeTab === "roles" && (
-          <div className="space-y-4">
-            <h3 className="font-display text-xl font-bold text-ink">Role & Account Management</h3>
-            <p className="text-sm text-muted">View school staff members and update their system roles or status.</p>
-
-            <div className="overflow-x-auto border border-outline/40 rounded-xl">
-              <table className="min-w-full text-left text-sm">
-                <thead className="bg-surface-low font-label text-xs uppercase tracking-wide text-muted">
-                  <tr>
-                    <th className="px-4 py-3">Member</th>
-                    <th className="px-4 py-3">Role</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3">Job Details</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {members.map((member) => (
-                    <tr key={member.memberId} className="border-t border-outline/60 hover:bg-surface-low/50">
-                      <td className="px-4 py-4">
-                        <p className="font-semibold text-ink">{member.fullName}</p>
-                        <p className="text-xs text-muted">{member.email}</p>
-                      </td>
-                      <td className="px-4 py-4">
-                        <select
-                          value={member.role}
-                          onChange={(e) => handleRoleChange(member.memberId, e.target.value)}
-                          className="rounded border border-outline/60 px-2 py-1 text-xs focus:outline-none"
-                        >
-                          <option value="principal">Principal</option>
-                          <option value="administrator">Administrator</option>
-                          <option value="student_staff">Registrar</option>
-                          <option value="teacher">Teacher</option>
-                        </select>
-                      </td>
-                      <td className="px-4 py-4">
-                        <select
-                          value={member.status}
-                          onChange={(e) => handleStatusChange(member.memberId, e.target.value)}
-                          className="rounded border border-outline/60 px-2 py-1 text-xs focus:outline-none"
-                        >
-                          <option value="active">Active</option>
-                          <option value="disabled">Disabled</option>
-                          <option value="inactive">Inactive</option>
-                          <option value="archived">Archived</option>
-                        </select>
-                      </td>
-                      <td className="px-4 py-4 text-muted">
-                        {member.department && `${member.department} • `}
-                        {member.jobTitle ?? "—"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <RolesTab 
+            members={members} 
+            customRoles={customRoles} 
+            rolePermissions={rolePermissions} 
+            userOverrides={userOverrides} 
+          />
         )}
       </div>
     </div>

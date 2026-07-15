@@ -424,6 +424,40 @@ export async function getPrincipalExamApprovals(user: AppUser, status: ResultApp
   return data ?? [];
 }
 
+export async function getExamResultsForReviewByApprovalId(user: AppUser, approvalId: string) {
+  if (user.role !== "principal") throw new Error("Unauthorized to review exam results.");
+  const supabase = await createClient();
+
+  // 1. Get the approval and exam details
+  const { data: approval, error: approvalError } = await supabase
+    .from("result_approvals")
+    .select(
+      "*,exams!inner(id,title,exam_type,term,exam_date,max_marks,status,classes(name,grades(name),sections(name)),subjects(name),creator:profiles!exams_created_by_fkey(id,full_name)),submitter:profiles!result_approvals_submitted_by_fkey(id,full_name)"
+    )
+    .eq("school_id", user.schoolId)
+    .eq("id", approvalId)
+    .maybeSingle();
+
+  if (approvalError) throw new Error(approvalError.message);
+  if (!approval) throw new Error("Approval request not found.");
+
+  // 2. Fetch all marks and student details for this exam
+  const { data: marks, error: marksError } = await supabase
+    .from("marks")
+    .select("id,student_id,marks_obtained,grade,teacher_remarks,status,students(first_name,last_name,admission_number)")
+    .eq("school_id", user.schoolId)
+    .eq("exam_id", approval.exam_id)
+    .order("students(last_name)", { ascending: true });
+
+  if (marksError) throw new Error(marksError.message);
+
+  return {
+    approval,
+    exam: approval.exams,
+    marks: marks ?? []
+  };
+}
+
 export async function reviewExamApproval(user: AppUser, approvalId: string, decision: "approved" | "rejected", principalComment?: string | null) {
   if (user.role !== "principal") throw new Error("Only the principal can approve or reject results.");
   const supabase = await createClient();

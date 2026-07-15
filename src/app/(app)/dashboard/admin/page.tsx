@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { ButtonLink } from "@/components/ui/button";
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
-import { Shield, Settings, Users, UserCog, GraduationCap } from "lucide-react";
+import { Shield, Settings, Users, UserCog, GraduationCap, UserPlus } from "lucide-react";
 import Link from "next/link";
 
 export default async function AdminDashboardPage() {
@@ -23,6 +23,25 @@ export default async function AdminDashboardPage() {
         title="Admin Console"
         description="Manage system configurations, user profiles, role permissions, academic sessions, and check audit logs."
       />
+
+      {/* Quick Actions */}
+      <section className="mb-6">
+        <h3 className="mb-3 font-display text-base font-bold text-muted uppercase tracking-wide">Quick Actions</h3>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Link
+            href="/students?action=new"
+            className="group flex items-center gap-3 rounded-xl border border-outline/40 bg-surface-low p-4 transition hover:border-primary hover:bg-primary-soft/10"
+          >
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary group-hover:bg-primary group-hover:text-white transition">
+              <UserPlus className="h-5 w-5" aria-hidden="true" />
+            </div>
+            <div>
+              <p className="font-semibold text-ink text-sm">New Student</p>
+              <p className="text-xs text-muted">Enroll a new admission</p>
+            </div>
+          </Link>
+        </div>
+      </section>
 
       {/* Admin Quick Links */}
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

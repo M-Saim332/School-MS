@@ -3,9 +3,9 @@
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { BriefcaseBusiness, CheckCircle2, IdCard, Mail, Phone, Sparkles } from "lucide-react";
+import { BriefcaseBusiness, CheckCircle2, IdCard, Lock, Mail, Phone } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
-import { Field, Input, Textarea } from "@/components/ui/form-field";
+import { Field, Input } from "@/components/ui/form-field";
 import { updateProfileAction } from "@/app/(app)/profile/actions";
 import { profileFormSchema, type ProfileFormValues } from "@/lib/validation/profile";
 import type { ProfileDetails } from "@/lib/services/profile";
@@ -16,6 +16,8 @@ export function ProfileForm({ profile }: { profile: ProfileDetails }) {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const isAdmin = profile.role === "administrator";
+
   const {
     register,
     handleSubmit,
@@ -25,24 +27,29 @@ export function ProfileForm({ profile }: { profile: ProfileDetails }) {
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       fullName: profile.fullName,
-      avatarUrl: profile.avatarUrl ?? "",
       phone: profile.phone ?? "",
-      bio: profile.bio ?? "",
+      personalEmail: profile.personalEmail ?? "",
       department: profile.department ?? "",
-      jobTitle: profile.jobTitle ?? ""
+      jobTitle: profile.jobTitle ?? "",
+      address: profile.address ?? "",
+      emergencyContactName: profile.emergencyContactName ?? "",
+      emergencyContactPhone: profile.emergencyContactPhone ?? ""
     }
   });
 
   const displayName = watch("fullName") || profile.fullName;
-  const avatarUrl = watch("avatarUrl");
 
   function onSubmit(values: ProfileFormValues) {
     setMessage(null);
     setError(null);
     startTransition(async () => {
       try {
-        await updateProfileAction(values);
-        setMessage("Profile updated. Administrators will see the latest staff details.");
+        const res = await updateProfileAction(values);
+        if (res && "error" in res) {
+          setError(res.error as string);
+        } else {
+          setMessage("Profile updated successfully.");
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Profile could not be updated.");
       }
@@ -51,25 +58,25 @@ export function ProfileForm({ profile }: { profile: ProfileDetails }) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
+      {/* ── Avatar / Info Sidebar ── */}
       <aside className="card-surface overflow-hidden rounded-lg">
         <div className="bg-gradient-to-br from-primary via-[#2d7dd2] to-success p-6 text-white">
           <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-lg bg-white/20 text-2xl font-bold shadow-soft backdrop-blur">
-            {avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
-            ) : (
-              initials(displayName)
-            )}
+            {initials(displayName)}
           </div>
           <h2 className="mt-5 font-display text-2xl font-semibold leading-tight">{displayName}</h2>
-          <p className="mt-1 text-sm font-semibold uppercase tracking-[0.16em] text-white/80">{profile.role.replace("_", " ")}</p>
+          <p className="mt-1 text-sm font-semibold uppercase tracking-[0.16em] text-white/80">
+            {profile.role.replace("_", " ")}
+          </p>
         </div>
 
         <div className="grid gap-4 p-5 text-sm">
           <div className="flex gap-3">
             <Mail className="mt-0.5 h-4 w-4 text-primary" aria-hidden="true" />
             <div>
-              <p className="font-label text-xs font-bold uppercase tracking-wide text-muted">Email</p>
+              <p className="font-label text-xs font-bold uppercase tracking-wide text-muted">
+                Work Email
+              </p>
               <p className="mt-1 font-semibold text-ink">{profile.email ?? "Not provided"}</p>
             </div>
           </div>
@@ -83,63 +90,128 @@ export function ProfileForm({ profile }: { profile: ProfileDetails }) {
           <div className="flex gap-3">
             <BriefcaseBusiness className="mt-0.5 h-4 w-4 text-primary" aria-hidden="true" />
             <div>
-              <p className="font-label text-xs font-bold uppercase tracking-wide text-muted">Current title</p>
-              <p className="mt-1 font-semibold text-ink">{watch("jobTitle") || "Not set"}</p>
+              <p className="font-label text-xs font-bold uppercase tracking-wide text-muted">
+                Current Title
+              </p>
+              <p className="mt-1 font-semibold text-ink">{profile.jobTitle || "Not set"}</p>
             </div>
           </div>
           <div className="flex gap-3">
             <Phone className="mt-0.5 h-4 w-4 text-primary" aria-hidden="true" />
             <div>
               <p className="font-label text-xs font-bold uppercase tracking-wide text-muted">Phone</p>
-              <p className="mt-1 font-semibold text-ink">{watch("phone") || "Not set"}</p>
+              <p className="mt-1 font-semibold text-ink">
+                {watch("phone") ? `+92 ${watch("phone")}` : "Not set"}
+              </p>
             </div>
           </div>
         </div>
       </aside>
 
+      {/* ── Edit Form ── */}
       <section className="card-surface rounded-lg p-5 sm:p-6">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="font-label text-xs font-bold uppercase tracking-[0.16em] text-primary">Account details</p>
-            <h2 className="mt-1 font-display text-2xl font-semibold text-ink">Profile Information</h2>
-          </div>
-          <div className="inline-flex items-center gap-2 rounded-lg bg-tertiary-soft/70 px-3 py-2 text-xs font-bold uppercase tracking-wide text-tertiary">
-            <Sparkles className="h-4 w-4" aria-hidden="true" />
-            Admin visible
-          </div>
+        <div className="mb-6">
+          <p className="font-label text-xs font-bold uppercase tracking-[0.16em] text-primary">
+            Account Details
+          </p>
+          <h2 className="mt-1 font-display text-2xl font-semibold text-ink">Profile Information</h2>
+          <p className="mt-1 text-sm text-muted">
+            Administrators can view your work details in the staff directory.
+          </p>
         </div>
 
-        {message ? (
+        {message && (
           <div className="mb-5 flex items-center gap-2 rounded-lg bg-success-soft px-3 py-2 text-sm font-semibold text-success">
             <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
             {message}
           </div>
-        ) : null}
-        {error ? <div className="mb-5 rounded-lg bg-danger-soft px-3 py-2 text-sm font-semibold text-danger">{error}</div> : null}
+        )}
+        {error && (
+          <div className="mb-5 rounded-lg bg-danger-soft px-3 py-2 text-sm font-semibold text-danger">
+            {error}
+          </div>
+        )}
 
         <div className="grid gap-4 md:grid-cols-2">
-          <Field label="Full name" error={errors.fullName?.message}>
+          {/* Full name — editable by everyone */}
+          <Field label="Full Name" error={errors.fullName?.message}>
             <Input {...register("fullName")} placeholder="Jane Doe" />
           </Field>
-          <Field label="Phone" error={errors.phone?.message}>
-            <Input {...register("phone")} placeholder="+1 555 0100" />
+
+          {/* Phone — Pakistani format, UI shows 10-digit local number */}
+          <Field
+            label="Phone"
+            error={errors.phone?.message}
+            hint="Enter 10-digit number starting with 3 (e.g. 3001234567)"
+          >
+            <div className="flex">
+              <span className="inline-flex items-center rounded-l-lg border border-r-0 border-outline/60 bg-surface-low px-3 text-sm font-semibold text-muted">
+                +92
+              </span>
+              <Input
+                {...register("phone")}
+                className="rounded-l-none"
+                placeholder="3001234567"
+                maxLength={10}
+              />
+            </div>
           </Field>
-          <Field label="Department" error={errors.department?.message}>
-            <Input {...register("department")} placeholder="Admissions, Mathematics, Operations..." />
+
+          {/* Personal Email */}
+          <Field label="Personal Email" error={errors.personalEmail?.message}>
+            <Input
+              {...register("personalEmail")}
+              type="email"
+              placeholder="personal@gmail.com"
+            />
           </Field>
-          <Field label="Job title" error={errors.jobTitle?.message}>
-            <Input {...register("jobTitle")} placeholder="Registrar, Teacher, Principal..." />
+
+          {/* Department — read-only unless administrator */}
+          <Field
+            label="Department"
+            hint={!isAdmin ? "Contact an administrator to change your department." : undefined}
+            error={errors.department?.message}
+          >
+            {isAdmin ? (
+              <Input {...register("department")} placeholder="Admissions, Mathematics, Operations..." />
+            ) : (
+              <div className="flex items-center gap-2 rounded-lg border border-outline/60 bg-surface-low px-3 py-2.5 text-sm">
+                <Lock className="h-3.5 w-3.5 text-muted" aria-hidden="true" />
+                <span className="text-ink">{profile.department || "—"}</span>
+              </div>
+            )}
           </Field>
+
+          {/* Job Title — always read-only for non-admins */}
+          <Field
+            label="Job Title"
+            hint={!isAdmin ? "Job title is set by your administrator." : undefined}
+            error={errors.jobTitle?.message}
+          >
+            {isAdmin ? (
+              <Input {...register("jobTitle")} placeholder="Registrar, Teacher, Principal..." />
+            ) : (
+              <div className="flex items-center gap-2 rounded-lg border border-outline/60 bg-surface-low px-3 py-2.5 text-sm">
+                <Lock className="h-3.5 w-3.5 text-muted" aria-hidden="true" />
+                <span className="text-ink">{profile.jobTitle || "—"}</span>
+              </div>
+            )}
+          </Field>
+
+          {/* Address */}
           <div className="md:col-span-2">
-            <Field label="Avatar URL" error={errors.avatarUrl?.message}>
-              <Input {...register("avatarUrl")} placeholder="https://example.com/photo.jpg" />
+            <Field label="Address" error={errors.address?.message}>
+              <Input {...register("address")} placeholder="Home or office address" />
             </Field>
           </div>
-          <div className="md:col-span-2">
-            <Field label="Short bio" error={errors.bio?.message}>
-              <Textarea {...register("bio")} placeholder="A short professional note for administrators and school leadership." />
-            </Field>
-          </div>
+
+          {/* Emergency Contact */}
+          <Field label="Emergency Contact Name" error={errors.emergencyContactName?.message}>
+            <Input {...register("emergencyContactName")} placeholder="Full name" />
+          </Field>
+          <Field label="Emergency Contact Phone" error={errors.emergencyContactPhone?.message}>
+            <Input {...register("emergencyContactPhone")} placeholder="+92 3001234567" />
+          </Field>
         </div>
 
         <div className="mt-6 flex flex-wrap justify-end gap-3">

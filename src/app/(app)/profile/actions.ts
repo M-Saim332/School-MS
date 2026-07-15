@@ -6,11 +6,16 @@ import { updateProfileDetails } from "@/lib/services/profile";
 import { profileFormSchema, type ProfileFormValues } from "@/lib/validation/profile";
 
 export async function updateProfileAction(values: ProfileFormValues) {
-  const user = await requireUser();
-  const parsed = profileFormSchema.parse(values);
-  await updateProfileDetails(user, parsed);
-  revalidatePath("/profile");
-  revalidatePath("/staff");
-  revalidatePath("/teachers");
-  revalidatePath("/admin");
+  try {
+    const user = await requireUser();
+    const parsed = profileFormSchema.parse(values);
+    await updateProfileDetails(user, parsed);
+    revalidatePath("/profile");
+    revalidatePath("/staff");
+    revalidatePath("/teachers");
+    revalidatePath("/admin");
+    return { ok: true };
+  } catch (err: any) {
+    return { error: err.message };
+  }
 }

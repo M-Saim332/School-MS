@@ -11,7 +11,6 @@ import {
   LayoutDashboard,
   Settings,
   Shield,
-  UserCog,
   Users,
   BookOpen,
   Coins
@@ -60,8 +59,7 @@ export const navItems: NavItem[] = [
       { href: "/payroll/history", label: "History", permission: "payroll:view" }
     ]
   },
-  { href: "/staff", label: "People", icon: Users, permission: "staff:view" },
-  { href: "/teachers", label: "Teachers", icon: UserCog, permission: "teachers:manage" },
+  { href: "/staff", label: "Staff", icon: Users, permission: "staff:view" },
   { href: "/classes", label: "Classes", icon: BookOpen, permission: "classes:manage" },
   { href: "/academics", label: "Academics", icon: BarChart3, permission: "academics:view" },
   { href: "/reports", label: "Reports", icon: Activity, permission: "reports:view" },

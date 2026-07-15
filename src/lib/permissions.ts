@@ -31,6 +31,15 @@ export type Permission =
   | "announcements:view"
   | "announcements:manage";
 
+export const AVAILABLE_PERMISSIONS: Permission[] = [
+  "dashboard:view", "students:view", "students:create", "students:update", "students:archive",
+  "attendance:view", "attendance:submit", "staff:view", "staff:manage", "academics:view",
+  "academics:manage", "marks:manage", "marks:approve", "results:view", "results:generate",
+  "reports:view", "activity:view", "settings:manage", "users:manage", "approvals:view",
+  "approvals:review", "teachers:manage", "classes:manage", "finance:view", "finance:manage",
+  "payroll:view", "payroll:manage", "announcements:view", "announcements:manage"
+];
+
 const rolePermissions: Record<UserRole, Permission[]> = {
   principal: [
     "dashboard:view",
@@ -108,8 +117,11 @@ const rolePermissions: Record<UserRole, Permission[]> = {
   ]
 };
 
-export function hasPermission(role: UserRole | undefined, permission: Permission) {
+export function hasPermission(role: UserRole | undefined, permission: Permission, userPermissions?: string[] | null) {
   if (!role) return false;
+  // If we have a resolved permission list from the DB, use that
+  if (userPermissions != null) return userPermissions.includes(permission);
+  // Fall back to static lookup
   return rolePermissions[role].includes(permission);
 }
 
@@ -118,5 +130,7 @@ export function getRolePermissions(role: UserRole) {
 }
 
 export function roleHome(role: UserRole) {
+  if (role === "administrator") return "/admin";
+  if (role === "student_staff") return "/students";
   return "/dashboard";
 }

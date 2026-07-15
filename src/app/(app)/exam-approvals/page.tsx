@@ -9,7 +9,6 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Textarea } from "@/components/ui/form-field";
 import { requireUser } from "@/lib/auth/session";
 import { formatExamType, getPrincipalExamApprovals, getWorkflowStatusFromExam } from "@/lib/services/marks";
-import { reviewExamApprovalAction } from "@/app/(app)/exam-approvals/actions";
 import type { ResultApprovalStatus } from "@/types/database";
 
 const statusTone = {
@@ -79,17 +78,14 @@ export default async function ExamApprovalsPage({ searchParams }: { searchParams
                 </CardHeader>
                 <CardContent>
                   {approval.status === "pending" ? (
-                    <form action={reviewExamApprovalAction.bind(null, approval.id)} className="grid gap-3">
-                      <Textarea name="principal_comment" placeholder="Optional comment. Required by process if rejecting." />
-                      <div className="flex justify-end gap-3">
-                        <Button type="submit" name="decision" value="rejected" variant="secondary" className="text-danger hover:bg-danger-soft">
-                          <XCircle className="h-4 w-4" /> Reject
-                        </Button>
-                        <Button type="submit" name="decision" value="approved" className="bg-success text-white hover:bg-success/90">
-                          <CheckCircle2 className="h-4 w-4" /> Approve
-                        </Button>
-                      </div>
-                    </form>
+                    <div className="flex justify-end pt-2">
+                      <Link
+                        href={`/exam-approvals/review/${approval.id}`}
+                        className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+                      >
+                        Review and Decide
+                      </Link>
+                    </div>
                   ) : (
                     <div className="rounded-lg bg-surface-low p-3 text-sm">
                       <p className="font-semibold text-ink">Principal comment</p>
