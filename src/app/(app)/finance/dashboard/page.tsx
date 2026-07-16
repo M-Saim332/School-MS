@@ -10,7 +10,24 @@ import { formatPKR, formatDatePK } from "@/lib/utils";
 
 export default async function FinanceDashboardPage() {
   const user = await requireUser("finance:view");
-  const data = await getFinanceDashboard(user);
+  let data;
+  try {
+    data = await getFinanceDashboard(user);
+  } catch (error) {
+    return (
+      <>
+        <PageHeader eyebrow="Finance" title="Financial Dashboard" />
+        <Card className="mt-8 border-warning/50 bg-warning-soft">
+          <CardHeader>
+            <CardTitle className="text-warning">Finance Module Not Initialized</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-warning-strong">
+            The finance module database tables are missing or inaccessible. Please ensure the finance migration has been applied to your database.
+          </CardContent>
+        </Card>
+      </>
+    );
+  }
 
   const stats = [
     {

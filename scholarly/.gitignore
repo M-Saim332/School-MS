@@ -1,8 +1,0 @@
-.next/
-node_modules/
-.env
-.env*.local
-coverage/
-dist/
-*.tsbuildinfo
-.codex-logs/

@@ -16,6 +16,25 @@ export default async function ReportsPage() {
     status: row.status
   }));
 
+  const enrollmentRows = (reports.enrollment as any[]).map((row: any) => ({
+    grade: row.grade_name,
+    class: row.class_name,
+    students: row.student_count
+  }));
+
+  const archivedRows = (reports.archived as any[]).map((row: any) => ({
+    admission_number: row.admission_number,
+    first_name: row.first_name,
+    last_name: row.last_name,
+    archived_at: row.archived_at
+  }));
+
+  const activityRows = (reports.activity as any[]).map((row: any) => ({
+    action: row.action,
+    entity: row.entity_type,
+    created_at: row.created_at
+  }));
+
   return (
     <>
       <PageHeader eyebrow="Reports" title="School Reports" description="Export attendance, enrollment, archived-student, and activity data for the current tenant." />
@@ -32,7 +51,7 @@ export default async function ReportsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Enrollment Counts</CardTitle>
-            <CsvExport rows={reports.enrollment as any} filename="gocampusflow-enrollment.csv" />
+            <CsvExport rows={enrollmentRows} filename="gocampusflow-enrollment.csv" />
           </CardHeader>
           <CardContent>
             <ReportTable rows={(reports.enrollment as any[]).slice(0, 10)} columns={["grade_name", "class_name", "student_count"]} />
@@ -42,6 +61,7 @@ export default async function ReportsPage() {
           <CardHeader>
             <CardTitle>Archived Students</CardTitle>
             <Badge>{reports.archived.length}</Badge>
+            <CsvExport rows={archivedRows} filename="gocampusflow-archived.csv" />
           </CardHeader>
           <CardContent>
             <ReportTable rows={(reports.archived as any[]).slice(0, 10)} columns={["admission_number", "first_name", "last_name", "archived_at"]} />
@@ -51,6 +71,7 @@ export default async function ReportsPage() {
           <CardHeader>
             <CardTitle>Activity Logs</CardTitle>
             <Badge>{reports.activity.length}</Badge>
+            <CsvExport rows={activityRows} filename="gocampusflow-activity.csv" />
           </CardHeader>
           <CardContent>
             <ReportTable rows={(reports.activity as any[]).slice(0, 10)} columns={["action", "entity_type", "created_at"]} />
