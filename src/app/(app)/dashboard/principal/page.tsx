@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
-import { ClassDistributionChart } from "@/components/dashboard/responsive-charts";
+import { LazyClassDistributionChart } from "@/components/dashboard/lazy-responsive-charts";
 import { formatPKR, formatDatePK } from "@/lib/utils";
 import { GraduationCap, Users, CalendarX2, AlertTriangle, FileText, Bell, UserPlus } from "lucide-react";
 import Link from "next/link";
@@ -101,7 +101,7 @@ export default async function PrincipalDashboardPage() {
             <CardTitle>Class Distribution</CardTitle>
           </CardHeader>
           <CardContent>
-            <ClassDistributionChart data={dashboard.classDistribution} />
+            <LazyClassDistributionChart data={dashboard.classDistribution} />
           </CardContent>
         </Card>
         <ActivityFeed items={dashboard.activity} />

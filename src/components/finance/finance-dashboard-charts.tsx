@@ -15,7 +15,7 @@ import {
 } from "recharts";
 import { EmptyState } from "@/components/ui/empty-state";
 
-const COLORS = ["#3366cc", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
+const COLORS = ["#2563eb", "#22c55e", "#f59e0b", "#ef4444", "#06b6d4"];
 
 export function OutstandingByClassChart({ data }: { data: Array<{ className: string; amount: number }> }) {
   if (!data.length || data.every(d => d.amount === 0)) {
@@ -32,11 +32,11 @@ export function OutstandingByClassChart({ data }: { data: Array<{ className: str
     <div className="h-[300px] w-full min-w-0">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 12, right: 8, left: -2, bottom: 18 }}>
-          <CartesianGrid stroke="#e9e8e9" vertical={false} />
+          <CartesianGrid stroke="#e2e8f0" vertical={false} />
           <XAxis dataKey="className" tick={{ fontSize: 12 }} />
           <YAxis tick={{ fontSize: 12 }} tickFormatter={(val) => `$${val}`} />
           <Tooltip formatter={(value) => [`$${value}`, "Outstanding"]} />
-          <Bar name="Outstanding Balance" dataKey="amount" fill="#ef4444" radius={[6, 6, 0, 0]} maxBarSize={42} />
+          <Bar name="Outstanding Balance" dataKey="amount" fill="#ef4444" radius={[8, 8, 0, 0]} maxBarSize={42} />
         </BarChart>
       </ResponsiveContainer>
     </div>

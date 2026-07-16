@@ -144,9 +144,9 @@ export function SchoolProfileForm({
 
   return (
     <form onSubmit={onSubmit} className="grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
-      <aside className="card-surface overflow-hidden rounded-lg">
-        <div className="bg-gradient-to-br from-primary via-[#2d7dd2] to-success p-6 text-white">
-          <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-white/20 shadow-soft backdrop-blur">
+      <aside className="card-surface overflow-hidden rounded-[18px]">
+        <div className="border-b border-outline bg-surface-low p-6">
+          <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-white text-primary shadow-soft ring-1 ring-outline">
             {hasLogo ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={logoPreviewUrl} alt={`${displayName} logo`} className="h-full w-full object-cover" />
@@ -154,8 +154,8 @@ export function SchoolProfileForm({
               <span className="text-2xl font-bold">{initials(displayName)}</span>
             )}
           </div>
-          <h2 className="mt-5 font-display text-2xl font-semibold leading-tight">{displayName}</h2>
-          <p className="mt-1 text-sm font-semibold uppercase tracking-[0.16em] text-white/80">School Profile</p>
+          <h2 className="mt-5 font-display text-2xl font-bold leading-tight tracking-tight text-ink">{displayName}</h2>
+          <p className="mt-1 text-sm font-semibold uppercase tracking-[0.14em] text-muted">School Profile</p>
         </div>
 
         <div className="grid gap-4 p-5 text-sm">
@@ -197,7 +197,7 @@ export function SchoolProfileForm({
               target="_blank"
               rel="noreferrer"
               download
-              className="inline-flex items-center gap-2 rounded-lg bg-surface-low px-3 py-2 text-sm font-semibold text-primary transition hover:bg-primary-soft"
+              className="inline-flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-sm font-semibold text-primary ring-1 ring-outline transition hover:bg-primary-soft"
             >
               <Download className="h-4 w-4" aria-hidden="true" />
               Download School Logo
@@ -205,7 +205,7 @@ export function SchoolProfileForm({
           ) : null}
 
           {canManage && hasFavicon ? (
-            <div className="rounded-lg border border-outline/40 bg-surface-low p-4">
+            <div className="rounded-2xl border border-outline bg-surface-low p-4">
                 <p className="font-label text-xs font-bold uppercase tracking-wide text-muted">Favicon Preview</p>
                 <div className="mt-3 flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-outline/40">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -216,10 +216,10 @@ export function SchoolProfileForm({
         </div>
       </aside>
 
-      <section className="card-surface rounded-lg p-5 sm:p-6">
+      <section className="card-surface rounded-[18px] p-6">
         <div className="mb-6">
           <p className="font-label text-xs font-bold uppercase tracking-[0.16em] text-primary">School Details</p>
-          <h2 className="mt-1 font-display text-2xl font-semibold text-ink">Profile Information</h2>
+          <h2 className="mt-1 font-display text-2xl font-bold tracking-tight text-ink">Profile Information</h2>
           <p className="mt-1 text-sm text-muted">
             {canManage
               ? "Update your school's shared contact details and branding."
@@ -228,13 +228,13 @@ export function SchoolProfileForm({
         </div>
 
         {message ? (
-          <div className="mb-5 flex items-center gap-2 rounded-lg bg-success-soft px-3 py-2 text-sm font-semibold text-success">
+          <div className="mb-5 flex items-center gap-2 rounded-xl bg-success-soft px-4 py-3 text-sm font-semibold text-success">
             <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
             {message}
           </div>
         ) : null}
         {error ? (
-          <div className="mb-5 rounded-lg bg-danger-soft px-3 py-2 text-sm font-semibold text-danger">
+          <div className="mb-5 rounded-xl bg-danger-soft px-4 py-3 text-sm font-semibold text-danger">
             {error}
           </div>
         ) : null}

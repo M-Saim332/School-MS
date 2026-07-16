@@ -51,7 +51,7 @@ export default async function MarksPage({ searchParams }: { searchParams: Promis
         description="Enter regular assessment marks that are approved immediately, or upload major examination results for Principal approval."
         actions={
           <ButtonLink href="/results" variant="secondary">
-            My Result History
+            Exams & Results
           </ButtonLink>
         }
       />

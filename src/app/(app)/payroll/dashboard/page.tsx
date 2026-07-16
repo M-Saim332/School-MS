@@ -1,5 +1,5 @@
 import { requireUser } from "@/lib/auth/session";
-import { getPayrollDashboardStats, getPayrollList, currentMonthKey, formatMonth } from "@/lib/services/payroll";
+import { getApprovedUnpaidLeaveFlags, getPayrollDashboardStats, getPayrollList, currentMonthKey, formatMonth } from "@/lib/services/payroll";
 import { hasPermission } from "@/lib/permissions";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,11 +13,12 @@ export default async function PayrollDashboardPage({ searchParams }: { searchPar
   const user = await requireUser("payroll:view");
   const sp = await searchParams;
   const month = sp.month ?? currentMonthKey();
-  const canManage = hasPermission(user.role, "payroll:manage");
+  const canManage = hasPermission(user.role, "payroll:manage", user.permissions);
 
-  const [stats, payrollList] = await Promise.all([
+  const [stats, payrollList, unpaidLeaves] = await Promise.all([
     getPayrollDashboardStats(user, month),
-    getPayrollList(user, month)
+    getPayrollList(user, month),
+    getApprovedUnpaidLeaveFlags(user, month)
   ]);
 
   const statCards = [
@@ -113,6 +114,38 @@ export default async function PayrollDashboardPage({ searchParams }: { searchPar
           );
         })}
       </div>
+
+      {canManage && unpaidLeaves.length ? (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Approved Unpaid Leave Flags</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left text-sm">
+                <thead className="font-label text-xs uppercase tracking-wide text-muted">
+                  <tr>
+                    <th className="py-3 pr-4">Employee</th>
+                    <th className="py-3 pr-4">Dates</th>
+                    <th className="py-3 pr-4">Days</th>
+                    <th className="py-3 pr-4">Reason</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {unpaidLeaves.map((leave: any) => (
+                    <tr key={`${leave.user_id}-${leave.start_date}`} className="border-t border-outline/60">
+                      <td className="py-3 pr-4 font-semibold">{leave.full_name}</td>
+                      <td className="py-3 pr-4 text-muted">{leave.start_date} to {leave.end_date}</td>
+                      <td className="py-3 pr-4">{leave.leave_days}</td>
+                      <td className="py-3 pr-4 text-muted">{leave.reason}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       {/* Payroll Table */}
       <Card>

@@ -80,29 +80,19 @@ async function getGradeScale(user: AppUser): Promise<GradeScale[]> {
 }
 
 async function assertTeacherCanUseSubject(user: AppUser, classId: string, subjectId: string) {
-  if (user.role !== "teacher") throw new Error("Only teachers can manage marks.");
+  if (user.role !== "teacher" && user.role !== "head_teacher") throw new Error("Only teachers can manage marks.");
   const supabase = await createClient();
-  const [headClass, assignment] = await Promise.all([
-    supabase
-      .from("classes")
-      .select("id")
-      .eq("school_id", user.schoolId)
-      .eq("id", classId)
-      .eq("head_teacher_id", user.id)
-      .maybeSingle(),
-    supabase
-      .from("teacher_assignments")
-      .select("id")
-      .eq("school_id", user.schoolId)
-      .eq("teacher_id", user.id)
-      .eq("class_id", classId)
-      .eq("subject_id", subjectId)
-      .maybeSingle()
-  ]);
+  const assignment = await supabase
+    .from("teacher_assignments")
+    .select("id")
+    .eq("school_id", user.schoolId)
+    .eq("teacher_id", user.id)
+    .eq("class_id", classId)
+    .eq("subject_id", subjectId)
+    .maybeSingle();
 
-  if (headClass.error) throw new Error(headClass.error.message);
   if (assignment.error) throw new Error(assignment.error.message);
-  if (!headClass.data && !assignment.data) throw new Error("You can enter marks only for assigned classes and subjects.");
+  if (!assignment.data) throw new Error("You can enter marks only for subjects explicitly assigned to you.");
 }
 
 async function getEditableExam(user: AppUser, examId: string) {
@@ -116,37 +106,25 @@ async function getEditableExam(user: AppUser, examId: string) {
 
   if (error) throw new Error(error.message);
   if (!exam) throw new Error("Exam not found.");
-  if (exam.created_by !== user.id) throw new Error("You can edit only exams you created.");
+  await assertTeacherCanUseSubject(user, exam.class_id, exam.subject_id);
   const canEditApprovedRegular = exam.status === "approved" && !exam.requires_approval;
   if (!["draft", "rejected"].includes(exam.status) && !canEditApprovedRegular) {
     throw new Error("This exam is locked and cannot be edited.");
   }
-  await assertTeacherCanUseSubject(user, exam.class_id, exam.subject_id);
   return exam as any;
 }
 
 export async function getTeacherMarksWorkspace(user: AppUser, filters: { classId?: string; subjectId?: string; examId?: string } = {}) {
   const supabase = await createClient();
-  const [assignments, headClasses, subjects] = await Promise.all([
-    supabase
-      .from("teacher_assignments")
-      .select("class_id,subject_id,classes(id,name,room,grades(name),sections(name)),subjects(id,name,code)")
-      .eq("school_id", user.schoolId)
-      .eq("teacher_id", user.id)
-      .not("subject_id", "is", null)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("classes")
-      .select("id,name,room,grades(name),sections(name)")
-      .eq("school_id", user.schoolId)
-      .eq("head_teacher_id", user.id)
-      .order("name"),
-    supabase.from("subjects").select("id,name,code").eq("school_id", user.schoolId).order("name")
-  ]);
+  const assignments = await supabase
+    .from("teacher_assignments")
+    .select("class_id,subject_id,classes(id,name,room,grades(name),sections(name)),subjects(id,name,code)")
+    .eq("school_id", user.schoolId)
+    .eq("teacher_id", user.id)
+    .not("subject_id", "is", null)
+    .order("created_at", { ascending: false });
 
   if (assignments.error) throw new Error(assignments.error.message);
-  if (headClasses.error) throw new Error(headClasses.error.message);
-  if (subjects.error) throw new Error(subjects.error.message);
 
   const optionMap = new Map<string, any>();
   for (const row of assignments.data ?? []) {
@@ -159,24 +137,8 @@ export async function getTeacherMarksWorkspace(user: AppUser, filters: { classId
       section_name: item.classes.sections?.name,
       subject_id: item.subjects.id,
       subject_name: item.subjects.name,
-      is_head_teacher: false
+      is_head_teacher: user.role === "head_teacher"
     });
-  }
-
-  for (const classRow of headClasses.data ?? []) {
-    const cls: any = classRow;
-    for (const subject of subjects.data ?? []) {
-      const subj: any = subject;
-      optionMap.set(`${cls.id}:${subj.id}`, {
-        class_id: cls.id,
-        class_name: cls.name,
-        grade_name: cls.grades?.name,
-        section_name: cls.sections?.name,
-        subject_id: subj.id,
-        subject_name: subj.name,
-        is_head_teacher: true
-      });
-    }
   }
 
   const options = [...optionMap.values()].sort((a, b) => `${a.class_name} ${a.subject_name}`.localeCompare(`${b.class_name} ${b.subject_name}`));
@@ -189,7 +151,6 @@ export async function getTeacherMarksWorkspace(user: AppUser, filters: { classId
         .eq("school_id", user.schoolId)
         .eq("class_id", selected.class_id)
         .eq("subject_id", selected.subject_id)
-        .eq("created_by", user.id)
         .order("created_at", { ascending: false })
     : { data: [], error: null };
 

@@ -24,7 +24,7 @@ export default async function TeachersPage() {
       <div className="grid gap-6">
         {managedStaff.map((member: any) => (
           <Card key={member.member_id} className="overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-primary via-accent to-tertiary-soft" />
+            <div className="h-1.5 bg-primary" />
             <CardHeader>
               <div className="flex items-start justify-between gap-4">
                 <div>

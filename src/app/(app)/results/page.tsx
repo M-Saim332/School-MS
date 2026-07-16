@@ -45,7 +45,7 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
     <>
       <PageHeader
         eyebrow="Results management"
-        title={user.role === "teacher" ? "My Result History" : user.role === "principal" ? "Result Approvals" : "Results"}
+        title={user.role === "teacher" ? "My Exams & Results" : user.role === "principal" ? "Exam & Result Approvals" : "Exams & Results"}
         description={roleDescription(user.role)}
       />
 

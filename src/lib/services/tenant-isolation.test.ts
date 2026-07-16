@@ -7,7 +7,6 @@ vi.mock("@/lib/supabase/server", () => ({
 }));
 
 const DUMMY_SCHOOL = "50000000-0000-0000-0000-000000000001";
-const OTHER_SCHOOL = "50000000-0000-0000-0000-000000000002";
 
 describe("Tenant Isolation", () => {
   let mockSupabase: any;
@@ -28,9 +27,17 @@ describe("Tenant Isolation", () => {
 
     await getStudents({ 
       id: "user1", 
+      email: "registrar@example.com",
+      fullName: "Registrar One",
+      avatarUrl: null,
       schoolId: DUMMY_SCHOOL,
-      memberId: "m1",
-      permissions: ["students:view"] 
+      schoolName: "Test School",
+      role: "student_staff",
+      department: null,
+      jobTitle: null,
+      mustChangePassword: false,
+      permissions: ["students:view"],
+      customRoleId: null
     }, {});
 
     // Ensure the query specifically matched the logged-in user's schoolId

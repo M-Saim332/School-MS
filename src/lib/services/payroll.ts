@@ -1,6 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
-import type { AppUser, Payroll, SalaryAdjustment, TeacherEmploymentDetails } from "@/types/database";
+import type { AppUser, SalaryAdjustment, TeacherEmploymentDetails } from "@/types/database";
 import { hasPermission } from "@/lib/permissions";
+
+function isMissingPayrollLeaveFlagsView(error: { code?: string; message?: string } | null) {
+  return error?.code === "PGRST205" || error?.message?.includes("public.payroll_unpaid_leave_flags");
+}
 
 // ─── Employment Details ────────────────────────────────────────────────────────
 
@@ -197,6 +201,24 @@ export async function getPayrollDashboardStats(user: AppUser, month: string) {
     paidCount: rows.filter((r) => r.status === "paid").length,
     generatedCount: rows.filter((r) => r.status === "generated").length
   };
+}
+
+export async function getApprovedUnpaidLeaveFlags(user: AppUser, month: string) {
+  if (!hasPermission(user.role, "payroll:view", user.permissions)) throw new Error("Unauthorized");
+  const supabase = await createClient();
+  const monthStart = `${month}-01`;
+  const nextMonthStart = getNextMonth(month);
+  const { data, error } = await supabase
+    .from("payroll_unpaid_leave_flags")
+    .select("*")
+    .eq("school_id", user.schoolId)
+    .lt("start_date", nextMonthStart)
+    .gte("end_date", monthStart)
+    .order("start_date", { ascending: false });
+
+  if (isMissingPayrollLeaveFlagsView(error)) return [];
+  if (error) throw new Error(error.message);
+  return data ?? [];
 }
 
 export async function generateMonthlyPayroll(user: AppUser, month: string) {

@@ -3,7 +3,7 @@ import { getFinanceDashboard } from "@/lib/services/finance";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { OutstandingByClassChart, CollectionMethodChart } from "@/components/finance/finance-dashboard-charts";
+import { LazyCollectionMethodChart, LazyOutstandingByClassChart } from "@/components/finance/lazy-finance-dashboard-charts";
 import Link from "next/link";
 import { Wallet, ArrowDownCircle, Percent, ClipboardList, AlertCircle, Banknote } from "lucide-react";
 import { formatPKR, formatDatePK } from "@/lib/utils";
@@ -129,7 +129,7 @@ export default async function FinanceDashboardPage() {
             <CardTitle>Outstanding Fees by Class</CardTitle>
           </CardHeader>
           <CardContent>
-            <OutstandingByClassChart data={data.outstandingByClass} />
+            <LazyOutstandingByClassChart data={data.outstandingByClass} />
           </CardContent>
         </Card>
 
@@ -138,7 +138,7 @@ export default async function FinanceDashboardPage() {
             <CardTitle>Monthly Collections by Method</CardTitle>
           </CardHeader>
           <CardContent>
-            <CollectionMethodChart data={data.collectionMethodData} />
+            <LazyCollectionMethodChart data={data.collectionMethodData} />
           </CardContent>
         </Card>
       </div>

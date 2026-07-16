@@ -14,11 +14,13 @@ export function EmptyState({
   className?: string;
 }) {
   return (
-    <div className={cn("flex min-h-56 flex-col items-center justify-center rounded-lg bg-surface-low p-8 text-center", className)}>
-      <Inbox className="mb-3 h-8 w-8 text-primary" aria-hidden="true" />
-      <h3 className="font-display text-lg font-semibold text-ink">{title}</h3>
-      <p className="mt-1 max-w-md text-sm text-muted">{description}</p>
-      {action ? <div className="mt-4">{action}</div> : null}
+    <div className={cn("flex min-h-56 flex-col items-center justify-center rounded-[18px] bg-surface-low p-10 text-center", className)}>
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-primary shadow-soft ring-1 ring-outline/70">
+        <Inbox className="h-6 w-6" aria-hidden="true" />
+      </div>
+      <h3 className="font-display text-lg font-bold tracking-tight text-ink">{title}</h3>
+      <p className="mt-2 max-w-md text-sm leading-6 text-muted">{description}</p>
+      {action ? <div className="mt-5">{action}</div> : null}
     </div>
   );
 }
