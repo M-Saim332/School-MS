@@ -8,7 +8,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { AppUser } from "@/types/database";
 import { hasPermission } from "@/lib/permissions";
 import { cn, initials } from "@/lib/utils";
-import { navItems } from "@/components/layout/nav-items";
+import { getNavItems, navItemVisible } from "@/components/layout/nav-items";
 import { createClient } from "@/lib/supabase/browser";
 import { AnnouncementBell } from "@/components/layout/announcement-bell";
 import { BrandingFaviconSync } from "@/components/layout/branding-favicon-sync";
@@ -25,12 +25,12 @@ export function AppShell({ user, branding, children }: { user: AppUser; branding
   const [pendingCount, setPendingCount] = useState(0);
   const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({});
   const menuRef = useRef<HTMLDivElement>(null);
-  const items = navItems.filter((item) => {
+  const items = getNavItems(user.role).filter((item) => {
     if (item.href === "/academics" && hasPermission(user.role, "classes:manage", user.permissions)) {
       return false;
     }
 
-    return hasPermission(user.role, item.permission, user.permissions);
+    return navItemVisible(user.role, item.permission, user.permissions, item.anyPermissions);
   });
   const supabase = useMemo(() => createClient(), []);
 
@@ -38,16 +38,26 @@ export function AppShell({ user, branding, children }: { user: AppUser; branding
     setProfileOpen(false);
   }, [pathname]);
 
+  const prevPathnameRef = useRef(pathname);
+
   useEffect(() => {
-    // Auto-expand the current module when navigating inside it.
+    const previousPath = prevPathnameRef.current;
+    if (pathname === previousPath) return; // only run on actual path change
+    prevPathnameRef.current = pathname;
+
     setExpandedModules((current) => {
       let next = current;
       for (const item of items) {
         if (!item.subItems) continue;
-        if (pathname === item.href || pathname.startsWith(`${item.href}/`)) {
-          if (current[item.href]) continue;
+
+        const inModule = pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+        if (inModule && !current[item.href]) {
           if (next === current) next = { ...current };
           next[item.href] = true;
+        } else if (!inModule && current[item.href]) {
+          if (next === current) next = { ...current };
+          next[item.href] = false;
         }
       }
       return next;
@@ -142,7 +152,9 @@ export function AppShell({ user, branding, children }: { user: AppUser; branding
           const showBadge = isApprovals && pendingCount > 0 && hasPermission(user.role, "approvals:review", user.permissions);
 
           if (item.subItems) {
-            const allowedSubItems = item.subItems.filter(sub => hasPermission(user.role, sub.permission, user.permissions));
+            const allowedSubItems = item.subItems.filter((sub) =>
+              navItemVisible(user.role, sub.permission, user.permissions, sub.anyPermissions)
+            );
             if (allowedSubItems.length === 0) return null;
             const expanded = expandedModules[item.href] ?? active;
             return (
@@ -150,7 +162,10 @@ export function AppShell({ user, branding, children }: { user: AppUser; branding
                 <button
                   type="button"
                   onClick={() =>
-                    setExpandedModules((current) => ({ ...current, [item.href]: !(current[item.href] ?? active) }))
+                    setExpandedModules((current) => {
+                      const isExpanded = current[item.href] ?? active;
+                      return { ...current, [item.href]: !isExpanded };
+                    })
                   }
                   className={cn(
                     "group flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold transition-all duration-200",

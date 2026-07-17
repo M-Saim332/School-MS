@@ -2,9 +2,9 @@ import { requireUser } from "@/lib/auth/session";
 import { getStudentFees, getPaymentHistory } from "@/lib/services/finance";
 import { getAcademicOptions } from "@/lib/services/academics";
 import { PageHeader } from "@/components/layout/page-header";
-import { PaymentsClient } from "@/components/finance/payments-client";
+import { FeeManagementClient } from "@/components/finance/fee-management-client";
 
-export default async function PaymentsPage() {
+export default async function FeeManagementPage() {
   const user = await requireUser("finance:view");
   const [accounts, academics, payments] = await Promise.all([
     getStudentFees(user, {}),
@@ -16,13 +16,14 @@ export default async function PaymentsPage() {
     <>
       <PageHeader
         eyebrow="Finance"
-        title="Payment Processing"
-        description="Search students to view their ledgers, record installment payments, print receipt items, or void transactions."
+        title="Fee Management"
+        description="Review student fee ledgers, collect payments, apply discounts, and print receipts from one consolidated workspace."
       />
-      <PaymentsClient
+      <FeeManagementClient
         user={user}
         accounts={accounts}
         classes={academics.classes}
+        sessions={academics.years}
         payments={payments}
       />
     </>

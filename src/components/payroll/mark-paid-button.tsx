@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { markPayrollPaidAction } from "@/app/(app)/payroll/actions";
+import { markPayrollPaidAction } from "@/app/(app)/finance/payroll/actions";
 
 export function MarkPaidButton({ payrollId }: { payrollId: string }) {
   const [isPending, startTransition] = useTransition();

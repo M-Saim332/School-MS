@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { generatePayrollAction } from "@/app/(app)/payroll/actions";
+import { generatePayrollAction } from "@/app/(app)/finance/payroll/actions";
 
 export function GeneratePayrollButton({ month }: { month: string }) {
   const [isPending, startTransition] = useTransition();

@@ -14,6 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { formatMonth } from "@/lib/services/payroll";
 import { RolesTab } from "@/components/settings/roles-tab";
+import { Lock } from "lucide-react";
 
 interface Props {
   user: any;
@@ -192,19 +193,19 @@ export function SettingsTabs({ user, profile, schoolSettings, academicYears, mem
           Notifications
         </button>
 
-        {canManageSchoolProfile && (
           <>
             <div className="h-px bg-outline/40 my-2" />
             <span className="px-4 text-[10px] font-bold uppercase tracking-wider text-muted mb-1">
-              {isAdmin ? "Admin Only" : "School Management"}
+              {isAdmin ? "Admin Only" : "School Details"}
             </span>
             <button
               onClick={() => { setActiveTab("school"); setMessage(null); }}
-              className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition ${activeTab === "school" ? "bg-primary text-white" : "hover:bg-surface-low text-muted"}`}
+              className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition flex items-center justify-between ${activeTab === "school" ? "bg-primary text-white" : "hover:bg-surface-low text-muted"}`}
             >
-              School Profile
+              <span>School Profile</span>
+              {!canManageSchoolProfile && <Lock className="h-4 w-4" aria-hidden="true" />}
             </button>
-            {isAdmin && (
+            {canManageSchoolProfile && isAdmin && (
               <>
                 <button
                   onClick={() => { setActiveTab("academics"); setMessage(null); }}
@@ -227,7 +228,6 @@ export function SettingsTabs({ user, profile, schoolSettings, academicYears, mem
               </>
             )}
           </>
-        )}
       </div>
 
       {/* Forms Area */}
@@ -417,7 +417,10 @@ export function SettingsTabs({ user, profile, schoolSettings, academicYears, mem
         {/* Tab 4: School Profile */}
         {activeTab === "school" && (
           <form onSubmit={handleSchoolSubmit} className="space-y-4 max-w-lg">
-            <h3 className="font-display text-xl font-bold text-ink">School Profile Settings</h3>
+            <h3 className="font-display text-xl font-bold text-ink flex items-center gap-2">
+              School Profile Settings
+              {!canManageSchoolProfile && <Lock className="h-5 w-5 text-muted" aria-hidden="true" />}
+            </h3>
             <p className="text-sm text-muted">Change settings isolated by school ID.</p>
 
             <div>
@@ -425,8 +428,9 @@ export function SettingsTabs({ user, profile, schoolSettings, academicYears, mem
               <input
                 value={schoolProfile.name}
                 onChange={(e) => setSchoolProfile({ ...schoolProfile, name: e.target.value })}
-                className="w-full rounded-lg border border-outline/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full rounded-lg border border-outline/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-60 disabled:cursor-not-allowed"
                 required
+                disabled={!canManageSchoolProfile}
               />
             </div>
             <div>
@@ -434,7 +438,8 @@ export function SettingsTabs({ user, profile, schoolSettings, academicYears, mem
               <select
                 value={schoolProfile.timezone}
                 onChange={(e) => setSchoolProfile({ ...schoolProfile, timezone: e.target.value })}
-                className="w-full rounded-lg border border-outline/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full rounded-lg border border-outline/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-60 disabled:cursor-not-allowed"
+                disabled={!canManageSchoolProfile}
               >
                 <option value="Asia/Karachi">Asia/Karachi (Pakistan Standard Time)</option>
                 <option value="UTC">Coordinated Universal Time (UTC)</option>
@@ -445,8 +450,9 @@ export function SettingsTabs({ user, profile, schoolSettings, academicYears, mem
               <input
                 value={schoolProfile.currency}
                 onChange={(e) => setSchoolProfile({ ...schoolProfile, currency: e.target.value })}
-                className="w-full rounded-lg border border-outline/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full rounded-lg border border-outline/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-60 disabled:cursor-not-allowed"
                 required
+                disabled={!canManageSchoolProfile}
               />
             </div>
             <div>
@@ -455,18 +461,21 @@ export function SettingsTabs({ user, profile, schoolSettings, academicYears, mem
                 type="number"
                 value={schoolProfile.feeGraceDays}
                 onChange={(e) => setSchoolProfile({ ...schoolProfile, feeGraceDays: e.target.value })}
-                className="w-full rounded-lg border border-outline/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full rounded-lg border border-outline/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-60 disabled:cursor-not-allowed"
                 required
+                disabled={!canManageSchoolProfile}
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={isPending}
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-105 disabled:opacity-60"
-            >
-              {isPending ? "Saving..." : "Save School Profile"}
-            </button>
+            {canManageSchoolProfile && (
+              <button
+                type="submit"
+                disabled={isPending}
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-105 disabled:opacity-60"
+              >
+                {isPending ? "Saving..." : "Save School Profile"}
+              </button>
+            )}
           </form>
         )}
 

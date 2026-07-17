@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, Download, Globe, Mail, Phone } from "lucide-react";
+import { CheckCircle2, Download, Globe, Lock, Mail, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/form-field";
 import { saveSchoolProfileAction } from "@/app/(app)/school-profile/actions";
@@ -219,7 +219,10 @@ export function SchoolProfileForm({
       <section className="card-surface rounded-[18px] p-6">
         <div className="mb-6">
           <p className="font-label text-xs font-bold uppercase tracking-[0.16em] text-primary">School Details</p>
-          <h2 className="mt-1 font-display text-2xl font-bold tracking-tight text-ink">Profile Information</h2>
+          <h2 className="mt-1 flex items-center gap-2 font-display text-2xl font-bold tracking-tight text-ink">
+            Profile Information
+            {!canManage && <Lock className="h-5 w-5 text-muted" aria-hidden="true" />}
+          </h2>
           <p className="mt-1 text-sm text-muted">
             {canManage
               ? "Update your school's shared contact details and branding."
@@ -278,11 +281,13 @@ export function SchoolProfileForm({
             />
           </Field>
 
-          <div className="md:col-span-2">
-            <Field label="School Logo" hint="Upload a PNG, JPG, WEBP, SVG, or ICO image. Everyone can preview and download the logo.">
-              <Input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon,image/vnd.microsoft.icon" onChange={handleLogoFileChange} disabled={readOnly} />
-            </Field>
-          </div>
+          {canManage ? (
+            <div className="md:col-span-2">
+              <Field label="School Logo" hint="Upload a PNG, JPG, WEBP, SVG, or ICO image. Everyone can preview and download the logo.">
+                <Input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon,image/vnd.microsoft.icon" onChange={handleLogoFileChange} />
+              </Field>
+            </div>
+          ) : null}
 
           {canManage ? (
             <div className="md:col-span-2">

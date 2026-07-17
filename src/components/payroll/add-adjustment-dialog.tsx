@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { createAdjustmentAction } from "@/app/(app)/payroll/actions";
+import { createAdjustmentAction } from "@/app/(app)/finance/payroll/actions";
 import type { AdjustmentType } from "@/types/database";
 
 interface Props {
