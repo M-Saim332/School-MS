@@ -45,7 +45,7 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
     <>
       <PageHeader
         eyebrow="Results management"
-        title={user.role === "teacher" ? "My Exams & Results" : user.role === "principal" ? "Exam & Result Approvals" : "Exams & Results"}
+        title={user.role === "teacher" ? "My Result History" : user.role === "principal" ? "Result Approvals" : "Results"}
         description={roleDescription(user.role)}
       />
 
@@ -60,13 +60,13 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
       {user.role === "student_staff" ? (
         <div className="mb-5 flex flex-wrap gap-2">
           <Link
-            href="/results?view=management"
+            href="/academics/results?view=management"
             className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${view !== "cards" ? "bg-primary text-white" : "bg-white text-muted hover:bg-surface-low"}`}
           >
             Approved Results
           </Link>
           <Link
-            href="/results?view=cards"
+            href="/academics/results?view=cards"
             className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${view === "cards" ? "bg-primary text-white" : "bg-white text-muted hover:bg-surface-low"}`}
           >
             Result Cards
@@ -91,7 +91,7 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
             <CardTitle>{user.role === "teacher" ? "Uploaded Results" : user.role === "principal" ? "Major Examination Review" : "Result Register"}</CardTitle>
           </CardHeader>
           <CardContent>
-            <form className="mb-5 grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_auto]" action="/results">
+            <form className="mb-5 grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_auto]" action="/academics/results">
               {user.role === "student_staff" ? <input type="hidden" name="view" value="management" /> : null}
               <Field label="Term">
                 <Input name="term" defaultValue={params.term ?? ""} placeholder="Filter by term" />
@@ -116,7 +116,7 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
               {statusFilters.map((item) => (
                 <Link
                   key={item.value}
-                  href={`/results?status=${item.value}${params.term ? `&term=${encodeURIComponent(params.term)}` : ""}${user.role === "student_staff" ? "&view=management" : ""}`}
+                  href={`/academics/results?status=${item.value}${params.term ? `&term=${encodeURIComponent(params.term)}` : ""}${user.role === "student_staff" ? "&view=management" : ""}`}
                   className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${status === item.value ? "bg-primary text-white" : "bg-white text-muted hover:bg-surface-low"}`}
                 >
                   {item.label}

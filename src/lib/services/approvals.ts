@@ -97,7 +97,7 @@ export async function reviewRequest(user: AppUser, requestId: string, decision: 
 
   const newStudentStatus = 
     decision === "approved" 
-      ? (request.request_type === "admission" ? "active" : "cancelled")
+      ? (request.request_type === "admission" ? "active" : "archived")
       : (request.request_type === "admission" ? "pending_approval" : "active"); // Revert status if denied
 
   // Update student
@@ -107,21 +107,9 @@ export async function reviewRequest(user: AppUser, requestId: string, decision: 
       status: newStudentStatus,
       ...(decision === "approved" && request.request_type === "cancellation" ? { archived_at: new Date().toISOString() } : {})
     })
-    .eq("school_id", user.schoolId)
     .eq("id", request.student_id);
 
   if (studentError) throw new Error(studentError.message);
-
-  if (decision === "approved" && request.request_type === "cancellation") {
-    const { error: withdrawError } = await supabase
-      .from("enrollments")
-      .update({ status: "withdrawn", ends_on: new Date().toISOString().slice(0, 10) })
-      .eq("school_id", user.schoolId)
-      .eq("student_id", request.student_id)
-      .eq("status", "active");
-
-    if (withdrawError) throw new Error(withdrawError.message);
-  }
 
   // On admission approval: create the enrollment if a class was requested
   if (decision === "approved" && request.request_type === "admission") {

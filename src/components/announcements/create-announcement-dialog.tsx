@@ -69,25 +69,25 @@ export function CreateAnnouncementDialog({
   }
 
   const modal = open ? (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/30 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-[20px] bg-white shadow-lift ring-1 ring-outline">
-        <div className="border-b border-outline px-6 py-5">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-lg rounded-xl bg-white shadow-[0_32px_80px_rgba(27,28,29,0.18)]">
+        <div className="border-b border-outline/40 px-6 py-4">
           <h2 className="font-display text-xl font-bold text-ink">New Announcement</h2>
           <p className="text-sm text-muted">Broadcast a message to all school staff members.</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4 p-6">
           <div>
             <label className="mb-1 block text-sm font-semibold text-ink">Title <span className="text-danger">*</span></label>
-            <input value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="e.g. Important Staff Meeting" className="w-full rounded-xl border border-outline px-4 py-2.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10" />
+            <input value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="e.g. Important Staff Meeting" className="w-full rounded-lg border border-outline/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
           </div>
           <div>
             <label className="mb-1 block text-sm font-semibold text-ink">Description <span className="text-danger">*</span></label>
-            <textarea value={form.description} onChange={(e) => set("description", e.target.value)} rows={3} placeholder="Provide full details of the announcement..." className="w-full resize-none rounded-xl border border-outline px-4 py-3 text-sm font-medium focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10" />
+            <textarea value={form.description} onChange={(e) => set("description", e.target.value)} rows={3} placeholder="Provide full details of the announcement..." className="w-full rounded-lg border border-outline/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="mb-1 block text-sm font-semibold text-ink">Priority</label>
-              <select value={form.priority} onChange={(e) => set("priority", e.target.value)} className="w-full rounded-xl border border-outline px-4 py-2.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10">
+              <select value={form.priority} onChange={(e) => set("priority", e.target.value)} className="w-full rounded-lg border border-outline/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
@@ -96,7 +96,7 @@ export function CreateAnnouncementDialog({
             </div>
             <div>
               <label className="mb-1 block text-sm font-semibold text-ink">Type</label>
-              <select value={form.type} onChange={(e) => set("type", e.target.value)} className="w-full rounded-xl border border-outline px-4 py-2.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10">
+              <select value={form.type} onChange={(e) => set("type", e.target.value)} className="w-full rounded-lg border border-outline/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
                 <option value="general">General</option>
                 <option value="academic">Academic</option>
                 <option value="holiday">Holiday</option>
@@ -109,7 +109,7 @@ export function CreateAnnouncementDialog({
           </div>
           <div>
             <label className="mb-1 block text-sm font-semibold text-ink">Audience</label>
-            <select value={form.audience_type} onChange={(e) => set("audience_type", e.target.value)} className="w-full rounded-xl border border-outline px-4 py-2.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10">
+            <select value={form.audience_type} onChange={(e) => set("audience_type", e.target.value)} className="w-full rounded-lg border border-outline/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
               <option value="all">All Staff</option>
               <option value="teachers">Teachers Only</option>
               <option value="registrar">Registrar Only</option>
@@ -119,17 +119,17 @@ export function CreateAnnouncementDialog({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="mb-1 block text-sm font-semibold text-ink">Publish Date</label>
-              <input type="date" value={form.publish_date} onChange={(e) => set("publish_date", e.target.value)} className="w-full rounded-xl border border-outline px-4 py-2.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10" />
+              <input type="date" value={form.publish_date} onChange={(e) => set("publish_date", e.target.value)} className="w-full rounded-lg border border-outline/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
             </div>
             <div>
               <label className="mb-1 block text-sm font-semibold text-ink">Expiry Date <span className="text-xs text-muted">(optional)</span></label>
-              <input type="date" value={form.expiry_date} onChange={(e) => set("expiry_date", e.target.value)} className="w-full rounded-xl border border-outline px-4 py-2.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10" />
+              <input type="date" value={form.expiry_date} onChange={(e) => set("expiry_date", e.target.value)} className="w-full rounded-lg border border-outline/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
             </div>
           </div>
           {error && <p className="text-sm font-semibold text-danger">{error}</p>}
           <div className="flex justify-end gap-2 pt-2">
-            <button type="button" onClick={() => setOpen(false)} className="rounded-xl border border-outline bg-white px-4 py-2 text-sm font-semibold text-ink hover:bg-surface-low">Cancel</button>
-            <button type="submit" disabled={isPending} className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white shadow-button hover:bg-primary-ink disabled:opacity-60">
+            <button type="button" onClick={() => setOpen(false)} className="rounded-lg border border-outline/60 px-4 py-2 text-sm font-semibold text-muted hover:bg-surface-low">Cancel</button>
+            <button type="submit" disabled={isPending} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-105 disabled:opacity-60">
               {isPending ? "Publishing..." : "Publish Announcement"}
             </button>
           </div>
@@ -143,7 +143,7 @@ export function CreateAnnouncementDialog({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={triggerClassName ?? "inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-white shadow-button hover:bg-primary-ink"}
+        className={triggerClassName ?? "inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-white shadow-soft hover:brightness-105"}
       >
         {triggerLabel}
       </button>

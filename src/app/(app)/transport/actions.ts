@@ -57,7 +57,7 @@ export async function assignTransportAction(formData: FormData) {
     throw error;
   }
   revalidatePath("/transport");
-  revalidatePath("/finance/student-fees");
+  revalidatePath("/finance/fees");
 }
 
 export async function removeTransportAction(formData: FormData) {
@@ -69,5 +69,5 @@ export async function removeTransportAction(formData: FormData) {
     throw error;
   }
   revalidatePath("/transport");
-  revalidatePath("/finance/student-fees");
+  revalidatePath("/finance/fees");
 }

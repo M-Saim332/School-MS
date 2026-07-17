@@ -1,43 +1,54 @@
-import { ClipboardPenLine } from "lucide-react";
 import { redirect } from "next/navigation";
+import { ClipboardPenLine } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Field, Input, Select } from "@/components/ui/form-field";
-import { requireUser } from "@/lib/auth/session";
-import { canManageSchoolBranding } from "@/lib/roles";
-import { getSpecialExamSetup } from "@/lib/services/special-exams";
+import { ResultsTable } from "@/app/(app)/results/_components/results-table";
 import { createSpecialExamAction } from "@/app/(app)/special-exams/actions";
+import { requireUser } from "@/lib/auth/session";
+import { getResultsManagementWorkspace } from "@/lib/services/marks";
+import { getSpecialExamSetup } from "@/lib/services/special-exams";
 
-export default async function SpecialExamsPage() {
+export default async function AcademicControlPage() {
   const user = await requireUser("academics:view");
-  if (!canManageSchoolBranding(user.role)) {
-    redirect("/academics/exams-setup");
+
+  if (user.role !== "principal") {
+    redirect("/academics");
   }
-  const setup = await getSpecialExamSetup(user);
+
+  const [setup, results] = await Promise.all([
+    getSpecialExamSetup(user),
+    getResultsManagementWorkspace(user, { status: "all" })
+  ]);
+
+  const pendingCount = results.filter((row) => row.workflowStatus === "pending_approval").length;
 
   return (
     <>
       <PageHeader
         eyebrow="Principal portal"
-        title="Special Exams"
-        description="Create special exam tasks for the assigned teacher of a class and subject."
+        title="Academic Control"
+        description="Manage live exam configurations and student result approvals from one unified view."
       />
 
-      <div className="grid gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
+      <div className="mb-6 rounded-lg bg-warning-soft p-4 text-sm font-semibold text-warning">
+        {pendingCount
+          ? `${pendingCount} major examination result${pendingCount === 1 ? "" : "s"} awaiting review.`
+          : "No major examination results are currently pending approval."}
+      </div>
+
+      <section className="grid gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
         <Card>
           <CardHeader>
             <CardTitle>Create Special Exam</CardTitle>
-            <ClipboardPenLine className="h-5 w-5 text-primary" />
+            <ClipboardPenLine className="h-5 w-5 text-primary" aria-hidden="true" />
           </CardHeader>
           <CardContent>
             {setup.migrationRequired ? (
-              <EmptyState
-                title="Database migration required"
-                description="Apply the latest School OS migration to enable special exam creation."
-              />
+              <EmptyState title="Database migration required" description="Apply the latest School OS migration to enable special exam creation." />
             ) : (
               <form action={createSpecialExamAction} className="grid gap-4">
                 <Field label="Teacher assignment">
@@ -75,13 +86,13 @@ export default async function SpecialExamsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Special Exam Tasks</CardTitle>
+            <CardTitle>Live Exam Configurations</CardTitle>
           </CardHeader>
           <CardContent>
             {setup.migrationRequired ? (
               <EmptyState title="Special exams unavailable" description="The hosted database does not have the special exam columns yet." />
             ) : !setup.exams.length ? (
-              <EmptyState title="No special exams yet" description="Created exams will appear for their assigned teacher in Marks Entry." />
+              <EmptyState title="No special exams yet" description="Created exams will appear for their assigned teacher in the Results Portal." />
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full text-left text-sm">
@@ -117,7 +128,20 @@ export default async function SpecialExamsPage() {
             )}
           </CardContent>
         </Card>
-      </div>
+      </section>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Student Results</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!results.length ? (
+            <EmptyState title="No results found" description="Uploaded major examination results will appear here for approval." />
+          ) : (
+            <ResultsTable rows={results} showApprovalColumns inlineApproval />
+          )}
+        </CardContent>
+      </Card>
     </>
   );
 }

@@ -1,10 +1,9 @@
-export type UserRole = "principal" | "teacher" | "student_staff" | "administrator" | "cashier" | "staff" | "head_teacher";
+export type UserRole = "principal" | "teacher" | "student_staff" | "administrator";
 export type StudentStatus =
   | "active"
   | "graduated"
   | "transferred"
   | "archived"
-  | "cancelled"
   | "pending_approval"
   | "pending_cancellation";
 export type AttendanceStatus = "present" | "absent" | "late" | "excused";
@@ -28,6 +27,8 @@ export type MarkStatus = "draft" | "submitted" | "approved" | "rejected";
 export type ResultApprovalStatus = "pending" | "approved" | "rejected";
 export type AssessmentCategory = "regular" | "major";
 export type ResultWorkflowStatus = "draft" | "uploaded" | "pending_approval" | "approved" | "rejected";
+export type StaffLeaveStatus = "pending" | "approved" | "rejected";
+export type StaffLeaveType = "casual" | "medical" | "annual" | "unpaid" | "other";
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
@@ -97,6 +98,25 @@ export type AppUser = {
   /** Resolved permission list (base role + custom role + overrides). Null means "use static defaults". */
   permissions: string[] | null;
   customRoleId: string | null;
+};
+
+export type StaffLeave = {
+  id: string;
+  school_id: string;
+  user_id: string;
+  leave_type: StaffLeaveType;
+  start_date: string;
+  end_date: string;
+  reason: string;
+  status: StaffLeaveStatus;
+  is_paid_leave: boolean;
+  principal_remarks: string | null;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+  updated_at: string;
+  applicant_name?: string | null;
+  reviewed_by_name?: string | null;
 };
 
 export type Student = {
@@ -194,8 +214,6 @@ export type Exam = {
   approved_by_principal_name: string | null;
   approved_at: string | null;
   rejection_reason: string | null;
-  is_special: boolean;
-  assigned_teacher_id: string | null;
   status: ExamStatus;
   submitted_at: string | null;
   finalized_at: string | null;
@@ -300,63 +318,6 @@ export type Payroll = {
 export type PayrollRow = Payroll & {
   teacher_name?: string | null;
   teacher_email?: string | null;
-};
-
-export type StaffLeaveStatus = "pending" | "approved" | "rejected";
-export type StaffLeaveType = "casual" | "medical" | "annual" | "unpaid" | "other";
-
-export type StaffLeave = {
-  id: string;
-  school_id: string;
-  user_id: string;
-  leave_type: StaffLeaveType;
-  start_date: string;
-  end_date: string;
-  reason: string;
-  status: StaffLeaveStatus;
-  is_paid_leave: boolean;
-  principal_remarks: string | null;
-  reviewed_by: string | null;
-  reviewed_at: string | null;
-  created_at: string;
-  updated_at: string;
-  applicant_name?: string | null;
-  reviewed_by_name?: string | null;
-};
-
-export type TransportRoute = {
-  id: string;
-  school_id: string;
-  name: string;
-  start_point: string;
-  end_point: string;
-  monthly_fare: number;
-};
-
-export type TransportDriver = {
-  id: string;
-  school_id: string;
-  full_name: string;
-  phone: string;
-  license_number: string;
-  status: "active" | "inactive";
-};
-
-export type TransportVehicle = {
-  id: string;
-  school_id: string;
-  plate_number: string;
-  seat_capacity: number;
-  driver_id: string | null;
-  route_id: string | null;
-  status: "active" | "maintenance" | "inactive";
-  driver_name?: string | null;
-  driver_phone?: string | null;
-  route_name?: string | null;
-  start_point?: string | null;
-  end_point?: string | null;
-  monthly_fare?: number | null;
-  passenger_count?: number;
 };
 
 // ─── Announcement Types ───────────────────────────────────────────────────────

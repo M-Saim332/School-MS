@@ -1,13 +1,15 @@
 import type { UserRole } from "@/types/database";
 
-export function canManageSchoolBranding(role: UserRole | undefined) {
-  return role === "administrator" || role === "principal";
+type RoleLike = UserRole | "admin" | undefined;
+
+export function canManageSchoolBranding(role: RoleLike) {
+  return role === "administrator" || role === "admin" || role === "principal";
 }
 
-export function usesPrincipalAcademicControl(role: UserRole | undefined) {
+export function usesPrincipalAcademicControl(role: RoleLike) {
   return role === "principal";
 }
 
-export function usesAcademicEvaluationTabs(role: UserRole | undefined) {
-  return role === "teacher" || role === "head_teacher" || role === "student_staff" || role === "administrator";
+export function usesAcademicEvaluationTabs(role: RoleLike) {
+  return role === "teacher" || role === "student_staff" || role === "administrator" || role === "admin";
 }

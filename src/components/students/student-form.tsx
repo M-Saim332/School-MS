@@ -71,7 +71,6 @@ export function StudentForm({
               <option value="graduated">Graduated</option>
               <option value="transferred">Transferred</option>
               <option value="archived">Archived</option>
-              <option value="cancelled">Cancelled</option>
             </Select>
           </Field>
           <Field label="First name" error={errors.first_name?.message}>

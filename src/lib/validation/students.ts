@@ -19,7 +19,7 @@ export const studentSchema = z.object({
   phone,
   address: z.string().trim().max(240).optional().nullable(),
   admission_date: z.string().date("Enter a valid admission date"),
-  status: z.enum(["active", "graduated", "transferred", "archived", "cancelled"]),
+  status: z.enum(["active", "graduated", "transferred", "archived"]),
   class_id: z.string().transform(v => v === "" ? null : v).pipe(z.string().uuid("Choose a valid class").nullable()).optional().nullable(),
   guardian_name: z.string().trim().min(1, "Guardian name is required").max(120),
   guardian_relationship: z.string().trim().min(1, "Relationship is required").max(60),

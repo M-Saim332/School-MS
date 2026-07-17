@@ -30,7 +30,7 @@ export async function createFeeStructureAction(formData: FormData) {
   
   revalidatePath("/finance/fee-structures");
   revalidatePath("/finance/dashboard");
-  revalidatePath("/finance/student-fees");
+  revalidatePath("/finance/fees");
 }
 
 export async function updateFeeStructureAction(id: string, formData: FormData) {
@@ -52,7 +52,7 @@ export async function updateFeeStructureAction(id: string, formData: FormData) {
 
   revalidatePath("/finance/fee-structures");
   revalidatePath("/finance/dashboard");
-  revalidatePath("/finance/student-fees");
+  revalidatePath("/finance/fees");
 }
 
 export async function deleteFeeStructureAction(id: string) {
@@ -61,7 +61,7 @@ export async function deleteFeeStructureAction(id: string) {
 
   revalidatePath("/finance/fee-structures");
   revalidatePath("/finance/dashboard");
-  revalidatePath("/finance/student-fees");
+  revalidatePath("/finance/fees");
 }
 
 export async function applyDiscountAction(accountId: string, formData: FormData) {
@@ -77,8 +77,7 @@ export async function applyDiscountAction(accountId: string, formData: FormData)
 
   await applyDiscount(user, accountId, values);
 
-  revalidatePath("/finance/student-fees");
-  revalidatePath(`/finance/student-fees/${accountId}`);
+  revalidatePath("/finance/fees");
   revalidatePath("/finance/dashboard");
 }
 
@@ -96,9 +95,8 @@ export async function recordPaymentAction(formData: FormData) {
 
   const payment = await recordPayment(user, values);
 
-  revalidatePath("/finance/payments");
-  revalidatePath("/finance/student-fees");
-  revalidatePath(`/finance/student-fees/${values.student_fee_account_id}`);
+  revalidatePath("/finance/fees");
+  revalidatePath("/finance/receipts");
   revalidatePath("/finance/dashboard");
   revalidatePath("/finance/receipts");
   
@@ -109,9 +107,8 @@ export async function voidPaymentAction(paymentId: string, reason: string) {
   const user = await requireUser("finance:manage");
   const payment = await voidPayment(user, paymentId, reason);
 
-  revalidatePath("/finance/payments");
-  revalidatePath("/finance/student-fees");
-  revalidatePath(`/finance/student-fees/${payment.student_fee_account_id}`);
+  revalidatePath("/finance/fees");
+  revalidatePath("/finance/receipts");
   revalidatePath("/finance/dashboard");
   revalidatePath("/finance/receipts");
 }

@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { hasPermission } from "@/lib/permissions";
 import { logActivity } from "@/lib/services/activity";
+import { canManageSchoolBranding } from "@/lib/roles";
 import type { AppUser } from "@/types/database";
 
 function isMissingSpecialExamSchema(error: { code?: string; message?: string } | null) {
@@ -85,7 +85,7 @@ export async function getSpecialExamSetup(user: AppUser) {
 }
 
 export async function createSpecialExam(user: AppUser, formData: FormData) {
-  if (!hasPermission(user.role, "special-exams:manage", user.permissions)) throw new Error("Unauthorized to create special exams.");
+  if (!canManageSchoolBranding(user.role)) throw new Error("Unauthorized to create special exams.");
   const assignmentKey = String(formData.get("assignment_key") ?? "");
   const [teacherId, classId, subjectId] = assignmentKey.split(":");
   if (!teacherId || !classId || !subjectId) throw new Error("Choose a teacher, class, and subject assignment.");

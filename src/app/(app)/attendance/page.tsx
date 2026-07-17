@@ -1,6 +1,5 @@
 import { PageHeader } from "@/components/layout/page-header";
 import { AttendanceForm } from "@/components/attendance/attendance-form";
-import { AttendanceRegisterView } from "@/components/attendance/attendance-register-view";
 import { requireUser } from "@/lib/auth/session";
 import { getAttendanceContext } from "@/lib/services/attendance";
 import { hasPermission } from "@/lib/permissions";
@@ -11,35 +10,24 @@ export default async function AttendancePage({ searchParams }: { searchParams: P
   const user = await requireUser("attendance:view");
   const context = await getAttendanceContext(user, params.classId, params.date);
   const selectedClass = context.classes.find((item) => item.id === context.selectedClassId);
-  const canOpenMarkingForm = hasPermission(user.role, "attendance:submit", user.permissions);
 
   return (
     <>
       <PageHeader
         eyebrow="Daily workflow"
         title="Attendance"
-        description={canOpenMarkingForm ? "Choose a date and class, mark the roster, and submit attendance once for that class and day." : "Review submitted attendance by class and date."}
+        description="Choose a date and class, mark the roster, and submit attendance once for that class and day."
       />
-      {canOpenMarkingForm ? (
-        <AttendanceForm
-          classes={context.classes}
-          roster={context.roster}
-          selectedClassId={context.selectedClassId}
-          attendanceDate={context.attendanceDate}
-          submitted={Boolean(context.session)}
-          canSubmit={Boolean(selectedClass?.can_mark_attendance) && !context.session}
-          restrictionMessage={selectedClass && !selectedClass.can_mark_attendance ? "Only the head teacher can mark attendance." : null}
-          onSubmit={submitAttendanceAction}
-        />
-      ) : (
-        <AttendanceRegisterView
-          classes={context.classes}
-          roster={context.roster}
-          selectedClassId={context.selectedClassId}
-          attendanceDate={context.attendanceDate}
-          submitted={Boolean(context.session)}
-        />
-      )}
+      <AttendanceForm
+        classes={context.classes}
+        roster={context.roster}
+        selectedClassId={context.selectedClassId}
+        attendanceDate={context.attendanceDate}
+        submitted={Boolean(context.session)}
+        canSubmit={hasPermission(user.role, "attendance:submit") && Boolean(selectedClass?.can_mark_attendance) && !context.session}
+        restrictionMessage={selectedClass && !selectedClass.can_mark_attendance ? "Only the head teacher can mark attendance." : null}
+        onSubmit={submitAttendanceAction}
+      />
     </>
   );
 }

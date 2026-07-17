@@ -7,10 +7,7 @@ const statusTone = {
   active: "green",
   graduated: "blue",
   transferred: "yellow",
-  archived: "gray",
-  cancelled: "red",
-  pending_approval: "yellow",
-  pending_cancellation: "yellow"
+  archived: "gray"
 } as const;
 
 export function StudentTable({ rows }: { rows: any[] }) {
@@ -19,10 +16,10 @@ export function StudentTable({ rows }: { rows: any[] }) {
   }
 
   return (
-    <div className="card-surface overflow-hidden rounded-[18px]">
+    <div className="overflow-hidden rounded-lg border border-outline bg-white">
       <div className="hidden overflow-x-auto lg:block">
         <table className="min-w-full text-left text-sm">
-          <thead className="font-label text-xs uppercase tracking-wide text-muted">
+          <thead className="bg-surface-low font-label text-xs uppercase tracking-wide text-muted">
             <tr>
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Admission</th>
@@ -34,9 +31,9 @@ export function StudentTable({ rows }: { rows: any[] }) {
           </thead>
           <tbody>
             {rows.map((student) => (
-              <tr key={student.id} className="border-t border-outline hover:bg-surface-low">
+              <tr key={student.id} className="border-t border-outline/60 hover:bg-surface-low/70">
                 <td className="px-4 py-4">
-                  <Link href={`/students/${student.id}`} className="font-semibold text-primary hover:text-primary-ink">
+                  <Link href={`/students/${student.id}`} className="font-semibold text-primary hover:underline">
                     {student.first_name} {student.last_name}
                   </Link>
                   <p className="text-xs text-muted">{student.email ?? "No email"}</p>
@@ -57,7 +54,7 @@ export function StudentTable({ rows }: { rows: any[] }) {
       </div>
       <div className="grid gap-3 p-3 lg:hidden">
         {rows.map((student) => (
-          <Link key={student.id} href={`/students/${student.id}`} className="rounded-2xl bg-surface-low p-4 ring-1 ring-outline/70 transition hover:bg-primary-soft">
+          <Link key={student.id} href={`/students/${student.id}`} className="rounded-lg bg-surface-low p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="font-semibold text-ink">

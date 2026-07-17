@@ -5,20 +5,17 @@ import { logActivity } from "@/lib/services/activity";
 import { staffFormSchema, type StaffFormValues } from "@/lib/validation/staff";
 
 const creatableRoles: Record<UserRole, UserRole[]> = {
-  administrator: ["administrator", "principal", "teacher", "head_teacher", "staff", "student_staff", "cashier"],
-  principal: ["teacher", "head_teacher", "staff", "student_staff", "cashier"],
+  administrator: ["administrator", "principal", "teacher", "student_staff"],
+  principal: ["teacher", "student_staff"],
   teacher: [],
-  student_staff: [],
-  cashier: [],
-  staff: [],
-  head_teacher: []
+  student_staff: []
 };
 
 export async function createStaffAccount(user: AppUser, values: StaffFormValues) {
   const parsed = staffFormSchema.parse(values);
   const adminClient = createAdminClient();
 
-  if (!(creatableRoles[user.role] ?? []).includes(parsed.role)) {
+  if (!creatableRoles[user.role].includes(parsed.role)) {
     throw new Error("You do not have permission to create that role.");
   }
 

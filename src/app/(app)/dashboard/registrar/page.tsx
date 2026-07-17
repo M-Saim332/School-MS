@@ -36,7 +36,7 @@ export default async function RegistrarDashboardPage() {
             <h3 className="font-display text-lg font-bold text-ink">Print Result Cards</h3>
             <p className="mt-1 text-sm text-muted">Generate and print official approved exam result cards for class registers.</p>
           </div>
-          <ButtonLink href="/results?view=cards">
+          <ButtonLink href="/academics/results?view=cards">
             Open Results <ArrowRight className="ml-1 h-4 w-4" />
           </ButtonLink>
         </div>
@@ -46,7 +46,7 @@ export default async function RegistrarDashboardPage() {
             <h3 className="font-display text-lg font-bold text-ink">Collect Fees</h3>
             <p className="mt-1 text-sm text-muted">Record student tuition payments and print localized receipts.</p>
           </div>
-          <ButtonLink href="/finance/payments" variant="secondary">
+          <ButtonLink href="/finance/fees" variant="secondary">
             Payments &rarr;
           </ButtonLink>
         </div>
@@ -96,7 +96,7 @@ export default async function RegistrarDashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Recent Payments</CardTitle>
-            <Link href="/finance/payments" className="text-xs font-bold text-primary hover:underline">
+            <Link href="/finance/fees" className="text-xs font-bold text-primary hover:underline">
               All History
             </Link>
           </CardHeader>

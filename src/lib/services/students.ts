@@ -179,56 +179,6 @@ export async function updateStudent(user: AppUser, id: string, values: StudentFo
 
   if (error) throw new Error(error.message);
 
-  const { data: guardianLink, error: guardianFetchError } = await supabase
-    .from("student_guardians")
-    .select("guardian_id")
-    .eq("school_id", user.schoolId)
-    .eq("student_id", id)
-    .order("is_primary", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (guardianFetchError) throw new Error(guardianFetchError.message);
-
-  if (guardianLink?.guardian_id) {
-    const { error: guardianUpdateError } = await supabase
-      .from("guardians")
-      .update({
-        full_name: parsed.guardian_name,
-        relationship: parsed.guardian_relationship,
-        email: parsed.guardian_email || null,
-        phone: parsed.guardian_phone,
-        emergency_contact_name: parsed.emergency_contact_name,
-        emergency_contact_phone: parsed.emergency_contact_phone
-      })
-      .eq("school_id", user.schoolId)
-      .eq("id", guardianLink.guardian_id);
-
-    if (guardianUpdateError) throw new Error(guardianUpdateError.message);
-  } else {
-    const { data: guardian, error: guardianInsertError } = await supabase
-      .from("guardians")
-      .insert({
-        school_id: user.schoolId,
-        full_name: parsed.guardian_name,
-        relationship: parsed.guardian_relationship,
-        email: parsed.guardian_email || null,
-        phone: parsed.guardian_phone,
-        emergency_contact_name: parsed.emergency_contact_name,
-        emergency_contact_phone: parsed.emergency_contact_phone
-      })
-      .select("id")
-      .single();
-
-    if (guardianInsertError) throw new Error(guardianInsertError.message);
-    await supabase.from("student_guardians").insert({
-      school_id: user.schoolId,
-      student_id: id,
-      guardian_id: guardian.id,
-      is_primary: true
-    });
-  }
-
   // Handle class assignment: upsert or withdraw enrollment
   if (parsed.class_id) {
     const { data: activeYear } = await supabase
@@ -309,14 +259,5 @@ export async function archiveStudent(user: AppUser, id: string) {
     .eq("id", id);
 
   if (error) throw new Error(error.message);
-
-  const { error: enrollError } = await supabase
-    .from("enrollments")
-    .update({ status: "withdrawn", ends_on: new Date().toISOString().slice(0, 10) })
-    .eq("school_id", user.schoolId)
-    .eq("student_id", id)
-    .eq("status", "active");
-
-  if (enrollError) throw new Error(enrollError.message);
   await logActivity(user, "student_archived", "student", id);
 }

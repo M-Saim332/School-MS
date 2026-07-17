@@ -59,13 +59,13 @@ export function ProfileForm({ profile }: { profile: ProfileDetails }) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
       {/* ── Avatar / Info Sidebar ── */}
-      <aside className="card-surface overflow-hidden rounded-[18px]">
-        <div className="border-b border-outline bg-surface-low p-6">
-          <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-primary text-2xl font-bold text-white shadow-button">
+      <aside className="card-surface overflow-hidden rounded-lg">
+        <div className="bg-gradient-to-br from-primary via-[#2d7dd2] to-success p-6 text-white">
+          <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-lg bg-white/20 text-2xl font-bold shadow-soft backdrop-blur">
             {initials(displayName)}
           </div>
-          <h2 className="mt-5 font-display text-2xl font-bold leading-tight tracking-tight text-ink">{displayName}</h2>
-          <p className="mt-1 text-sm font-semibold uppercase tracking-[0.14em] text-muted">
+          <h2 className="mt-5 font-display text-2xl font-semibold leading-tight">{displayName}</h2>
+          <p className="mt-1 text-sm font-semibold uppercase tracking-[0.16em] text-white/80">
             {profile.role.replace("_", " ")}
           </p>
         </div>
@@ -109,25 +109,25 @@ export function ProfileForm({ profile }: { profile: ProfileDetails }) {
       </aside>
 
       {/* ── Edit Form ── */}
-      <section className="card-surface rounded-[18px] p-6">
+      <section className="card-surface rounded-lg p-5 sm:p-6">
         <div className="mb-6">
           <p className="font-label text-xs font-bold uppercase tracking-[0.16em] text-primary">
             Account Details
           </p>
-          <h2 className="mt-1 font-display text-2xl font-bold tracking-tight text-ink">Profile Information</h2>
+          <h2 className="mt-1 font-display text-2xl font-semibold text-ink">Profile Information</h2>
           <p className="mt-1 text-sm text-muted">
             Administrators can view your work details in the staff directory.
           </p>
         </div>
 
         {message && (
-          <div className="mb-5 flex items-center gap-2 rounded-xl bg-success-soft px-4 py-3 text-sm font-semibold text-success">
+          <div className="mb-5 flex items-center gap-2 rounded-lg bg-success-soft px-3 py-2 text-sm font-semibold text-success">
             <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
             {message}
           </div>
         )}
         {error && (
-          <div className="mb-5 rounded-xl bg-danger-soft px-4 py-3 text-sm font-semibold text-danger">
+          <div className="mb-5 rounded-lg bg-danger-soft px-3 py-2 text-sm font-semibold text-danger">
             {error}
           </div>
         )}

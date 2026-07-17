@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatMonth } from "@/lib/services/payroll";
 import { RolesTab } from "@/components/settings/roles-tab";
 import { Lock } from "lucide-react";
+import { canManageSchoolBranding } from "@/lib/roles";
 
 interface Props {
   user: any;
@@ -36,7 +37,7 @@ export function SettingsTabs({ user, profile, schoolSettings, academicYears, mem
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const isAdmin = user.role === "administrator";
-  const canManageSchoolProfile = user.role === "administrator" || user.role === "principal";
+  const canManageSchoolProfile = canManageSchoolBranding(user.role);
 
   // Tab 1 Form State (Profile)
   const [profileForm, setProfileForm] = useState({
@@ -109,6 +110,7 @@ export function SettingsTabs({ user, profile, schoolSettings, academicYears, mem
 
   function handleSchoolSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!canManageSchoolProfile) return;
     setMessage(null);
     startTransition(async () => {
       const res = await updateSchoolProfileAction(schoolProfile.name, schoolProfile.timezone, {

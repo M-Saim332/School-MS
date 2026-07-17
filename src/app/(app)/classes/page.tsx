@@ -87,7 +87,7 @@ export default async function ClassesPage({
 
             return (
               <Card key={cls.id} className="flex h-full flex-col overflow-hidden">
-                <div className="h-1.5 bg-primary" />
+                <div className="h-1.5 bg-gradient-to-r from-primary via-accent to-tertiary-soft" />
 
                 <div className="flex flex-1 flex-col p-5">
                   <div className="flex items-start justify-between gap-3">

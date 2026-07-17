@@ -11,5 +11,7 @@ export async function reviewExamApprovalAction(approvalId: string, formData: For
 
   await reviewExamApproval(user, approvalId, decision, String(formData.get("principal_comment") ?? ""));
   revalidatePath("/results");
+  revalidatePath("/academics/results");
+  revalidatePath("/admin/academic-control");
   revalidatePath("/exam-approvals");
 }

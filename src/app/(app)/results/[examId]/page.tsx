@@ -27,7 +27,7 @@ export default async function ResultDetailPage({ params }: { params: Promise<{ e
         title={exam.title}
         description={`${formatExamType(exam.exam_type)} / ${exam.term} / ${exam.subjects?.name ?? "Subject"}`}
         actions={
-          <ButtonLink href="/results" variant="secondary">
+          <ButtonLink href="/academics/results" variant="secondary">
             <ArrowLeft className="h-4 w-4" /> Back to Results
           </ButtonLink>
         }
@@ -146,7 +146,7 @@ export default async function ResultDetailPage({ params }: { params: Promise<{ e
       {user.role === "teacher" && exam.workflowStatus === "rejected" ? (
         <p className="mt-4 text-sm text-muted">
           This result was rejected. You can edit marks from the{" "}
-          <Link href={`/marks?classId=${exam.class_id}&subjectId=${exam.subject_id}&examId=${exam.id}`} className="font-semibold text-primary">
+          <Link href={`/academics/results?classId=${exam.class_id}&subjectId=${exam.subject_id}&examId=${exam.id}`} className="font-semibold text-primary">
             Marks Entry
           </Link>{" "}
           page and resubmit for approval.

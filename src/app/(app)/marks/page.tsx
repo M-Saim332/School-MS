@@ -50,8 +50,8 @@ export default async function MarksPage({ searchParams }: { searchParams: Promis
         title="Marks Entry"
         description="Enter regular assessment marks that are approved immediately, or upload major examination results for Principal approval."
         actions={
-          <ButtonLink href="/results" variant="secondary">
-            Exams & Results
+          <ButtonLink href="/academics/results" variant="secondary">
+            My Result History
           </ButtonLink>
         }
       />
@@ -70,7 +70,7 @@ export default async function MarksPage({ searchParams }: { searchParams: Promis
                   {workspace.options.map((option) => (
                     <Link
                       key={`${option.class_id}:${option.subject_id}`}
-                      href={`/marks?classId=${option.class_id}&subjectId=${option.subject_id}`}
+                      href={`/academics/results?classId=${option.class_id}&subjectId=${option.subject_id}`}
                       className={`rounded-lg border px-3 py-3 text-sm transition ${
                         workspace.selected?.class_id === option.class_id && workspace.selected?.subject_id === option.subject_id
                           ? "border-primary bg-primary-soft text-primary"
@@ -154,7 +154,7 @@ export default async function MarksPage({ searchParams }: { searchParams: Promis
                     {workspace.exams.map((exam: any) => (
                       <Link
                         key={exam.id}
-                        href={`/marks?classId=${exam.class_id}&subjectId=${exam.subject_id}&examId=${exam.id}`}
+                        href={`/academics/results?classId=${exam.class_id}&subjectId=${exam.subject_id}&examId=${exam.id}`}
                         className={`rounded-lg border p-3 text-sm transition ${
                           selectedExam?.id === exam.id ? "border-primary bg-primary-soft" : "border-outline/50 bg-white hover:bg-surface-low"
                         }`}

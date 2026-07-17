@@ -6,15 +6,15 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
       <div className="w-full max-w-md">
         <div className="mb-8 flex items-center justify-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-button">
+          <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary text-white">
             <BookOpen aria-hidden="true" />
           </div>
           <div>
-            <p className="font-display text-3xl font-bold leading-tight tracking-tight text-ink">GoCampusFlow</p>
+            <p className="font-display text-3xl font-bold leading-tight text-primary">GoCampusFlow</p>
             <p className="font-label text-xs font-semibold uppercase tracking-wider text-muted">Secure school management</p>
           </div>
         </div>
-        <div className="card-surface rounded-[20px] p-8">{children}</div>
+        <div className="card-surface rounded-lg p-6">{children}</div>
       </div>
     </main>
   );

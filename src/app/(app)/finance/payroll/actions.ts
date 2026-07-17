@@ -16,7 +16,7 @@ export async function generatePayrollAction(month: string) {
   try {
     const user = await requireUser("payroll:manage");
     await generateMonthlyPayroll(user, month);
-    revalidatePath("/payroll");
+    revalidatePath("/finance/payroll");
     return { ok: true };
   } catch (err: any) {
     return { error: err.message };
@@ -27,7 +27,7 @@ export async function markPayrollPaidAction(payrollId: string) {
   try {
     const user = await requireUser("payroll:manage");
     await markPayrollPaid(user, payrollId);
-    revalidatePath("/payroll");
+    revalidatePath("/finance/payroll");
     return { ok: true };
   } catch (err: any) {
     return { error: err.message };
@@ -44,7 +44,7 @@ export async function createAdjustmentAction(data: {
   try {
     const user = await requireUser("payroll:manage");
     await createSalaryAdjustment(user, data);
-    revalidatePath("/payroll");
+    revalidatePath("/finance/payroll");
     return { ok: true };
   } catch (err: any) {
     return { error: err.message };
@@ -55,7 +55,7 @@ export async function deleteAdjustmentAction(adjustmentId: string) {
   try {
     const user = await requireUser("payroll:manage");
     await deleteSalaryAdjustment(user, adjustmentId);
-    revalidatePath("/payroll");
+    revalidatePath("/finance/payroll");
     return { ok: true };
   } catch (err: any) {
     return { error: err.message };
@@ -77,7 +77,7 @@ export async function saveEmploymentDetailsAction(
   try {
     const user = await requireUser("payroll:manage");
     await upsertTeacherEmploymentDetails(user, teacherId, data);
-    revalidatePath("/payroll");
+    revalidatePath("/finance/payroll");
     revalidatePath("/teachers");
     return { ok: true };
   } catch (err: any) {
