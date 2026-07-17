@@ -108,6 +108,9 @@ npm install
    - `202607120001_principal_class_management.sql`
    - `202607120002_exam_results_workflow.sql`
    - `202607130001_finance_module.sql`
+   - `202607140001_pakistan_erp_enhancements.sql`
+   - `202607150002_custom_roles_and_profile_improvements.sql`
+   - `202607160001_school_os_workflows.sql`
 
    If you use the Supabase CLI with a linked project you can run all migrations at once:
 

@@ -233,8 +233,8 @@ begin
 end;
 $$;
 
--- 13. Seed default permissions for the existing demo school
-select public.initialize_school_permissions('00000000-0000-0000-0000-000000000001'::uuid);
+-- 13. Seed default permissions for any existing schools (if applied to an existing database)
+select public.initialize_school_permissions(id) from public.schools;
 
 -- 14. Trigger to auto-initialize permissions for any new school
 create or replace function public.on_school_created()
