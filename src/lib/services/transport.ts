@@ -11,7 +11,6 @@ function isMissingTransportSchema(error: { code?: string; message?: string } | n
     error.message?.includes("public.transport_routes") ||
     error.message?.includes("public.transport_drivers") ||
     error.message?.includes("public.transport_vehicles") ||
-    error.message?.includes("public.transport_vehicle_dashboard") ||
     error.message?.includes("public.student_transport_assignments") ||
     error.message?.includes("assign_student_transport")
   );
@@ -32,7 +31,7 @@ export async function getTransportDashboard(user: AppUser) {
   const [routes, drivers, vehicles, assignments, students] = await Promise.all([
     supabase.from("transport_routes").select("*").eq("school_id", user.schoolId).order("name"),
     supabase.from("transport_drivers").select("*").eq("school_id", user.schoolId).order("full_name"),
-    supabase.from("transport_vehicle_dashboard").select("*").eq("school_id", user.schoolId).order("plate_number"),
+    supabase.from("transport_vehicles").select("*").eq("school_id", user.schoolId).order("plate_number"),
     supabase
       .from("student_transport_assignments")
       .select("id,vehicle_id,student_id,students(first_name,last_name,admission_number)")
@@ -63,7 +62,22 @@ export async function getTransportDashboard(user: AppUser) {
   return {
     routes: routes.data ?? [],
     drivers: drivers.data ?? [],
-    vehicles: vehicles.data ?? [],
+    vehicles: (vehicles.data ?? []).map((vehicle: any) => {
+      const driver = (drivers.data ?? []).find((item: any) => item.id === vehicle.driver_id);
+      const route = (routes.data ?? []).find((item: any) => item.id === vehicle.route_id);
+      const passengerCount = (assignments.data ?? []).filter((item: any) => item.vehicle_id === vehicle.id).length;
+
+      return {
+        ...vehicle,
+        driver_name: driver?.full_name ?? null,
+        driver_phone: driver?.phone ?? null,
+        route_name: route?.name ?? null,
+        start_point: route?.start_point ?? null,
+        end_point: route?.end_point ?? null,
+        monthly_fare: route?.monthly_fare ?? null,
+        passenger_count: passengerCount
+      };
+    }),
     assignments: (assignments.data ?? []).map((row: any) => ({
       id: row.id,
       vehicle_id: row.vehicle_id,
@@ -79,15 +93,26 @@ export async function getTransportDashboard(user: AppUser) {
 export async function createTransportRoute(user: AppUser, formData: FormData) {
   assertCanManageTransport(user);
   const supabase = await createClient();
-  const { error } = await supabase.from("transport_routes").insert({
+  const vehicleId = String(formData.get("vehicle_id") ?? "");
+  const { data, error } = await supabase.from("transport_routes").insert({
     school_id: user.schoolId,
     name: String(formData.get("name") ?? "").trim(),
     start_point: String(formData.get("start_point") ?? "").trim(),
     end_point: String(formData.get("end_point") ?? "").trim(),
     monthly_fare: Number(formData.get("monthly_fare") ?? 0)
-  });
+  }).select("id").single();
   if (isMissingTransportSchema(error)) throw new Error(missingTransportMessage());
   if (error) throw new Error(error.message);
+
+  if (vehicleId && data?.id) {
+    const { error: vehicleError } = await supabase
+      .from("transport_vehicles")
+      .update({ route_id: data.id })
+      .eq("school_id", user.schoolId)
+      .eq("id", vehicleId);
+    if (isMissingTransportSchema(vehicleError)) throw new Error(missingTransportMessage());
+    if (vehicleError) throw new Error(vehicleError.message);
+  }
 }
 
 export async function createTransportDriver(user: AppUser, formData: FormData) {
@@ -119,6 +144,28 @@ export async function createTransportVehicle(user: AppUser, formData: FormData) 
   });
   if (isMissingTransportSchema(error)) throw new Error(missingTransportMessage());
   if (error) throw new Error(error.message);
+}
+
+export async function updateTransportVehicle(user: AppUser, formData: FormData) {
+  assertCanManageTransport(user);
+  const supabase = await createClient();
+  const vehicleId = String(formData.get("vehicle_id") ?? "");
+  const driverId = String(formData.get("driver_id") ?? "");
+  const routeId = String(formData.get("route_id") ?? "");
+  const { error } = await supabase
+    .from("transport_vehicles")
+    .update({
+      driver_id: driverId || null,
+      route_id: routeId || null
+    })
+    .eq("school_id", user.schoolId)
+    .eq("id", vehicleId);
+  if (isMissingTransportSchema(error)) throw new Error(missingTransportMessage());
+  if (error) throw new Error(error.message);
+  await logActivity(user, "transport_vehicle_updated", "transport_vehicle", vehicleId, {
+    driver_id: driverId || null,
+    route_id: routeId || null
+  });
 }
 
 export async function assignStudentToVehicle(user: AppUser, formData: FormData) {

@@ -8,7 +8,8 @@ import {
   createTransportDriver,
   createTransportRoute,
   createTransportVehicle,
-  removeStudentTransport
+  removeStudentTransport,
+  updateTransportVehicle
 } from "@/lib/services/transport";
 
 function isMigrationRequiredError(error: unknown) {
@@ -41,6 +42,17 @@ export async function createVehicleAction(formData: FormData) {
   const user = await requireUser("transport:manage");
   try {
     await createTransportVehicle(user, formData);
+  } catch (error) {
+    if (isMigrationRequiredError(error)) redirect("/transport");
+    throw error;
+  }
+  revalidatePath("/transport");
+}
+
+export async function updateVehicleAction(formData: FormData) {
+  const user = await requireUser("transport:manage");
+  try {
+    await updateTransportVehicle(user, formData);
   } catch (error) {
     if (isMigrationRequiredError(error)) redirect("/transport");
     throw error;

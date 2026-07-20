@@ -1,7 +1,8 @@
 import { Suspense } from "react";
-import { Mail, Phone, AtSign, Building2 } from "lucide-react";
+import type { ReactNode } from "react";
+import { AtSign, Building2, ChevronDown, KeyRound, Mail, Phone, ShieldCheck, Users } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { requireUser } from "@/lib/auth/session";
@@ -30,8 +31,6 @@ export default async function StaffPage({
 }) {
   const params = await searchParams;
   const user = await requireUser("staff:view");
-
-  // Fetch custom roles for the filter dropdown and role name resolution
   const supabase = await createClient();
   const { data: customRoles } = await supabase
     .from("custom_roles")
@@ -52,14 +51,9 @@ export default async function StaffPage({
         eyebrow="School Directory"
         title="Staff"
         description="View all staff profiles, departments, roles, statuses, and class assignment summaries."
-        actions={
-          canCreateUsers ? (
-            <StaffFormModal allowedRoles={[...allowedRoles]} triggerLabel="Add Staff Member" />
-          ) : null
-        }
+        actions={canCreateUsers ? <StaffFormModal allowedRoles={[...allowedRoles]} triggerLabel="Add Staff Member" /> : null}
       />
 
-      {/* Search & Filter — no submit button, auto-applies on change */}
       <Card className="mb-5 p-4">
         <Suspense>
           <StaffFilterForm customRoles={customRoles ?? []} />
@@ -72,75 +66,77 @@ export default async function StaffPage({
           description="Try a different search or role filter, or invite new staff from Settings."
         />
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-3">
           {staff.map((member: any) => (
-            <Card key={member.member_id} className="overflow-hidden">
-              <div className="h-1.5 bg-primary" />
+            <details key={member.member_id} className="group overflow-hidden rounded-[18px] bg-white shadow-card ring-1 ring-outline/70">
+              <summary className="grid cursor-pointer gap-4 px-5 py-4 transition hover:bg-surface-low md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+                <div className="min-w-0">
+                  <div className="mb-2 flex flex-wrap gap-2">
+                    <Badge tone="blue">{getRoleLabel(member.role, member.custom_role_name)}</Badge>
+                    <Badge tone={member.status === "active" ? "green" : "gray"}>{member.status}</Badge>
+                    {member.must_change_password ? <Badge tone="yellow">Password reset</Badge> : null}
+                  </div>
+                  <h2 className="truncate font-display text-lg font-semibold text-ink">{member.full_name}</h2>
+                  <p className="mt-1 flex items-center gap-1.5 text-sm text-muted">
+                    <Mail className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                    <span className="truncate">{member.email}</span>
+                  </p>
+                </div>
+                <div className="flex items-center justify-end gap-3">
+                  <span className="text-sm font-semibold text-muted">
+                    {member.assigned_classes ?? 0} assigned class{Number(member.assigned_classes ?? 0) === 1 ? "" : "es"}
+                  </span>
+                  <ChevronDown className="h-4 w-4 text-muted transition group-open:rotate-180" aria-hidden="true" />
+                </div>
+              </summary>
 
-              <div className="p-5">
-                {/* Header row */}
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <h2 className="font-display text-xl font-semibold text-ink truncate">
-                      {member.full_name}
-                    </h2>
-                    <p className="mt-1 flex items-center gap-1.5 text-sm text-muted">
-                      <Mail className="h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
-                      <span className="truncate">{member.email}</span>
-                    </p>
-                    {member.personal_email && (
-                      <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted">
-                        <AtSign className="h-3 w-3 flex-shrink-0" aria-hidden="true" />
-                        <span className="truncate">{member.personal_email}</span>
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                    <Badge tone={member.status === "active" ? "green" : "gray"}>
-                      {member.status}
-                    </Badge>
-                    {member.must_change_password ? (
-                      <Badge tone="yellow">Password reset</Badge>
-                    ) : null}
-                  </div>
+              <div className="grid gap-5 border-t border-outline/60 p-5">
+                <div className="grid gap-3 md:grid-cols-4">
+                  <StaffInfo icon={<ShieldCheck className="h-4 w-4" />} label="Role" value={getRoleLabel(member.role, member.custom_role_name)} />
+                  <StaffInfo icon={<Building2 className="h-4 w-4" />} label="Department" value={[member.department, member.job_title].filter(Boolean).join(" / ") || "Not set"} />
+                  <StaffInfo icon={<Phone className="h-4 w-4" />} label="Phone" value={member.phone || "Not provided"} />
+                  <StaffInfo icon={<Users className="h-4 w-4" />} label="Assigned Classes" value={String(member.assigned_classes ?? 0)} />
                 </div>
 
-                <CardContent className="mt-4 grid gap-2 p-0 text-sm text-muted">
-                  {/* Role */}
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-ink">Role:</span>
-                    <span>{getRoleLabel(member.role, member.custom_role_name)}</span>
-                  </div>
-
-                  {/* Department */}
-                  {(member.department || member.job_title) && (
-                    <div className="flex items-center gap-2">
-                      <Building2 className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-                      <span>
-                        {[member.department, member.job_title].filter(Boolean).join(" · ")}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Phone */}
-                  {member.phone && (
-                    <p className="flex items-center gap-1.5">
-                      <Phone className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-                      <span>{member.phone}</span>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div className="rounded-lg border border-outline/40 bg-surface-low p-3 text-sm">
+                    <p className="mb-2 font-label text-xs font-bold uppercase tracking-wide text-muted">Contact</p>
+                    <p className="flex items-center gap-2 font-semibold text-ink">
+                      <Mail className="h-4 w-4 text-primary" aria-hidden="true" />
+                      <span className="truncate">{member.email}</span>
                     </p>
-                  )}
-
-                  {/* Classes */}
-                  <p>
-                    <span className="font-semibold text-ink">Assigned classes:</span>{" "}
-                    {member.assigned_classes ?? 0}
-                  </p>
-                </CardContent>
+                    {member.personal_email ? (
+                      <p className="mt-2 flex items-center gap-2 text-muted">
+                        <AtSign className="h-4 w-4 text-primary" aria-hidden="true" />
+                        <span className="truncate">{member.personal_email}</span>
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="rounded-lg border border-outline/40 bg-surface-low p-3 text-sm">
+                    <p className="mb-2 font-label text-xs font-bold uppercase tracking-wide text-muted">Account</p>
+                    <p className="flex items-center gap-2 text-muted">
+                      <KeyRound className="h-4 w-4 text-primary" aria-hidden="true" />
+                      <span>{member.must_change_password ? "Must change password on next login" : "Password is active"}</span>
+                    </p>
+                  </div>
+                </div>
               </div>
-            </Card>
+            </details>
           ))}
         </div>
       )}
     </>
+  );
+}
+
+function StaffInfo({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-outline/40 bg-surface-low p-3 text-sm">
+      <div className="mb-1 flex items-center gap-1.5 text-muted">
+        <span className="text-primary">{icon}</span>
+        {label}
+      </div>
+      <p className="truncate font-semibold text-ink">{value}</p>
+    </div>
   );
 }

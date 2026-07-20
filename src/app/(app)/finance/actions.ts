@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/session";
 import {
   createFeeStructure,
+  upsertFeeStructuresForClasses,
   updateFeeStructure,
   deleteFeeStructure,
   applyDiscount,
@@ -28,7 +29,28 @@ export async function createFeeStructureAction(formData: FormData) {
 
   await createFeeStructure(user, values);
   
-  revalidatePath("/finance/fee-structures");
+  revalidatePath("/finance/fees");
+  revalidatePath("/finance/dashboard");
+  revalidatePath("/finance/student-fees");
+}
+
+export async function createFeeStructuresForClassesAction(formData: FormData) {
+  const user = await requireUser("finance:manage");
+  const classIds = formData.getAll("class_ids").map(String).filter(Boolean);
+  const values = {
+    academic_year_id: formData.get("academic_year_id") as string,
+    tuition_fee: Number(formData.get("tuition_fee")),
+    admission_fee: Number(formData.get("admission_fee")),
+    examination_fee: Number(formData.get("examination_fee")),
+    library_fee: Number(formData.get("library_fee")),
+    laboratory_fee: Number(formData.get("laboratory_fee")),
+    transport_fee: Number(formData.get("transport_fee")),
+    miscellaneous_charges: Number(formData.get("miscellaneous_charges"))
+  };
+
+  await upsertFeeStructuresForClasses(user, values, classIds);
+
+  revalidatePath("/finance/fees");
   revalidatePath("/finance/dashboard");
   revalidatePath("/finance/student-fees");
 }
@@ -50,7 +72,7 @@ export async function updateFeeStructureAction(id: string, formData: FormData) {
 
   await updateFeeStructure(user, id, values);
 
-  revalidatePath("/finance/fee-structures");
+  revalidatePath("/finance/fees");
   revalidatePath("/finance/dashboard");
   revalidatePath("/finance/student-fees");
 }
@@ -59,7 +81,7 @@ export async function deleteFeeStructureAction(id: string) {
   const user = await requireUser("finance:manage");
   await deleteFeeStructure(user, id);
 
-  revalidatePath("/finance/fee-structures");
+  revalidatePath("/finance/fees");
   revalidatePath("/finance/dashboard");
   revalidatePath("/finance/student-fees");
 }
@@ -77,6 +99,7 @@ export async function applyDiscountAction(accountId: string, formData: FormData)
 
   await applyDiscount(user, accountId, values);
 
+  revalidatePath("/finance/fees");
   revalidatePath("/finance/student-fees");
   revalidatePath(`/finance/student-fees/${accountId}`);
   revalidatePath("/finance/dashboard");
@@ -97,10 +120,10 @@ export async function recordPaymentAction(formData: FormData) {
   const payment = await recordPayment(user, values);
 
   revalidatePath("/finance/payments");
+  revalidatePath("/finance/fees");
   revalidatePath("/finance/student-fees");
   revalidatePath(`/finance/student-fees/${values.student_fee_account_id}`);
   revalidatePath("/finance/dashboard");
-  revalidatePath("/finance/receipts");
   
   return payment;
 }
@@ -110,8 +133,8 @@ export async function voidPaymentAction(paymentId: string, reason: string) {
   const payment = await voidPayment(user, paymentId, reason);
 
   revalidatePath("/finance/payments");
+  revalidatePath("/finance/fees");
   revalidatePath("/finance/student-fees");
   revalidatePath(`/finance/student-fees/${payment.student_fee_account_id}`);
   revalidatePath("/finance/dashboard");
-  revalidatePath("/finance/receipts");
 }

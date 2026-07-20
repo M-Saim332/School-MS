@@ -76,6 +76,49 @@ export async function createFeeStructure(user: AppUser, values: any) {
   return data;
 }
 
+export async function upsertFeeStructuresForClasses(user: AppUser, values: any, classIds: string[]) {
+  if (!hasPermission(user.role, "finance:manage")) {
+    throw new Error("Unauthorized to manage fee structures");
+  }
+
+  if (!classIds.length) {
+    throw new Error("Choose at least one class for this fee structure");
+  }
+
+  const parsed = feeStructureSchema.parse({
+    ...values,
+    class_id: classIds[0]
+  });
+  const supabase = await createClient();
+  const rows = classIds.map((classId) => ({
+    school_id: user.schoolId,
+    academic_year_id: parsed.academic_year_id,
+    class_id: classId,
+    tuition_fee: parsed.tuition_fee,
+    admission_fee: parsed.admission_fee,
+    examination_fee: parsed.examination_fee,
+    library_fee: parsed.library_fee,
+    laboratory_fee: parsed.laboratory_fee,
+    transport_fee: parsed.transport_fee,
+    miscellaneous_charges: parsed.miscellaneous_charges
+  }));
+
+  const { data, error } = await supabase
+    .from("fee_structures")
+    .upsert(rows, { onConflict: "school_id,academic_year_id,class_id" })
+    .select();
+
+  if (error) throw new Error(error.message);
+
+  await logFinanceAction(user, "fee_structures_bulk_upserted", null, null, {
+    academic_year_id: parsed.academic_year_id,
+    class_count: classIds.length,
+    values: rows[0]
+  });
+
+  return data ?? [];
+}
+
 export async function updateFeeStructure(user: AppUser, id: string, values: any) {
   if (!hasPermission(user.role, "finance:manage")) {
     throw new Error("Unauthorized to manage fee structures");

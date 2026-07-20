@@ -1,13 +1,20 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import Link from "next/link";
-import { Search, Percent, X, Printer, Receipt, Wallet } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Download, Edit2, Plus, Search, Percent, X, Printer, Receipt, Trash2, Wallet } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input, Select, Field, Textarea } from "@/components/ui/form-field";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { applyDiscountAction, recordPaymentAction } from "@/app/(app)/finance/actions";
+import {
+  applyDiscountAction,
+  createFeeStructureAction,
+  createFeeStructuresForClassesAction,
+  deleteFeeStructureAction,
+  recordPaymentAction,
+  updateFeeStructureAction
+} from "@/app/(app)/finance/actions";
 import { hasPermission } from "@/lib/permissions";
 import type { AppUser } from "@/types/database";
 import { formatPKR, formatDatePK } from "@/lib/utils";
@@ -18,6 +25,7 @@ interface FeeManagementClientProps {
   classes: any[];
   sessions: any[];
   payments: any[];
+  structures: any[];
 }
 
 const statusTone = {
@@ -27,7 +35,8 @@ const statusTone = {
   overdue: "red"
 } as const;
 
-export function FeeManagementClient({ user, accounts, classes, sessions, payments }: FeeManagementClientProps) {
+export function FeeManagementClient({ user, accounts, classes, sessions, payments, structures }: FeeManagementClientProps) {
+  const router = useRouter();
   const [q, setQ] = useState("");
   const [classId, setClassId] = useState("all");
   const [status, setStatus] = useState("all");
@@ -48,6 +57,20 @@ export function FeeManagementClient({ user, accounts, classes, sessions, payment
   const [discountValue, setDiscountValue] = useState("0");
   const [discountReason, setDiscountReason] = useState<"scholarship" | "sibling_discount" | "merit" | "need_based" | "special_approval">("scholarship");
   const [discountRemarks, setDiscountRemarks] = useState("");
+  const [selectedReceipt, setSelectedReceipt] = useState<any | null>(null);
+  const [isStructureOpen, setIsStructureOpen] = useState(false);
+  const [editingStructure, setEditingStructure] = useState<any | null>(null);
+  const [structureScope, setStructureScope] = useState<"one" | "all">("one");
+  const [structureSessionId, setStructureSessionId] = useState("");
+  const [structureClassId, setStructureClassId] = useState("");
+  const [tuition, setTuition] = useState("0");
+  const [admission, setAdmission] = useState("0");
+  const [exam, setExam] = useState("0");
+  const [library, setLibrary] = useState("0");
+  const [lab, setLab] = useState("0");
+  const [transport, setTransport] = useState("0");
+  const [misc, setMisc] = useState("0");
+  const [structureError, setStructureError] = useState<string | null>(null);
 
   const canManage = hasPermission(user.role, "finance:manage", user.permissions);
 
@@ -83,6 +106,99 @@ export function FeeManagementClient({ user, accounts, classes, sessions, payment
     }),
     { payable: 0, paid: 0, outstanding: 0 }
   );
+  const structureTotal =
+    Number(tuition || 0) +
+    Number(admission || 0) +
+    Number(exam || 0) +
+    Number(library || 0) +
+    Number(lab || 0) +
+    Number(transport || 0) +
+    Number(misc || 0);
+
+  function resetStructureForm() {
+    setEditingStructure(null);
+    setStructureScope("one");
+    setStructureSessionId(sessions[0]?.id || "");
+    setStructureClassId(classes[0]?.id || "");
+    setTuition("0");
+    setAdmission("0");
+    setExam("0");
+    setLibrary("0");
+    setLab("0");
+    setTransport("0");
+    setMisc("0");
+    setStructureError(null);
+  }
+
+  function handleOpenStructure() {
+    resetStructureForm();
+    setIsStructureOpen(true);
+  }
+
+  function handleOpenEditStructure(struct: any) {
+    setEditingStructure(struct);
+    setStructureScope("one");
+    setStructureSessionId(struct.academic_year_id);
+    setStructureClassId(struct.class_id);
+    setTuition(String(struct.tuition_fee));
+    setAdmission(String(struct.admission_fee));
+    setExam(String(struct.examination_fee));
+    setLibrary(String(struct.library_fee));
+    setLab(String(struct.laboratory_fee));
+    setTransport(String(struct.transport_fee));
+    setMisc(String(struct.miscellaneous_charges));
+    setStructureError(null);
+    setIsStructureOpen(true);
+  }
+
+  async function handleSubmitStructure(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setStructureError(null);
+
+    const formData = new FormData();
+    formData.append("academic_year_id", structureSessionId);
+    formData.append("class_id", structureClassId);
+    formData.append("tuition_fee", tuition);
+    formData.append("admission_fee", admission);
+    formData.append("examination_fee", exam);
+    formData.append("library_fee", library);
+    formData.append("laboratory_fee", lab);
+    formData.append("transport_fee", transport);
+    formData.append("miscellaneous_charges", misc);
+
+    if (!editingStructure && structureScope === "all") {
+      classes.forEach((cls) => formData.append("class_ids", cls.id));
+    }
+
+    startTransition(async () => {
+      try {
+        if (editingStructure) {
+          await updateFeeStructureAction(editingStructure.id, formData);
+        } else if (structureScope === "all") {
+          await createFeeStructuresForClassesAction(formData);
+        } else {
+          await createFeeStructureAction(formData);
+        }
+        setIsStructureOpen(false);
+        router.refresh();
+      } catch (err: any) {
+        setStructureError(err.message || "Failed to save fee structure.");
+      }
+    });
+  }
+
+  function handleDeleteStructure(id: string) {
+    if (!window.confirm("Delete this fee structure? Student fee accounts mapped to it may be affected.")) return;
+
+    startTransition(async () => {
+      try {
+        await deleteFeeStructureAction(id);
+        router.refresh();
+      } catch (err: any) {
+        setStructureError(err.message || "Failed to delete fee structure.");
+      }
+    });
+  }
 
   function handleOpenDiscount(acc: any) {
     setSelectedAccount(acc);
@@ -108,6 +224,7 @@ export function FeeManagementClient({ user, accounts, classes, sessions, payment
       try {
         await applyDiscountAction(selectedAccount.id, formData);
         setIsDiscountOpen(false);
+        router.refresh();
       } catch (err: any) {
         setError(err.message || "Failed to apply discount.");
       }
@@ -145,6 +262,7 @@ export function FeeManagementClient({ user, accounts, classes, sessions, payment
         setTransactionNumber("");
         setReferenceNumber("");
         setRemarks("");
+        router.refresh();
       } catch (err: any) {
         setFormError(err.message || "Failed to record payment.");
       }
@@ -155,6 +273,30 @@ export function FeeManagementClient({ user, accounts, classes, sessions, payment
     <>
       <div id="fee-management-report" className="pb-24">
         <Card className="mb-6 p-4">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-outline/50 pb-4">
+            <div>
+              <p className="text-sm font-semibold text-ink">Fee structures</p>
+              <p className="text-xs text-muted">{structures.length} structure{structures.length === 1 ? "" : "s"} configured for student billing.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {canManage ? (
+                <button
+                  type="button"
+                  onClick={handleOpenStructure}
+                  className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-white shadow-soft hover:brightness-105"
+                >
+                  <Plus className="h-4 w-4" /> Add Fee Structure
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => downloadReport(filtered)}
+                className="inline-flex h-10 items-center gap-2 rounded-lg bg-white px-4 text-sm font-semibold text-primary ring-1 ring-outline hover:bg-primary-soft"
+              >
+                <Download className="h-4 w-4" /> Download Report
+              </button>
+            </div>
+          </div>
           <div className="grid gap-4 md:grid-cols-5">
             <div className="relative md:col-span-2">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
@@ -194,6 +336,48 @@ export function FeeManagementClient({ user, accounts, classes, sessions, payment
             <span>Show discounted accounts only</span>
           </label>
         </Card>
+
+        {structures.length ? (
+          <details className="mb-6 overflow-hidden rounded-lg bg-white ring-1 ring-outline/70">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-ink hover:bg-surface-low">
+              <span>Manage existing fee structures</span>
+              <span className="text-xs text-muted">{structures.length} total</span>
+            </summary>
+            <div className="overflow-x-auto border-t border-outline/50">
+              <table className="min-w-full text-left text-sm">
+                <thead className="bg-surface-low font-label text-xs uppercase tracking-wide text-muted">
+                  <tr>
+                    <th className="px-4 py-3">Session</th>
+                    <th className="px-4 py-3">Class</th>
+                    <th className="px-4 py-3">Total</th>
+                    {canManage ? <th className="px-4 py-3 text-right">Actions</th> : null}
+                  </tr>
+                </thead>
+                <tbody>
+                  {structures.map((struct) => (
+                    <tr key={struct.id} className="border-t border-outline/60">
+                      <td className="px-4 py-3 font-semibold text-primary">{struct.academic_years?.name}</td>
+                      <td className="px-4 py-3 font-semibold text-ink">{struct.classes?.grade_name} / {struct.classes?.name}</td>
+                      <td className="px-4 py-3">{formatPKR(feeStructureTotal(struct))}</td>
+                      {canManage ? (
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex justify-end gap-2">
+                            <button type="button" onClick={() => handleOpenEditStructure(struct)} className="rounded p-1 text-muted hover:bg-surface-low hover:text-primary" aria-label="Edit fee structure">
+                              <Edit2 className="h-4 w-4" />
+                            </button>
+                            <button type="button" onClick={() => handleDeleteStructure(struct.id)} className="rounded p-1 text-muted hover:bg-danger-soft hover:text-danger" aria-label="Delete fee structure">
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      ) : null}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </details>
+        ) : null}
 
         <div className="mb-6 grid gap-4 sm:grid-cols-3">
           <Card className="p-4">
@@ -255,12 +439,13 @@ export function FeeManagementClient({ user, accounts, classes, sessions, payment
                       </td>
                       <td className="px-4 py-4">
                         {receipt ? (
-                          <Link
-                            href={`/finance/receipts?id=${receipt.id}`}
+                          <button
+                            type="button"
+                            onClick={() => setSelectedReceipt(receipt)}
                             className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
                           >
                             <Receipt className="h-3.5 w-3.5" /> View/Print
-                          </Link>
+                          </button>
                         ) : (
                           <span className="text-xs text-muted">No receipt yet</span>
                         )}
@@ -414,6 +599,158 @@ export function FeeManagementClient({ user, accounts, classes, sessions, payment
           </Card>
         </div>
       ) : null}
+
+      {isStructureOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <Card className="w-full max-w-lg">
+            <div className="flex items-center justify-between border-b border-outline/40 p-4">
+              <h3 className="text-lg font-bold text-ink">{editingStructure ? "Edit Fee Structure" : "Add Fee Structure"}</h3>
+              <button onClick={() => setIsStructureOpen(false)} className="rounded p-1 text-muted hover:bg-surface-low" aria-label="Close fee structure form">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <form onSubmit={handleSubmitStructure}>
+              <div className="max-h-[70vh] space-y-4 overflow-y-auto p-4">
+                {structureError ? <div className="rounded-lg bg-danger-soft p-3 text-sm font-semibold text-danger">{structureError}</div> : null}
+                {!editingStructure ? (
+                  <div className="grid grid-cols-2 gap-2 rounded-lg bg-surface-low p-1">
+                    <button type="button" onClick={() => setStructureScope("one")} className={`rounded-md px-3 py-2 text-sm font-semibold ${structureScope === "one" ? "bg-white text-primary shadow-sm" : "text-muted"}`}>
+                      One class
+                    </button>
+                    <button type="button" onClick={() => setStructureScope("all")} className={`rounded-md px-3 py-2 text-sm font-semibold ${structureScope === "all" ? "bg-white text-primary shadow-sm" : "text-muted"}`}>
+                      All classes
+                    </button>
+                  </div>
+                ) : null}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label="Academic Session">
+                    <Select value={structureSessionId} onChange={(e) => setStructureSessionId(e.target.value)} disabled={!!editingStructure}>
+                      {sessions.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </Select>
+                  </Field>
+                  <Field label="Class">
+                    <Select value={structureClassId} onChange={(e) => setStructureClassId(e.target.value)} disabled={!!editingStructure || structureScope === "all"}>
+                      {classes.map((c) => <option key={c.id} value={c.id}>{c.grade_name} / {c.name}</option>)}
+                    </Select>
+                  </Field>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label="Tuition Fee"><Input type="number" min="0" value={tuition} onChange={(e) => setTuition(e.target.value)} required /></Field>
+                  <Field label="Admission Fee"><Input type="number" min="0" value={admission} onChange={(e) => setAdmission(e.target.value)} required /></Field>
+                  <Field label="Examination Fee"><Input type="number" min="0" value={exam} onChange={(e) => setExam(e.target.value)} required /></Field>
+                  <Field label="Library Fee"><Input type="number" min="0" value={library} onChange={(e) => setLibrary(e.target.value)} required /></Field>
+                  <Field label="Laboratory Fee"><Input type="number" min="0" value={lab} onChange={(e) => setLab(e.target.value)} required /></Field>
+                  <Field label="Transport Fee"><Input type="number" min="0" value={transport} onChange={(e) => setTransport(e.target.value)} required /></Field>
+                </div>
+                <Field label="Miscellaneous Charges">
+                  <Input type="number" min="0" value={misc} onChange={(e) => setMisc(e.target.value)} required />
+                </Field>
+                <div className="flex items-center justify-between rounded-lg bg-surface-low p-3">
+                  <span className="text-sm font-semibold text-muted">Total</span>
+                  <span className="font-display text-lg font-bold text-ink">{formatPKR(structureTotal)}</span>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 border-t border-outline/40 p-4">
+                <button type="button" onClick={() => setIsStructureOpen(false)} className="rounded-lg bg-surface-low px-4 py-2 text-sm font-semibold text-muted">
+                  Cancel
+                </button>
+                <button type="submit" disabled={pending} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white disabled:bg-outline">
+                  {pending ? "Saving..." : editingStructure ? "Save Structure" : structureScope === "all" ? "Save for All Classes" : "Save Structure"}
+                </button>
+              </div>
+            </form>
+          </Card>
+        </div>
+      ) : null}
+
+      {selectedReceipt ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm print:static print:block print:bg-white print:p-0">
+          <Card className="w-full max-w-2xl p-6 print:shadow-none print:ring-0">
+            <div className="mb-5 flex items-start justify-between gap-4 border-b border-outline/60 pb-4 print:hidden">
+              <div>
+                <h3 className="text-lg font-bold text-ink">Payment Receipt</h3>
+                <p className="text-xs text-muted">{selectedReceipt.receipt_number}</p>
+              </div>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => window.print()} className="rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white">
+                  Print
+                </button>
+                <button type="button" onClick={() => setSelectedReceipt(null)} className="rounded-lg bg-surface-low px-3 py-2 text-sm font-semibold text-muted">
+                  Close
+                </button>
+              </div>
+            </div>
+            <div className="space-y-5 text-sm">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="font-display text-2xl font-bold text-primary">Fee Receipt</h2>
+                  <p className="text-muted">Official payment record</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-mono font-bold text-ink">{selectedReceipt.receipt_number}</p>
+                  <p className="text-muted">{formatDatePK(selectedReceipt.payment_date)}</p>
+                </div>
+              </div>
+              <div className="grid gap-3 rounded-lg bg-surface-low p-4 sm:grid-cols-2">
+                <ReceiptLine label="Student" value={selectedReceipt.student_name} />
+                <ReceiptLine label="Admission" value={selectedReceipt.admission_number} />
+                <ReceiptLine label="Class" value={`${selectedReceipt.grade_name} ${selectedReceipt.section_name ?? ""}`} />
+                <ReceiptLine label="Session" value={selectedReceipt.academic_year_name} />
+              </div>
+              <div className="grid gap-3 rounded-lg border border-outline/60 p-4 sm:grid-cols-2">
+                <ReceiptLine label="Amount Paid" value={formatPKR(Number(selectedReceipt.amount))} strong />
+                <ReceiptLine label="Method" value={selectedReceipt.payment_method.replace("_", " ")} />
+                <ReceiptLine label="Reference" value={selectedReceipt.reference_number || selectedReceipt.transaction_number || "-"} />
+                <ReceiptLine label="Received By" value={selectedReceipt.received_by_name || "-"} />
+              </div>
+              {selectedReceipt.remarks ? <p className="text-muted">Remarks: {selectedReceipt.remarks}</p> : null}
+            </div>
+          </Card>
+        </div>
+      ) : null}
     </>
+  );
+}
+
+function feeStructureTotal(struct: any) {
+  return (
+    Number(struct.tuition_fee || 0) +
+    Number(struct.admission_fee || 0) +
+    Number(struct.examination_fee || 0) +
+    Number(struct.library_fee || 0) +
+    Number(struct.laboratory_fee || 0) +
+    Number(struct.transport_fee || 0) +
+    Number(struct.miscellaneous_charges || 0)
+  );
+}
+
+function downloadReport(rows: any[]) {
+  const headers = ["Student", "Admission", "Class", "Payable", "Paid", "Remaining", "Status"];
+  const body = rows.map((row) => [
+    row.student_name,
+    row.admission_number,
+    `${row.grade_name ?? ""} ${row.section_name ?? ""}`.trim(),
+    row.total_payable,
+    row.amount_paid,
+    row.remaining_balance,
+    row.payment_status
+  ]);
+  const csv = [headers, ...body]
+    .map((line) => line.map((value) => `"${String(value ?? "").replaceAll('"', '""')}"`).join(","))
+    .join("\n");
+  const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "fee-management-report.csv";
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function ReceiptLine({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
+  return (
+    <div>
+      <p className="text-xs font-bold uppercase tracking-wide text-muted">{label}</p>
+      <p className={strong ? "mt-1 font-display text-xl font-bold text-ink" : "mt-1 font-semibold text-ink"}>{value}</p>
+    </div>
   );
 }

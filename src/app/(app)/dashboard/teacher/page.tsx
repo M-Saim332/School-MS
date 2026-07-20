@@ -1,14 +1,12 @@
 import { requireUser } from "@/lib/auth/session";
 import { getDashboardData } from "@/lib/services/dashboard";
 import { getTeacherHeadClasses } from "@/lib/services/academics";
-import { getAnnouncements } from "@/lib/services/announcements";
 import { PageHeader } from "@/components/layout/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ButtonLink } from "@/components/ui/button";
 import { StatCard } from "@/components/dashboard/stat-card";
-import { formatDatePK } from "@/lib/utils";
 import { GraduationCap, UserRoundCheck, Users, CalendarX2, CalendarCheck, BookOpen } from "lucide-react";
 import Link from "next/link";
 
@@ -18,10 +16,9 @@ export default async function TeacherDashboardPage() {
     throw new Error("Unauthorized access to Teacher Dashboard");
   }
 
-  const [dashboard, headClasses, announcements] = await Promise.all([
+  const [dashboard, headClasses] = await Promise.all([
     getDashboardData(user),
-    getTeacherHeadClasses(user),
-    getAnnouncements(user)
+    getTeacherHeadClasses(user)
   ]);
 
   return (
@@ -29,7 +26,7 @@ export default async function TeacherDashboardPage() {
       <PageHeader
         eyebrow={user.schoolName}
         title="Teacher Dashboard"
-        description="View your assigned classes, register student attendance, update quiz/test marks, and view announcements."
+        description="View your assigned classes, register student attendance, and update quiz/test marks."
       />
 
       {/* Quick Actions */}
@@ -108,39 +105,6 @@ export default async function TeacherDashboardPage() {
         </div>
       </section>
 
-      {/* Announcements */}
-      <section className="mt-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Active Announcements</CardTitle>
-            <Link href="/announcements" className="text-xs font-bold text-primary hover:underline">
-              View All
-            </Link>
-          </CardHeader>
-          <CardContent>
-            {!announcements.length ? (
-              <EmptyState title="No active announcements" description="There are no announcements currently posted." />
-            ) : (
-              <div className="space-y-4">
-                {announcements.slice(0, 3).map((a) => (
-                  <div key={a.id} className="border-b border-outline/25 pb-4 last:border-b-0 last:pb-0">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-semibold text-ink">{a.title}</h4>
-                      <Badge tone={a.priority === "critical" ? "red" : a.priority === "high" ? "yellow" : "blue"}>
-                        {a.priority}
-                      </Badge>
-                    </div>
-                    <p className="mt-1 text-sm text-muted line-clamp-2">{a.description}</p>
-                    <p className="mt-2 text-xs text-muted">
-                      Published: {formatDatePK(a.publish_date)} by {a.created_by_name ?? "Principal"}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </section>
     </>
   );
 }

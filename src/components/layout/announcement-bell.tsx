@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Bell } from "lucide-react";
+import { Archive, Bell } from "lucide-react";
 import { createClient } from "@/lib/supabase/browser";
 import { CreateAnnouncementDialog } from "@/components/announcements/create-announcement-dialog";
+import { archiveAnnouncementAction } from "@/app/(app)/announcements/actions";
 import { hasPermission } from "@/lib/permissions";
 import { cn, formatDatePK } from "@/lib/utils";
 import type { AppUser, AnnouncementWithRead, AnnouncementPriority } from "@/types/database";
@@ -30,8 +30,9 @@ export function AnnouncementBell({ user }: { user: AppUser }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const supabase = useCallback(() => createClient(), []);
   const canManage = hasPermission(user.role, "announcements:manage", user.permissions);
+  const today = new Date().toISOString().split("T")[0];
 
-  const unreadCount = announcements.filter((a) => !a.is_read).length;
+  const unreadCount = announcements.filter((a) => !a.is_read && !a.is_archived && a.publish_date <= today).length;
 
   const fetchAnnouncements = useCallback(async () => {
     setLoading(true);
@@ -85,12 +86,23 @@ export function AnnouncementBell({ user }: { user: AppUser }) {
     await fetch("/api/announcements/mark-all-read", { method: "POST" });
   }
 
+  async function handleArchive(id: string) {
+    const previous = announcements;
+    setAnnouncements((prev) => prev.filter((a) => a.id !== id));
+    const res = await archiveAnnouncementAction(id);
+    if (res && "error" in res) {
+      setAnnouncements(previous);
+    } else {
+      fetchAnnouncements();
+    }
+  }
+
   return (
     <div className="relative" ref={panelRef}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-white ring-1 ring-outline transition duration-200 hover:bg-primary-soft hover:text-primary"
+        className="relative flex h-11 w-11 items-center justify-center rounded-full text-muted transition duration-200 hover:bg-primary-soft hover:text-primary"
         aria-label={`Announcements${unreadCount > 0 ? `, ${unreadCount} unread` : ""}`}
         aria-expanded={open}
       >
@@ -119,12 +131,6 @@ export function AnnouncementBell({ user }: { user: AppUser }) {
             )}
           </div>
           <div className="flex items-center gap-2">
-            <Link
-              href="/announcements"
-              className="inline-flex h-8 items-center rounded-xl bg-white px-3 text-xs font-semibold text-primary ring-1 ring-outline transition hover:bg-primary-soft"
-            >
-              History
-            </Link>
             {unreadCount > 0 && (
               <button
                 type="button"
@@ -148,7 +154,9 @@ export function AnnouncementBell({ user }: { user: AppUser }) {
             </div>
           ) : (
             <div className="divide-y divide-outline/30">
-              {announcements.map((a) => (
+              {announcements.map((a) => {
+                const isExpired = Boolean(a.expiry_date && a.expiry_date < today);
+                return (
                 <div
                   key={a.id}
                   className={cn(
@@ -178,15 +186,39 @@ export function AnnouncementBell({ user }: { user: AppUser }) {
                         <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide", PRIORITY_STYLES[a.priority])}>
                           {a.priority}
                         </span>
+                        {a.is_archived && (
+                          <span className="rounded bg-surface-high px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted">
+                            Archived
+                          </span>
+                        )}
+                        {!a.is_archived && isExpired && (
+                          <span className="rounded bg-surface-high px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted">
+                            Expired
+                          </span>
+                        )}
                         <span className="text-[10px] text-muted">{formatDatePK(a.publish_date)}</span>
                         {a.created_by_name && (
                           <span className="text-[10px] text-muted">by {a.created_by_name}</span>
                         )}
                       </div>
+                      {canManage && !a.is_archived && (
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleArchive(a.id);
+                          }}
+                          className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-semibold text-muted hover:text-danger"
+                        >
+                          <Archive className="h-3 w-3" aria-hidden="true" />
+                          Archive
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
-              ))}
+              );
+              })}
             </div>
           )}
         </div>
@@ -199,14 +231,7 @@ export function AnnouncementBell({ user }: { user: AppUser }) {
               triggerClassName="inline-flex h-10 w-full items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-white shadow-button hover:bg-primary-ink"
               onSuccess={fetchAnnouncements}
             />
-          ) : (
-            <Link
-              href="/announcements"
-              className="inline-flex h-10 w-full items-center justify-center rounded-xl bg-white px-4 text-sm font-semibold text-primary ring-1 ring-outline transition hover:bg-primary-soft"
-            >
-              Announcement History
-            </Link>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

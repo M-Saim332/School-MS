@@ -378,7 +378,7 @@ export function PaymentsClient({ user, accounts, classes, payments }: PaymentsCl
                           <div className="mt-3 pt-3 border-t border-outline/40 flex justify-between items-center text-xxs text-muted">
                             <span>Collected By: {p.received_by_name}</span>
                             <div className="flex items-center gap-2">
-                              <Link href={`/finance/receipts?id=${p.id}`} className="inline-flex items-center gap-1 font-bold text-primary hover:underline">
+                              <Link href="/finance/fees" className="inline-flex items-center gap-1 font-bold text-primary hover:underline">
                                 <Receipt className="h-3 w-3" /> View Receipt
                               </Link>
                               {canManage && !p.is_voided && (

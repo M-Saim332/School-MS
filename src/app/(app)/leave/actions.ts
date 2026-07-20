@@ -24,6 +24,7 @@ export async function submitLeaveAction(formData: FormData) {
   }
   revalidatePath("/leave");
   revalidatePath("/approvals");
+  redirect("/leave");
 }
 
 export async function reviewLeaveAction(formData: FormData) {

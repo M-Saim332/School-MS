@@ -1,15 +1,16 @@
 import { requireUser } from "@/lib/auth/session";
-import { getStudentFees, getPaymentHistory } from "@/lib/services/finance";
+import { getFeeStructures, getStudentFees, getPaymentHistory } from "@/lib/services/finance";
 import { getAcademicOptions } from "@/lib/services/academics";
 import { PageHeader } from "@/components/layout/page-header";
 import { FeeManagementClient } from "@/components/finance/fee-management-client";
 
 export default async function FeeManagementPage() {
   const user = await requireUser("finance:view");
-  const [accounts, academics, payments] = await Promise.all([
+  const [accounts, academics, payments, structures] = await Promise.all([
     getStudentFees(user, {}),
     getAcademicOptions(user),
-    getPaymentHistory(user, {})
+    getPaymentHistory(user, {}),
+    getFeeStructures(user)
   ]);
 
   return (
@@ -25,6 +26,7 @@ export default async function FeeManagementPage() {
         classes={academics.classes}
         sessions={academics.years}
         payments={payments}
+        structures={structures}
       />
     </>
   );

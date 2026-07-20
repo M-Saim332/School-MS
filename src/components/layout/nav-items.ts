@@ -39,10 +39,7 @@ const coreNavItems: NavItem[] = [
     permission: "finance:view",
     subItems: [
       { href: "/finance/dashboard", label: "Dashboard", permission: "finance:view" },
-      { href: "/finance/fee-structures", label: "Fee Structures", permission: "finance:view" },
       { href: "/finance/fees", label: "Fee Management", permission: "finance:view" },
-      { href: "/finance/receipts", label: "Receipts", permission: "finance:view" },
-      { href: "/finance/reports", label: "Reports", permission: "finance:view" },
       { href: "/finance/payroll", label: "Payroll", permission: "payroll:view" }
     ]
   },

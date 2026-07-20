@@ -13,7 +13,7 @@ export default async function FinanceDashboardPage() {
   let data;
   try {
     data = await getFinanceDashboard(user);
-  } catch (error) {
+  } catch {
     return (
       <>
         <PageHeader eyebrow="Finance" title="Financial Dashboard" />
@@ -171,7 +171,7 @@ export default async function FinanceDashboardPage() {
                   {data.recentPayments.map((p: any) => (
                     <tr key={p.id} className="border-t border-outline/60 hover:bg-surface-low/70">
                       <td className="px-4 py-4 font-mono font-semibold">
-                        <Link href={`/finance/receipts?id=${p.id}`} className="text-primary hover:underline">
+                        <Link href="/finance/fees" className="text-primary hover:underline">
                           {p.receipt_number}
                         </Link>
                       </td>
