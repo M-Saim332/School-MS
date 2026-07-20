@@ -2,8 +2,8 @@ import {
   Activity,
   BarChart3,
   CalendarCheck,
+  Bus,
   ClipboardCheck,
-  FileCheck2,
   GraduationCap,
   LayoutDashboard,
   Settings,
@@ -13,42 +13,25 @@ import {
   Coins
 } from "lucide-react";
 import type { Permission } from "@/lib/permissions";
+import { hasPermission } from "@/lib/permissions";
 import type { UserRole } from "@/types/database";
+import { usesAcademicEvaluationTabs, usesPrincipalAcademicControl } from "@/lib/roles";
 
 export interface NavItem {
   href: string;
   label: string;
   icon: typeof LayoutDashboard;
   permission: Permission;
-  subItems?: Array<{ href: string; label: string; permission: Permission }>;
-  roles?: UserRole[];
-  hiddenForRoles?: UserRole[];
+  anyPermissions?: Permission[];
+  subItems?: Array<{ href: string; label: string; permission: Permission; anyPermissions?: Permission[] }>;
 }
 
-export const navItems: NavItem[] = [
+const coreNavItems: NavItem[] = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard, permission: "dashboard:view" },
   { href: "/approvals", label: "Action Center", icon: ClipboardCheck, permission: "approvals:view" },
+  { href: "/leave", label: "Leave Center", icon: CalendarCheck, permission: "leave:view" },
   { href: "/students", label: "Students", icon: GraduationCap, permission: "students:view" },
   { href: "/attendance", label: "Attendance", icon: CalendarCheck, permission: "attendance:view" },
-  { href: "/exam-approvals", label: "Exam Approvals", icon: FileCheck2, permission: "marks:approve" },
-  {
-    href: "/admin/academic-control",
-    label: "Academic Control",
-    icon: BarChart3,
-    permission: "academics:view",
-    roles: ["principal"]
-  },
-  {
-    href: "/academics",
-    label: "Academics",
-    icon: BarChart3,
-    permission: "academics:view",
-    hiddenForRoles: ["principal"],
-    subItems: [
-      { href: "/academics/exams-setup", label: "Exams & Marks Setup", permission: "academics:view" },
-      { href: "/academics/results", label: "Results Portal", permission: "results:view" }
-    ]
-  },
   {
     href: "/finance",
     label: "Finance",
@@ -56,8 +39,8 @@ export const navItems: NavItem[] = [
     permission: "finance:view",
     subItems: [
       { href: "/finance/dashboard", label: "Dashboard", permission: "finance:view" },
-      { href: "/finance/fees", label: "Fee Management", permission: "finance:view" },
       { href: "/finance/fee-structures", label: "Fee Structures", permission: "finance:view" },
+      { href: "/finance/fees", label: "Fee Management", permission: "finance:view" },
       { href: "/finance/receipts", label: "Receipts", permission: "finance:view" },
       { href: "/finance/reports", label: "Reports", permission: "finance:view" },
       { href: "/finance/payroll", label: "Payroll", permission: "payroll:view" }
@@ -65,7 +48,84 @@ export const navItems: NavItem[] = [
   },
   { href: "/staff", label: "Staff", icon: Users, permission: "staff:view" },
   { href: "/classes", label: "Classes", icon: BookOpen, permission: "classes:manage" },
+  { href: "/transport", label: "Transport", icon: Bus, permission: "transport:view" },
   { href: "/reports", label: "Reports", icon: Activity, permission: "reports:view" },
   { href: "/admin", label: "Admin", icon: Shield, permission: "users:manage" },
   { href: "/settings", label: "Settings", icon: Settings, permission: "settings:manage" }
 ];
+
+function academicEvaluationModule(): NavItem {
+  return {
+    href: "/academics",
+    label: "Academics",
+    icon: BarChart3,
+    permission: "academics:view",
+    anyPermissions: ["results:view", "marks:manage", "special-exams:manage"],
+    subItems: [
+      {
+        href: "/academics/exams-setup",
+        label: "Exams & Marks Setup",
+        permission: "marks:manage",
+        anyPermissions: ["special-exams:manage"]
+      },
+      {
+        href: "/academics/results",
+        label: "Results Portal",
+        permission: "results:view"
+      }
+    ]
+  };
+}
+
+function principalAcademicControlItem(): NavItem {
+  return {
+    href: "/admin/academic-control",
+    label: "Academic Control",
+    icon: BarChart3,
+    permission: "marks:approve",
+    anyPermissions: ["results:view", "special-exams:manage"]
+  };
+}
+
+function structureAcademicsItem(): NavItem {
+  return {
+    href: "/academics",
+    label: "Academics",
+    icon: BarChart3,
+    permission: "academics:view"
+  };
+}
+
+export function getNavItems(role: UserRole): NavItem[] {
+  const items: NavItem[] = [];
+
+  for (const item of coreNavItems) {
+    if (item.href === "/classes") {
+      if (usesPrincipalAcademicControl(role)) {
+        items.push(principalAcademicControlItem());
+      } else if (usesAcademicEvaluationTabs(role)) {
+        items.push(academicEvaluationModule());
+      } else {
+        items.push(structureAcademicsItem());
+      }
+    }
+
+    items.push(item);
+  }
+
+  return items;
+}
+
+export function navItemVisible(
+  role: UserRole | undefined,
+  permission: Permission,
+  userPermissions?: string[] | null,
+  anyPermissions?: Permission[]
+) {
+  if (!role) return false;
+  if (hasPermission(role, permission, userPermissions)) return true;
+  return (anyPermissions ?? []).some((item) => hasPermission(role, item, userPermissions));
+}
+
+/** @deprecated Use getNavItems(role) for role-aware navigation. */
+export const navItems = coreNavItems;

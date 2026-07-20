@@ -12,7 +12,10 @@ import type { UserRole } from "@/types/database";
 
 const roleLabels: Record<UserRole, string> = {
   administrator: "Administrator",
+  cashier: "Cashier",
+  head_teacher: "Head Teacher",
   principal: "Principal",
+  staff: "Staff",
   teacher: "Teacher",
   student_staff: "Student-management staff"
 };

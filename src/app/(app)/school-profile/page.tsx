@@ -1,13 +1,13 @@
 import { PageHeader } from "@/components/layout/page-header";
 import { SchoolProfileForm } from "@/components/school/school-profile-form";
 import { requireUser } from "@/lib/auth/session";
-import { canManageSchoolBranding } from "@/lib/roles";
+import { hasPermission } from "@/lib/permissions";
 import { getSchoolProfile } from "@/lib/services/settings";
 
 export default async function SchoolProfilePage() {
   const user = await requireUser();
   const schoolProfile = await getSchoolProfile(user);
-  const canManageSchoolProfile = canManageSchoolBranding(user.role);
+  const canManageSchoolProfile = hasPermission(user.role, "settings:manage", user.permissions);
   const settings = schoolProfile.settings ?? {};
 
   return (

@@ -1,5 +1,4 @@
 import { ClipboardPenLine } from "lucide-react";
-import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,15 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Field, Input, Select } from "@/components/ui/form-field";
 import { requireUser } from "@/lib/auth/session";
-import { canManageSchoolBranding } from "@/lib/roles";
 import { getSpecialExamSetup } from "@/lib/services/special-exams";
 import { createSpecialExamAction } from "@/app/(app)/special-exams/actions";
 
 export default async function SpecialExamsPage() {
-  const user = await requireUser("academics:view");
-  if (!canManageSchoolBranding(user.role)) {
-    redirect("/academics/exams-setup");
-  }
+  const user = await requireUser("special-exams:manage");
   const setup = await getSpecialExamSetup(user);
 
   return (

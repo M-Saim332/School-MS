@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
-import { ClassDistributionChart } from "@/components/dashboard/responsive-charts";
+import { LazyClassDistributionChart } from "@/components/dashboard/lazy-responsive-charts";
 import { formatPKR, formatDatePK } from "@/lib/utils";
 import { GraduationCap, Users, CalendarX2, AlertTriangle, FileText, Bell, UserPlus } from "lucide-react";
 import Link from "next/link";
@@ -63,7 +63,7 @@ export default async function PrincipalDashboardPage() {
             <AlertTriangle className="h-5 w-5 flex-shrink-0" />
             <div>
               <p className="text-sm font-semibold">{pendingApprovalsCount} exam result sets are pending approval.</p>
-              <Link href="/admin/academic-control" className="text-xs font-bold underline hover:brightness-110">
+              <Link href="/results?status=pending_approval" className="text-xs font-bold underline hover:brightness-110">
                 Go to Result Approvals &rarr;
               </Link>
             </div>
@@ -101,7 +101,7 @@ export default async function PrincipalDashboardPage() {
             <CardTitle>Class Distribution</CardTitle>
           </CardHeader>
           <CardContent>
-            <ClassDistributionChart data={dashboard.classDistribution} />
+            <LazyClassDistributionChart data={dashboard.classDistribution} />
           </CardContent>
         </Card>
         <ActivityFeed items={dashboard.activity} />

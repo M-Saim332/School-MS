@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, BriefcaseBusiness, Building2, ChevronDown, LogOut, Menu, Search, UserRound, X } from "lucide-react";
+import { BookOpen, BriefcaseBusiness, Building2, ChevronDown, LogOut, Menu, UserRound, X } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { AppUser } from "@/types/database";
 import { hasPermission } from "@/lib/permissions";
 import { cn, initials } from "@/lib/utils";
-import { navItems } from "@/components/layout/nav-items";
+import { getNavItems, navItemVisible } from "@/components/layout/nav-items";
 import { createClient } from "@/lib/supabase/browser";
 import { AnnouncementBell } from "@/components/layout/announcement-bell";
 import { BrandingFaviconSync } from "@/components/layout/branding-favicon-sync";
@@ -25,31 +25,39 @@ export function AppShell({ user, branding, children }: { user: AppUser; branding
   const [pendingCount, setPendingCount] = useState(0);
   const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({});
   const menuRef = useRef<HTMLDivElement>(null);
-  const items = useMemo(
-    () =>
-      navItems.filter((item) => {
-        if (item.roles && !item.roles.includes(user.role)) return false;
-        if (item.hiddenForRoles?.includes(user.role)) return false;
-        return hasPermission(user.role, item.permission, user.permissions);
-      }),
-    [user.permissions, user.role]
-  );
+  const items = getNavItems(user.role).filter((item) => {
+    if (item.href === "/academics" && hasPermission(user.role, "classes:manage", user.permissions)) {
+      return false;
+    }
+
+    return navItemVisible(user.role, item.permission, user.permissions, item.anyPermissions);
+  });
   const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     setProfileOpen(false);
   }, [pathname]);
 
+  const prevPathnameRef = useRef(pathname);
+
   useEffect(() => {
-    // Auto-expand the current module when navigating inside it.
+    const previousPath = prevPathnameRef.current;
+    if (pathname === previousPath) return; // only run on actual path change
+    prevPathnameRef.current = pathname;
+
     setExpandedModules((current) => {
       let next = current;
       for (const item of items) {
         if (!item.subItems) continue;
-        if (pathname === item.href || pathname.startsWith(`${item.href}/`)) {
-          if (Object.prototype.hasOwnProperty.call(current, item.href)) continue;
+
+        const inModule = pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+        if (inModule && !current[item.href]) {
           if (next === current) next = { ...current };
           next[item.href] = true;
+        } else if (!inModule && current[item.href]) {
+          if (next === current) next = { ...current };
+          next[item.href] = false;
         }
       }
       return next;
@@ -110,7 +118,7 @@ export function AppShell({ user, branding, children }: { user: AppUser; branding
   }
 
   const renderProfileAvatar = () => (
-    <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary-soft text-sm font-bold text-primary ring-1 ring-white/80">
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary-soft text-sm font-bold text-primary ring-1 ring-outline/70">
       {user.avatarUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={user.avatarUrl} alt="" className="h-full w-full object-cover" />
@@ -121,9 +129,9 @@ export function AppShell({ user, branding, children }: { user: AppUser; branding
   );
 
   const sidebar = (
-    <aside className="flex h-full w-[280px] flex-col bg-white p-4">
-      <div className="mb-8 flex items-center gap-3 px-2">
-        <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-primary to-[#2d7dd2] text-white shadow-soft">
+    <aside className="flex h-full w-[280px] flex-col bg-white p-5">
+      <div className="mb-10 flex items-center gap-3 px-1">
+        <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-primary text-white shadow-button">
           {branding.logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={branding.logoUrl} alt={`${user.schoolName} logo`} className="h-full w-full object-cover" />
@@ -132,11 +140,11 @@ export function AppShell({ user, branding, children }: { user: AppUser; branding
           )}
         </div>
         <div>
-          <p className="font-display text-2xl font-bold leading-tight text-primary">GoCampusFlow</p>
+          <p className="font-display text-2xl font-bold leading-tight tracking-tight text-ink">GoCampusFlow</p>
           <p className="font-label text-xs font-semibold uppercase tracking-wider text-muted">{user.schoolName}</p>
         </div>
       </div>
-      <nav className="flex-1 space-y-1 overflow-y-auto">
+      <nav className="flex-1 space-y-1.5 overflow-y-auto pr-1">
         {items.map((item) => {
           const Icon = item.icon;
           const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -144,30 +152,32 @@ export function AppShell({ user, branding, children }: { user: AppUser; branding
           const showBadge = isApprovals && pendingCount > 0 && hasPermission(user.role, "approvals:review", user.permissions);
 
           if (item.subItems) {
-            const allowedSubItems = item.subItems.filter(sub => hasPermission(user.role, sub.permission, user.permissions));
+            const allowedSubItems = item.subItems.filter((sub) =>
+              navItemVisible(user.role, sub.permission, user.permissions, sub.anyPermissions)
+            );
             if (allowedSubItems.length === 0) return null;
             const expanded = expandedModules[item.href] ?? active;
             return (
               <div key={item.href} className="space-y-1">
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={() =>
                     setExpandedModules((current) => {
-                      const isOpen = current[item.href] ?? active;
-                      return { ...current, [item.href]: !isOpen };
-                    });
-                  }}
+                      const isExpanded = current[item.href] ?? active;
+                      return { ...current, [item.href]: !isExpanded };
+                    })
+                  }
                   className={cn(
-                    "group flex w-full items-center justify-between gap-3 rounded-lg px-3 py-3 text-left text-sm font-semibold transition",
-                    active ? "bg-primary-soft text-primary shadow-[inset_3px_0_0_#3366cc]" : "text-muted hover:bg-surface-low hover:text-primary"
+                    "group flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold transition-all duration-200",
+                    active ? "bg-primary text-white shadow-button" : "text-muted hover:bg-surface-low hover:text-ink"
                   )}
                   aria-expanded={expanded}
                 >
                   <div className="flex items-center gap-3">
                     <span
                       className={cn(
-                        "flex h-8 w-8 items-center justify-center rounded-lg transition",
-                        active ? "bg-white/80 text-primary" : "bg-surface-low text-muted group-hover:bg-white group-hover:text-primary"
+                        "flex h-8 w-8 items-center justify-center rounded-xl transition duration-200",
+                        active ? "bg-white/20 text-white" : "bg-surface-low text-muted group-hover:bg-white group-hover:text-primary group-hover:shadow-sm"
                       )}
                     >
                       <Icon className="h-4 w-4" aria-hidden="true" />
@@ -178,7 +188,7 @@ export function AppShell({ user, branding, children }: { user: AppUser; branding
                 </button>
 
                 {expanded && (
-                  <div className="ml-5 space-y-0.5 border-l border-outline/40 pl-2">
+                  <div className="ml-5 space-y-1 border-l border-outline/70 pl-3">
                     {allowedSubItems.map((sub) => {
                       const isSubActive = pathname === sub.href || pathname.startsWith(`${sub.href}/`);
                       return (
@@ -187,10 +197,10 @@ export function AppShell({ user, branding, children }: { user: AppUser; branding
                           key={sub.href}
                           onClick={() => setOpen(false)}
                           className={cn(
-                            "flex items-center gap-2 rounded-md px-3 py-2.5 text-xs font-semibold transition",
+                            "flex items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold transition duration-200",
                             isSubActive
-                              ? "bg-primary-soft text-primary font-bold shadow-[inset_2px_0_0_#3366cc]"
-                              : "text-muted hover:bg-surface-low hover:text-primary"
+                              ? "bg-primary-soft text-primary font-bold"
+                              : "text-muted hover:bg-surface-low hover:text-ink"
                           )}
                         >
                           {sub.label}
@@ -209,15 +219,15 @@ export function AppShell({ user, branding, children }: { user: AppUser; branding
               key={item.href}
               onClick={() => setOpen(false)}
               className={cn(
-                "group flex items-center justify-between gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition",
-                active ? "bg-primary-soft text-primary shadow-[inset_3px_0_0_#3366cc]" : "text-muted hover:bg-surface-low hover:text-primary"
+                "group flex items-center justify-between gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-200",
+                active ? "bg-primary text-white shadow-button" : "text-muted hover:bg-surface-low hover:text-ink"
               )}
             >
               <div className="flex items-center gap-3">
                 <span
                   className={cn(
-                    "flex h-8 w-8 items-center justify-center rounded-lg transition",
-                    active ? "bg-white/80 text-primary" : "bg-surface-low text-muted group-hover:bg-white group-hover:text-primary"
+                    "flex h-8 w-8 items-center justify-center rounded-xl transition duration-200",
+                    active ? "bg-white/20 text-white" : "bg-surface-low text-muted group-hover:bg-white group-hover:text-primary group-hover:shadow-sm"
                   )}
                 >
                   <Icon className="h-4 w-4" aria-hidden="true" />
@@ -225,7 +235,7 @@ export function AppShell({ user, branding, children }: { user: AppUser; branding
                 {item.label}
               </div>
               {showBadge && (
-                <span className="flex h-5 items-center justify-center rounded-full bg-danger px-2 text-xs font-bold text-white">
+                <span className="flex h-5 items-center justify-center rounded-full bg-danger px-2 text-xs font-bold text-white shadow-sm">
                   {pendingCount > 99 ? "99+" : pendingCount}
                 </span>
               )}
@@ -236,7 +246,7 @@ export function AppShell({ user, branding, children }: { user: AppUser; branding
       <Link
         href="/profile"
         onClick={() => setOpen(false)}
-        className="mt-4 rounded-lg bg-gradient-to-br from-surface-low to-primary-soft/70 p-3 text-sm transition hover:from-primary-soft hover:to-success-soft"
+        className="mt-5 rounded-2xl bg-surface-low p-4 text-sm ring-1 ring-outline/70 transition duration-200 hover:bg-primary-soft"
       >
         <p className="font-label text-xs font-bold uppercase tracking-wide text-primary">Signed in as</p>
         <p className="mt-1 truncate font-semibold text-ink">{user.fullName}</p>
@@ -248,16 +258,16 @@ export function AppShell({ user, branding, children }: { user: AppUser; branding
   return (
     <div className="min-h-screen bg-background text-ink">
       <BrandingFaviconSync faviconUrl={branding.faviconUrl} />
-      <div className="fixed inset-y-0 left-0 z-40 hidden w-[280px] bg-white/95 shadow-[1px_0_0_rgba(195,198,213,0.32)] backdrop-blur lg:block">{sidebar}</div>
+      <div className="fixed inset-y-0 left-0 z-40 hidden w-[280px] bg-white shadow-[1px_0_0_rgba(226,232,240,0.9)] lg:block">{sidebar}</div>
       <div className={cn("fixed inset-0 z-50 bg-black/30 lg:hidden", open ? "block" : "hidden")} onClick={() => setOpen(false)} />
       <div
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-[280px] transform bg-white shadow-soft transition lg:hidden",
+          "fixed inset-y-0 left-0 z-50 w-[280px] transform bg-white shadow-lift transition duration-200 lg:hidden",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="flex justify-end p-3">
-          <button className="rounded-lg p-2 hover:bg-surface-low" onClick={() => setOpen(false)} aria-label="Close navigation">
+          <button className="rounded-xl p-2 hover:bg-surface-low" onClick={() => setOpen(false)} aria-label="Close navigation">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -265,15 +275,11 @@ export function AppShell({ user, branding, children }: { user: AppUser; branding
       </div>
 
       <div className="lg:pl-[280px]">
-        <header className="sticky top-0 z-30 flex min-h-16 items-center justify-between gap-3 bg-white/82 px-4 shadow-[0_1px_0_rgba(195,198,213,0.32)] backdrop-blur-xl sm:px-6 lg:px-8">
+        <header className="sticky top-0 z-30 flex min-h-20 items-center justify-between gap-3 bg-white/92 px-4 shadow-[0_1px_0_rgba(226,232,240,0.9)] backdrop-blur-xl sm:px-6 lg:px-10">
           <div className="flex min-w-0 flex-1 items-center gap-3">
-            <button className="rounded-lg p-2 hover:bg-surface-low lg:hidden" onClick={() => setOpen(true)} aria-label="Open navigation">
+            <button className="rounded-xl p-2 hover:bg-surface-low lg:hidden" onClick={() => setOpen(true)} aria-label="Open navigation">
               <Menu className="h-5 w-5" />
             </button>
-            <div className="hidden min-w-[220px] max-w-md flex-1 items-center gap-2 rounded-lg bg-surface-low px-3 py-2 ring-1 ring-outline/25 sm:flex">
-              <Search className="h-4 w-4 text-muted" aria-hidden="true" />
-              <input className="w-full bg-transparent text-sm outline-none" placeholder="Search records..." aria-label="Search records" />
-            </div>
           </div>
           <div className="relative flex items-center gap-3" ref={menuRef}>
             {hasPermission(user.role, "announcements:view", user.permissions) && (
@@ -282,7 +288,7 @@ export function AppShell({ user, branding, children }: { user: AppUser; branding
             <button
               type="button"
               onClick={() => setProfileOpen((value) => !value)}
-              className="flex min-w-0 items-center gap-3 rounded-lg bg-surface-low py-1.5 pl-1.5 pr-2 ring-1 ring-outline/25 transition hover:bg-primary-soft/80"
+              className="flex min-w-0 items-center gap-3 rounded-xl bg-white py-1.5 pl-1.5 pr-3 ring-1 ring-outline transition duration-200 hover:bg-surface-low"
               aria-haspopup="menu"
               aria-expanded={profileOpen}
             >
@@ -296,12 +302,12 @@ export function AppShell({ user, branding, children }: { user: AppUser; branding
 
             <div
               className={cn(
-                "absolute right-0 top-[calc(100%+0.75rem)] w-72 rounded-lg bg-white/90 p-2 opacity-0 shadow-[0_24px_60px_rgba(27,28,29,0.12)] ring-1 ring-outline/30 backdrop-blur-xl transition",
+                "absolute right-0 top-[calc(100%+0.75rem)] w-72 rounded-[20px] bg-white p-2 opacity-0 shadow-lift ring-1 ring-outline transition duration-200",
                 profileOpen ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none -translate-y-1"
               )}
               role="menu"
             >
-              <div className="flex gap-3 rounded-lg bg-gradient-to-br from-primary-soft/80 to-success-soft/70 p-3">
+              <div className="flex gap-3 rounded-2xl bg-surface-low p-3">
                 {renderProfileAvatar()}
                 <div className="min-w-0">
                   <p className="truncate text-sm font-bold text-ink">{user.fullName}</p>
@@ -315,7 +321,7 @@ export function AppShell({ user, branding, children }: { user: AppUser; branding
               <div className="mt-2 grid gap-1">
                 <Link
                   href="/profile"
-                  className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-muted transition hover:bg-surface-low hover:text-primary"
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-muted transition hover:bg-surface-low hover:text-primary"
                   role="menuitem"
                 >
                   <UserRound className="h-4 w-4" aria-hidden="true" />
@@ -323,7 +329,7 @@ export function AppShell({ user, branding, children }: { user: AppUser; branding
                 </Link>
                 <Link
                   href="/school-profile"
-                  className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-muted transition hover:bg-surface-low hover:text-primary"
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-muted transition hover:bg-surface-low hover:text-primary"
                   role="menuitem"
                 >
                   <Building2 className="h-4 w-4" aria-hidden="true" />
@@ -332,7 +338,7 @@ export function AppShell({ user, branding, children }: { user: AppUser; branding
                 <button
                   type="button"
                   onClick={signOut}
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-muted transition hover:bg-danger-soft hover:text-danger"
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-muted transition hover:bg-danger-soft hover:text-danger"
                   role="menuitem"
                 >
                   <LogOut className="h-4 w-4" aria-hidden="true" />
@@ -342,7 +348,7 @@ export function AppShell({ user, branding, children }: { user: AppUser; branding
             </div>
           </div>
         </header>
-        <main className="mx-auto w-full max-w-[1520px] px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+        <main className="mx-auto w-full max-w-[1520px] px-4 py-8 sm:px-6 lg:px-10">{children}</main>
       </div>
     </div>
   );

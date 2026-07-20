@@ -30,7 +30,7 @@ export default async function ExamApprovalsPage({ searchParams }: { searchParams
         title="Exam Result Approvals"
         description="Approve finalized special exam result sets or reject them with a comment so teachers can correct marks."
         actions={
-          <Link href="/admin/academic-control" className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white">
+          <Link href="/results" className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white">
             Open Results Dashboard
           </Link>
         }

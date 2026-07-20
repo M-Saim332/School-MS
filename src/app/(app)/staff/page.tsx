@@ -75,8 +75,7 @@ export default async function StaffPage({
         <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
           {staff.map((member: any) => (
             <Card key={member.member_id} className="overflow-hidden">
-              {/* Coloured top accent bar */}
-              <div className="h-1.5 bg-gradient-to-r from-primary via-accent to-tertiary-soft" />
+              <div className="h-1.5 bg-primary" />
 
               <div className="p-5">
                 {/* Header row */}

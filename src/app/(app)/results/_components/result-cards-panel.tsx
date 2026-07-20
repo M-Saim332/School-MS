@@ -100,7 +100,7 @@ export function ResultCardsPanel({ workspace }: { workspace: ResultCardsWorkspac
 
 export function ResultCardsFilters({ workspace }: { workspace: ResultCardsWorkspace }) {
   return (
-    <form className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px_auto]" action="/academics/results">
+    <form className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px_auto]" action="/results">
       <input type="hidden" name="view" value="cards" />
       <Field label="Class">
         <Select name="classId" defaultValue={workspace.selectedClassId ?? ""}>

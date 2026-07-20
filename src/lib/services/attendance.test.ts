@@ -44,7 +44,20 @@ describe("Attendance Services", () => {
     // Simulate inserting new records returns success
     mockSupabase.insert.mockResolvedValue({ data: { id: "some-id" }, error: null });
 
-    const user = { id: "user1", schoolId: DUMMY_SCHOOL, memberId: "m1", permissions: ["attendance:submit"], role: "teacher" } as any;
+    const user = {
+      id: "user1",
+      email: "teacher@example.com",
+      fullName: "Teacher One",
+      avatarUrl: null,
+      schoolId: DUMMY_SCHOOL,
+      schoolName: "Test School",
+      role: "teacher" as const,
+      department: null,
+      jobTitle: null,
+      mustChangePassword: false,
+      permissions: ["attendance:submit"],
+      customRoleId: null
+    };
     
     const promise = submitAttendance(user, {
       class_id: DUMMY_CLASS,

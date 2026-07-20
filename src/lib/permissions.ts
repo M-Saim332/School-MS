@@ -10,10 +10,6 @@ export type Permission =
   | "attendance:submit"
   | "staff:view"
   | "staff:manage"
-  | "leave:view"
-  | "leave:manage"
-  | "transport:view"
-  | "transport:manage"
   | "academics:view"
   | "academics:manage"
   | "marks:manage"
@@ -32,17 +28,22 @@ export type Permission =
   | "finance:manage"
   | "payroll:view"
   | "payroll:manage"
+  | "leave:view"
+  | "leave:manage"
+  | "transport:view"
+  | "transport:manage"
+  | "special-exams:manage"
   | "announcements:view"
   | "announcements:manage";
 
 export const AVAILABLE_PERMISSIONS: Permission[] = [
   "dashboard:view", "students:view", "students:create", "students:update", "students:archive",
-  "attendance:view", "attendance:submit", "staff:view", "staff:manage", "leave:view", "leave:manage",
-  "transport:view", "transport:manage", "academics:view",
+  "attendance:view", "attendance:submit", "staff:view", "staff:manage", "academics:view",
   "academics:manage", "marks:manage", "marks:approve", "results:view", "results:generate",
   "reports:view", "activity:view", "settings:manage", "users:manage", "approvals:view",
   "approvals:review", "teachers:manage", "classes:manage", "finance:view", "finance:manage",
-  "payroll:view", "payroll:manage", "announcements:view", "announcements:manage"
+  "payroll:view", "payroll:manage", "leave:view", "leave:manage", "transport:view",
+  "transport:manage", "special-exams:manage", "announcements:view", "announcements:manage"
 ];
 
 const rolePermissions: Record<UserRole, Permission[]> = {
@@ -53,10 +54,6 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "students:update",
     "students:archive",
     "attendance:view",
-    "leave:view",
-    "leave:manage",
-    "transport:view",
-    "transport:manage",
     "staff:view",
     "academics:view",
     "marks:approve",
@@ -72,6 +69,11 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "finance:manage",
     "payroll:view",
     "payroll:manage",
+    "leave:view",
+    "leave:manage",
+    "transport:view",
+    "transport:manage",
+    "special-exams:manage",
     "announcements:view",
     "announcements:manage"
   ],
@@ -80,23 +82,26 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "students:view",
     "attendance:view",
     "attendance:submit",
-    "leave:view",
     "academics:view",
     "marks:manage",
     "results:view",
+    "leave:view",
     "payroll:view",
     "announcements:view"
   ],
   student_staff: [
     "dashboard:view",
     "students:view",
+    "students:create",
+    "students:update",
+    "students:archive",
     "attendance:view",
-    "leave:view",
-    "transport:view",
     "results:view",
     "results:generate",
     "reports:view",
     "approvals:view",
+    "transport:view",
+    "transport:manage",
     "finance:view",
     "announcements:view"
   ],
@@ -107,10 +112,6 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "students:update",
     "students:archive",
     "attendance:view",
-    "leave:view",
-    "leave:manage",
-    "transport:view",
-    "transport:manage",
     "staff:view",
     "staff:manage",
     "academics:view",
@@ -129,8 +130,39 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "finance:manage",
     "payroll:view",
     "payroll:manage",
+    "leave:view",
+    "leave:manage",
+    "transport:view",
+    "transport:manage",
+    "special-exams:manage",
     "announcements:view",
     "announcements:manage"
+  ],
+  cashier: [
+    "dashboard:view",
+    "students:view",
+    "finance:view",
+    "finance:manage",
+    "payroll:view",
+    "payroll:manage",
+    "announcements:view"
+  ],
+  staff: [
+    "dashboard:view",
+    "leave:view",
+    "announcements:view"
+  ],
+  head_teacher: [
+    "dashboard:view",
+    "students:view",
+    "attendance:view",
+    "attendance:submit",
+    "academics:view",
+    "marks:manage",
+    "results:view",
+    "leave:view",
+    "payroll:view",
+    "announcements:view"
   ]
 };
 
@@ -154,6 +186,8 @@ export function getRolePermissions(role: UserRole) {
 
 export function roleHome(role: UserRole) {
   if (role === "administrator") return "/admin";
+  if (role === "cashier") return "/finance";
+  if (role === "staff") return "/leave";
   if (role === "student_staff") return "/students";
   return "/dashboard";
 }

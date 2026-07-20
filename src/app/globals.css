@@ -4,6 +4,11 @@
 
 :root {
   color-scheme: light;
+  --app-radius-card: 18px;
+  --app-radius-control: 12px;
+  --app-shadow-soft: 0 8px 24px rgba(15, 23, 42, 0.06);
+  --app-shadow-lift: 0 16px 40px rgba(15, 23, 42, 0.08);
+  --app-transition: 200ms cubic-bezier(0.2, 0, 0, 1);
 }
 
 * {
@@ -16,11 +21,9 @@ html {
 
 body {
   min-height: 100vh;
-  background:
-    linear-gradient(135deg, rgba(217, 226, 255, 0.5), transparent 32%),
-    linear-gradient(315deg, rgba(204, 251, 241, 0.35), transparent 28%),
-    #f8f7f4;
-  color: #1b1c1d;
+  background: #ffffff;
+  color: #0f172a;
+  text-rendering: geometricPrecision;
 }
 
 a {
@@ -36,7 +39,7 @@ textarea {
 }
 
 *:focus-visible {
-  outline: 3px solid rgba(51, 102, 204, 0.32);
+  outline: 3px solid rgba(37, 99, 235, 0.22);
   outline-offset: 2px;
 }
 
@@ -46,15 +49,78 @@ textarea {
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #c3c6d5;
+  background: #cbd5e1;
   border-radius: 999px;
 }
 
 .card-surface {
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(195, 198, 213, 0.34);
-  box-shadow: 0 18px 46px rgba(27, 28, 29, 0.055);
-  backdrop-filter: blur(18px);
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.78);
+  box-shadow: var(--app-shadow-soft);
+  transition:
+    box-shadow var(--app-transition),
+    transform var(--app-transition),
+    border-color var(--app-transition),
+    background-color var(--app-transition);
+}
+
+.card-surface:hover {
+  border-color: rgba(203, 213, 225, 0.88);
+  box-shadow: var(--app-shadow-lift);
+  transform: translateY(-1px);
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+thead {
+  background: #f8fafc;
+}
+
+tbody tr {
+  transition: background-color var(--app-transition);
+}
+
+input,
+select,
+textarea,
+button,
+a {
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+::selection {
+  background: rgba(37, 99, 235, 0.16);
+  color: #1e40af;
+}
+
+main > * {
+  animation: page-fade-in 220ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
 }
 
 @media print {

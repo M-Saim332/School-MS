@@ -90,7 +90,7 @@ export function AnnouncementBell({ user }: { user: AppUser }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-surface-low ring-1 ring-outline/25 transition hover:bg-primary-soft/70"
+        className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-white ring-1 ring-outline transition duration-200 hover:bg-primary-soft hover:text-primary"
         aria-label={`Announcements${unreadCount > 0 ? `, ${unreadCount} unread` : ""}`}
         aria-expanded={open}
       >
@@ -104,14 +104,14 @@ export function AnnouncementBell({ user }: { user: AppUser }) {
 
       <div
         className={cn(
-          "absolute right-0 top-[calc(100%+0.75rem)] z-50 w-[360px] rounded-xl bg-white/95 shadow-[0_24px_60px_rgba(27,28,29,0.14)] ring-1 ring-outline/30 backdrop-blur-xl transition-all duration-200",
+          "absolute right-0 top-[calc(100%+0.75rem)] z-50 w-[360px] rounded-[20px] bg-white shadow-lift ring-1 ring-outline transition-all duration-200",
           open ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0"
         )}
         role="dialog"
         aria-label="Announcements panel"
       >
         {/* Header */}
-        <div className="flex items-center justify-between gap-3 border-b border-outline/40 px-4 py-3">
+        <div className="flex items-center justify-between gap-3 border-b border-outline px-4 py-4">
           <div>
             <p className="font-semibold text-ink">Announcements</p>
             {unreadCount > 0 && (
@@ -121,7 +121,7 @@ export function AnnouncementBell({ user }: { user: AppUser }) {
           <div className="flex items-center gap-2">
             <Link
               href="/announcements"
-              className="inline-flex h-8 items-center rounded-lg bg-surface-low px-3 text-xs font-semibold text-primary ring-1 ring-outline/25 transition hover:bg-primary-soft"
+              className="inline-flex h-8 items-center rounded-xl bg-white px-3 text-xs font-semibold text-primary ring-1 ring-outline transition hover:bg-primary-soft"
             >
               History
             </Link>
@@ -152,7 +152,7 @@ export function AnnouncementBell({ user }: { user: AppUser }) {
                 <div
                   key={a.id}
                   className={cn(
-                    "group cursor-pointer px-4 py-3 transition hover:bg-surface-low/80",
+                    "group cursor-pointer px-4 py-3 transition hover:bg-surface-low",
                     !a.is_read && "bg-primary-soft/20"
                   )}
                   onClick={() => !a.is_read && handleMarkRead(a.id)}
@@ -192,17 +192,17 @@ export function AnnouncementBell({ user }: { user: AppUser }) {
         </div>
 
         {/* Footer */}
-        <div className="border-t border-outline/40 px-4 py-3">
+        <div className="border-t border-outline px-4 py-3">
           {canManage ? (
             <CreateAnnouncementDialog
               triggerLabel="Make Announcement"
-              triggerClassName="inline-flex h-10 w-full items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-white shadow-soft hover:brightness-105"
+              triggerClassName="inline-flex h-10 w-full items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-white shadow-button hover:bg-primary-ink"
               onSuccess={fetchAnnouncements}
             />
           ) : (
             <Link
               href="/announcements"
-              className="inline-flex h-10 w-full items-center justify-center rounded-lg bg-surface-low px-4 text-sm font-semibold text-primary ring-1 ring-outline/25 transition hover:bg-primary-soft"
+              className="inline-flex h-10 w-full items-center justify-center rounded-xl bg-white px-4 text-sm font-semibold text-primary ring-1 ring-outline transition hover:bg-primary-soft"
             >
               Announcement History
             </Link>

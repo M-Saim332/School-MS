@@ -19,9 +19,8 @@ export async function createExamAction(formData: FormData) {
   });
 
   revalidatePath("/marks");
-  revalidatePath("/academics/results");
   revalidatePath("/results");
-  redirect(`/academics/results?classId=${formData.get("class_id")}&subjectId=${formData.get("subject_id")}&examId=${examId}`);
+  redirect(`/marks?classId=${formData.get("class_id")}&subjectId=${formData.get("subject_id")}&examId=${examId}`);
 }
 
 export async function saveMarksAction(formData: FormData) {
@@ -41,7 +40,6 @@ export async function saveMarksAction(formData: FormData) {
 
   await saveMarks(user, { exam_id: examId, records });
   revalidatePath("/marks");
-  revalidatePath("/academics/results");
   revalidatePath("/results");
 }
 
@@ -49,6 +47,5 @@ export async function submitExamForApprovalAction(formData: FormData) {
   const user = await requireUser("marks:manage");
   await submitExamForApproval(user, String(formData.get("exam_id") ?? ""));
   revalidatePath("/marks");
-  revalidatePath("/academics/results");
   revalidatePath("/results");
 }

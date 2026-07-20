@@ -33,7 +33,7 @@ export default async function AcademicsPage() {
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {assignments.map((item: any) => (
               <Card key={`${item.id}-${item.subject_name ?? "class"}`} className="overflow-hidden">
-                <div className="h-2 bg-gradient-to-r from-primary via-accent to-tertiary-soft" />
+                <div className="h-1.5 bg-primary" />
                 <div className="p-5">
                   <Badge tone="blue">{item.subject_name ?? "General"}</Badge>
                   <h2 className="mt-4 font-display text-2xl font-semibold text-ink">{item.name}</h2>

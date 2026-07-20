@@ -3,7 +3,7 @@ import { getFinanceDashboard } from "@/lib/services/finance";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { OutstandingByClassChart, CollectionMethodChart } from "@/components/finance/finance-dashboard-charts";
+import { LazyCollectionMethodChart, LazyOutstandingByClassChart } from "@/components/finance/lazy-finance-dashboard-charts";
 import Link from "next/link";
 import { Wallet, ArrowDownCircle, Percent, ClipboardList, AlertCircle, Banknote } from "lucide-react";
 import { formatPKR, formatDatePK } from "@/lib/utils";
@@ -96,7 +96,7 @@ export default async function FinanceDashboardPage() {
         description="Monitor expected tuition, collected amounts, outstanding balances, daily activity, and discounts."
         actions={
           <div className="flex gap-2">
-            <Link href="/finance/fees" className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-white shadow-soft hover:brightness-105">
+            <Link href="/finance/payments" className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-white shadow-soft hover:brightness-105">
               Record a Payment
             </Link>
           </div>
@@ -129,7 +129,7 @@ export default async function FinanceDashboardPage() {
             <CardTitle>Outstanding Fees by Class</CardTitle>
           </CardHeader>
           <CardContent>
-            <OutstandingByClassChart data={data.outstandingByClass} />
+            <LazyOutstandingByClassChart data={data.outstandingByClass} />
           </CardContent>
         </Card>
 
@@ -138,7 +138,7 @@ export default async function FinanceDashboardPage() {
             <CardTitle>Monthly Collections by Method</CardTitle>
           </CardHeader>
           <CardContent>
-            <CollectionMethodChart data={data.collectionMethodData} />
+            <LazyCollectionMethodChart data={data.collectionMethodData} />
           </CardContent>
         </Card>
       </div>
@@ -146,7 +146,7 @@ export default async function FinanceDashboardPage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Recent Payments</CardTitle>
-          <Link href="/finance/fees" className="text-sm font-bold text-primary hover:underline">
+          <Link href="/finance/payments" className="text-sm font-bold text-primary hover:underline">
             View All History &rarr;
           </Link>
         </CardHeader>
